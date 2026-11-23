@@ -70,7 +70,7 @@ I inspected it live. It was built by OFF+BRAND on **Webflow + Lenis (smooth scro
 | Footer rises as a rounded card with a huge closing line | A clear ending | A brown card rises over cream: *"Let's make something slow."*, contact details, and the thread finishes her signature. |
 | Smooth scroll (Lenis) | Everything feels expensive | Same. Also **slow it down in the Drift chapter**, so the motion itself says "stop rushing". |
 
-**What to leave:** the WebGL weight, the sports-brand loudness (neon, all-caps shouting) and the long preloader. Her audience (brands, recruiters, Instagram traffic in Sri Lanka) will often be on mid-range Android phones.
+**What to leave:** the WebGL *weight* (we allow one small, lazy-loaded OGL layer for signature moments, with CSS fallbacks, decided 2026-11-23), the sports-brand loudness (neon, all-caps shouting) and the long preloader. Her audience (brands, recruiters, Instagram traffic in Sri Lanka) will often be on mid-range Android phones.
 
 ---
 
@@ -164,7 +164,7 @@ Honest notes on colour:
 | Hosting | **Cloudflare Pages** (free, commercial use allowed, fast in South Asia) | Vercel's free tier forbids commercial use |
 | Analytics | Cloudflare Web Analytics or Plausible | No cookies, so no cookie banner |
 
-Skipped on purpose: WebGL/Three.js, a CMS, a dark-mode toggle (the chapters handle light and dark), a blog, the Dither Cursor, and Motion/Framer Motion (GSAP already covers it, and one library is enough).
+Skipped on purpose: three.js and 3D models (one lightweight OGL layer is allowed for signature moments since the Phase 2 redesign), a CMS, a dark-mode toggle (the chapters handle light and dark), a blog, the Dither Cursor, and Motion/Framer Motion (GSAP already covers it, and one library is enough).
 
 ---
 
