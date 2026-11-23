@@ -47,8 +47,18 @@ My feedback on Phase 1: **the home page doesn't look good.** The components feel
 - **Rename `/work` → `/collections`** everywhere (routes, links, tests, docs, the `add-collection` skill). Add `site/public/_redirects` with `/work/* /collections/:splat 301` for Cloudflare Pages.
 - **Navigation** on every page: monogram (home), Collections, About, Contact (jumps to the footer).
 
+## The quality bar: landonorris.com
+I want the motion on the level of **https://landonorris.com**: it should feel natural and make people say "wow". That site was made by OFF+BRAND, an award-winning studio, with Webflow, Lenis, Rive and custom WebGL. What makes it feel that way, and what we match:
+- **Everything responds.** The cursor, the scroll and hovers all produce motion, and the motion has weight: springs, inertia, easing, never linear or instant.
+- **Choreography, not effects.** Type, images and backgrounds move together as one sequence, with deliberate timing offsets.
+- **One unforgettable signature.** His 3D head follows the cursor, and a mask reveals the helmet underneath.
+- **Transitions are part of the story:** between sections and between pages.
+- **Small details everywhere:** a hand-drawn scribble over the type, the ON/OFF track hover, scattered photos at different depths, the footer rising as a card.
+
+We are **not** copying his site: not his layout, effects one-to-one, colours or loudness. Each of our effects comes from her world (fabric moving in coastal wind, stitches, paper, the moon, handwoven texture), so it feels natural for a slow-craft designer. The goal is the same level of polish and the same "how did they do that" moment.
+
 ## Motion thesis (do not drift from this)
-Immersive, but in the spirit of "The Slow Hand": unhurried, crafted, never busy.
+Immersive and award-level, but in the spirit of "The Slow Hand": crafted, fluid and confident, never busy or loud.
 - One continuous teal **stitched thread** runs through the home page and ties the scenes together.
 - Every scene has **one** authored moment and its own light.
 - Drift deliberately slows the scroll.
@@ -56,7 +66,7 @@ Immersive, but in the spirit of "The Slow Hand": unhurried, crafted, never busy.
 - Everything still readable with JavaScript off and under reduced motion.
 
 ## Components and tools to use
-- **Smooth scroll and scroll storytelling:**
+- **Smooth scroll and scroll storytelling** (the backbone of the "natural" feel):
   - **Lenis** (`lenis@1.3.27`) on GSAP's ticker, in one client `MotionProvider`.
   - **GSAP ScrollTrigger** for pins and scrubs.
   - **GSAP SplitText** for type reveals.
@@ -66,9 +76,21 @@ Immersive, but in the spirit of "The Slow Hand": unhurried, crafted, never busy.
   - Tumble Deck (portfolio reader),
   - Glass Folders (Revive's studio),
   - `useDialog` (every dialog).
+- **One WebGL layer, for the signature moments only.** Use **OGL** (`ogl`, about 30 KB), not three.js.
+  - **Loading:** load it after the first paint.
+  - **Fallbacks:** on low-power devices (`navigator.hardwareConcurrency <= 4` or `deviceMemory <= 4`), with Motion off, or if WebGL fails, fall back to the CSS version of the same effect.
+  - **Use it for:**
+    - **Hero, "fabric lens":** the sketch → photo reveal under the cursor. The edge of the lens ripples like fabric in wind (a noise-driven displacement). The lens has inertia, stretching slightly with cursor speed and settling with a spring.
+    - **Featured reel transitions:** between scenes, a displacement wipe driven by a woven-texture map (Dumbara pattern, crochet), so one collection "weaves" into the next.
+    - **`/collections` hover:** the revealed photo follows the cursor with inertia and a subtle wave distortion proportional to speed.
 - **New pieces to build:**
-  - **Hero lens:** `clip-path: circle()` following the pointer, lerp 0.1.
-  - **Featured reel:** pinned scenes with mask transitions.
+  - **Hero lens:** the CSS fallback uses `clip-path: circle()` following the pointer, lerp 0.1.
+  - **Featured reel:** pinned scenes with mask transitions (WebGL above, CSS fallback).
+  - **Hero type:** characters rise from a mask with a slight overshoot. The hero has a "breathing" state: the lens drifts slowly when the cursor is idle.
+  - **Scroll-velocity feel:** image cards and the thread respond subtly to scroll speed (a small skew or stretch that settles). This is what makes smooth scroll feel alive.
+  - **Magnetic links and buttons:** nav items and "Explore the collection →" pull slightly toward the cursor (desktop only, max 6 px).
+  - **Hand-drawn moments:** her handwriting or signature drawn stroke by stroke (SVG `stroke-dashoffset`) once she supplies it. Until then, the stitched thread does this job.
+  - **Scattered depth gallery:** in the featured reel or on `/about`, a few shoot photos and swatches pinned at different depths, drifting at different scroll speeds, like her collage boards.
   - **The thread:** an SVG path drawn by scroll, dashed like a running stitch.
   - **Hover-reveal list** for `/collections`.
   - **Thread-in intro:** first visit only, ≤ 1.5 s, skippable.
@@ -80,10 +102,11 @@ Immersive, but in the spirit of "The Slow Hand": unhurried, crafted, never busy.
 - **Not used:**
   - **Dither Cursor:** dropped; it's off-brand.
   - **Stipple Type:** on hold; needs a paid licence.
-  - **WebGL:** no; too heavy for her mostly-mobile audience.
+  - **three.js and 3D models:** too heavy, and no 3D asset of her exists. The single OGL layer above is the limit.
 
 ## How to work
-1. **Start with `superpowers:brainstorming`.** Before designing anything, ask me what I picture for the home page motion: what happens as someone lands and scrolls. Show me mockups in the browser (the brainstorming skill's visual companion) for the hero, the featured reel and the `/collections` list, and let me react.
+0. **Study the reference first.** Open https://landonorris.com in the browser and break down every motion moment from the first screen to the footer. For each one, write down what triggers it, what moves, the easing and duration (measured where you can), and why it feels good. Save this to `docs/review/landonorris-motion-study.md`. Then map each moment to our equivalent in her world, or say why we skip it. Use this study as the benchmark for everything below.
+1. **Then `superpowers:brainstorming`.** Before designing anything, ask me what I picture for the home page motion: what happens as someone lands and scrolls. Show me mockups in the browser (the brainstorming skill's visual companion) for the hero, the featured reel and the `/collections` list, and let me react.
 2. Write the design doc to `docs/superpowers/specs/<date>-immersive-redesign-design.md`, and get my approval.
 3. **Plan:** `superpowers:writing-plans` writes the plan to `docs/superpowers/plans/<date>-immersive-redesign.md`, following the format of the Phase 1 plan in that folder. Show me the plan and wait for my OK.
 4. **Build:**
@@ -101,7 +124,8 @@ Immersive, but in the spirit of "The Slow Hand": unhurried, crafted, never busy.
 - Animate `transform`, `opacity`, `clip-path`, mask and stroke-dashoffset only. Blur ≤ 20 px, small areas only.
 - **Easing and timing:** `--ease-out` for entrances; never ease-in; exits faster than entrances. Hero entrance done by 1.5 s.
 - **Performance:**
-  - First-load JS on `/` ≤ 250 KB gzipped. Add a check in `site/scripts/build/` that fails above it.
+  - First-load JS on `/` ≤ 250 KB gzipped, **not counting** the lazily loaded WebGL chunk. Add a check in `site/scripts/build/` that fails above it.
+  - The WebGL chunk is ≤ 60 KB gzipped, loaded after the first paint, and it never blocks content.
   - LCP < 2.5 s on a throttled mid-range phone (Lighthouse).
   - 60 fps scrolling on desktop.
 - Initial animation states are set **from JavaScript after mount**. The server HTML stays fully visible; the existing build check (no `opacity: 0` in HTML) must keep passing.
@@ -121,6 +145,8 @@ Immersive, but in the spirit of "The Slow Hand": unhurried, crafted, never busy.
   - the `/work` → `/collections` redirects file.
 - `npm run test:build` covers every route: `/`, `/collections/`, every `/collections/<slug>/`, `/about/`.
 - Motion: capture the hero, the featured reel, the manifesto and the footer with Impeccable's `motion-capture`, once normally and once with `--reduced-motion`. Send both to the `impeccable-motion-reviewer` agent and act on its fixes (at most 2 rounds). The browser pane runs 0 animation frames when hidden; use `motion-capture` (headless Chrome).
+- **Benchmark against the reference.** Capture landonorris.com's hero and one scroll transition with `motion-capture` too. Put our filmstrips next to theirs in `docs/review/`, and judge honestly: smoothness, responsiveness, choreography, and the "wow" of the signature moment. Write where we fall short and fix the biggest gap before finishing.
+- Check WebGL fallbacks: with WebGL disabled, on a low-power profile, and with Motion off, every scene still looks finished (the CSS versions).
 - Screenshot every route at 1440, 1024, 768, 390 and 320. Score with PLAN.md section 5b's rubric: average ≥ 8, nothing < 7. Put the scores in the plan's ledger.
 
 ## Out of scope
