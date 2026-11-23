@@ -39,7 +39,7 @@ async function padTo(img, ratio) {
     .toBuffer({ resolveWithObject: true })
 }
 
-async function emit(img, { folder, id, order, outRoot, urlPrefix }) {
+async function emit(img, { folder, id, order, outRoot, urlPrefix, zoomWidth }) {
   const { width, height } = img.info
   const dir = path.join(outRoot, 'media', folder)
   fs.mkdirSync(dir, { recursive: true })
@@ -54,6 +54,9 @@ async function emit(img, { folder, id, order, outRoot, urlPrefix }) {
   }
   const tiny = await fromRaw(img).resize({ width: 16 }).webp({ quality: 40 }).toBuffer()
   const largest = ws[ws.length - 1]
+  // Extra zoom-only size (WebP) for wide spreads, whose body text is tiny at 2400px.
+  const bigZoom = zoomWidth && width >= zoomWidth
+  if (bigZoom) await fromRaw(img).resize({ width: zoomWidth }).webp({ quality: 80 }).toFile(path.join(dir, `${id}-${zoomWidth}.webp`))
   return {
     id,
     order,
@@ -62,7 +65,7 @@ async function emit(img, { folder, id, order, outRoot, urlPrefix }) {
     placeholder: `data:image/webp;base64,${tiny.toString('base64')}`,
     srcset: { avif: srcset.avif.join(', '), webp: srcset.webp.join(', ') },
     src: url(ws.includes(1280) ? 1280 : largest, 'webp'),
-    zoom: url(largest, 'webp'),
+    zoom: url(bigZoom ? zoomWidth : largest, 'webp'),
   }
 }
 
@@ -93,9 +96,10 @@ export async function buildCollection(slug, { srcRoot, outRoot, urlPrefix = '', 
     const img = await load(path.join(dir, 'pages', f))
     const { width: w, height: h } = img.info
     // A spread is designed across its gutter, so it stays one card at 2√2.
-    const ratio = isSpread(w, h) ? 2 * Math.SQRT2 : Math.SQRT2
+    const spread = isSpread(w, h)
+    const ratio = spread ? 2 * Math.SQRT2 : Math.SQRT2
     const page = Math.abs(w / h - ratio) > 0.02 ? await padTo(img, ratio) : img
-    pages.push(await emit(page, { ...ctx, folder: `${slug}/pages`, id: pad2(n), order: n }))
+    pages.push(await emit(page, { ...ctx, folder: `${slug}/pages`, id: pad2(n), order: n, zoomWidth: spread ? 4800 : undefined }))
   }
 
   const result = { shoot, pages }

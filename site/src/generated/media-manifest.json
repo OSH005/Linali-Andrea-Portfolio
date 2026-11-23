@@ -236,7 +236,7 @@
             "webp": "/media/drift/pages/04-640.webp 640w, /media/drift/pages/04-1280.webp 1280w, /media/drift/pages/04-2400.webp 2400w"
           },
           "src": "/media/drift/pages/04-1280.webp",
-          "zoom": "/media/drift/pages/04-2400.webp"
+          "zoom": "/media/drift/pages/04-4800.webp"
         },
         {
           "id": "06",
@@ -249,7 +249,7 @@
             "webp": "/media/drift/pages/06-640.webp 640w, /media/drift/pages/06-1280.webp 1280w, /media/drift/pages/06-2400.webp 2400w"
           },
           "src": "/media/drift/pages/06-1280.webp",
-          "zoom": "/media/drift/pages/06-2400.webp"
+          "zoom": "/media/drift/pages/06-4800.webp"
         },
         {
           "id": "08",
@@ -262,7 +262,7 @@
             "webp": "/media/drift/pages/08-640.webp 640w, /media/drift/pages/08-1280.webp 1280w, /media/drift/pages/08-2400.webp 2400w"
           },
           "src": "/media/drift/pages/08-1280.webp",
-          "zoom": "/media/drift/pages/08-2400.webp"
+          "zoom": "/media/drift/pages/08-4800.webp"
         },
         {
           "id": "10",
@@ -275,7 +275,7 @@
             "webp": "/media/drift/pages/10-640.webp 640w, /media/drift/pages/10-1280.webp 1280w, /media/drift/pages/10-2400.webp 2400w"
           },
           "src": "/media/drift/pages/10-1280.webp",
-          "zoom": "/media/drift/pages/10-2400.webp"
+          "zoom": "/media/drift/pages/10-4800.webp"
         },
         {
           "id": "12",
@@ -288,7 +288,7 @@
             "webp": "/media/drift/pages/12-640.webp 640w, /media/drift/pages/12-1280.webp 1280w, /media/drift/pages/12-2400.webp 2400w"
           },
           "src": "/media/drift/pages/12-1280.webp",
-          "zoom": "/media/drift/pages/12-2400.webp"
+          "zoom": "/media/drift/pages/12-4800.webp"
         },
         {
           "id": "14",
@@ -301,7 +301,7 @@
             "webp": "/media/drift/pages/14-640.webp 640w, /media/drift/pages/14-1280.webp 1280w, /media/drift/pages/14-2400.webp 2400w"
           },
           "src": "/media/drift/pages/14-1280.webp",
-          "zoom": "/media/drift/pages/14-2400.webp"
+          "zoom": "/media/drift/pages/14-4800.webp"
         },
         {
           "id": "16",
@@ -314,7 +314,7 @@
             "webp": "/media/drift/pages/16-640.webp 640w, /media/drift/pages/16-1280.webp 1280w, /media/drift/pages/16-2400.webp 2400w"
           },
           "src": "/media/drift/pages/16-1280.webp",
-          "zoom": "/media/drift/pages/16-2400.webp"
+          "zoom": "/media/drift/pages/16-4800.webp"
         },
         {
           "id": "18",
@@ -327,7 +327,7 @@
             "webp": "/media/drift/pages/18-640.webp 640w, /media/drift/pages/18-1280.webp 1280w, /media/drift/pages/18-2400.webp 2400w"
           },
           "src": "/media/drift/pages/18-1280.webp",
-          "zoom": "/media/drift/pages/18-2400.webp"
+          "zoom": "/media/drift/pages/18-4800.webp"
         }
       ],
       "logo": {
@@ -1020,7 +1020,7 @@
             "webp": "/media/revive/pages/30-640.webp 640w, /media/revive/pages/30-1280.webp 1280w, /media/revive/pages/30-2400.webp 2400w"
           },
           "src": "/media/revive/pages/30-1280.webp",
-          "zoom": "/media/revive/pages/30-2400.webp"
+          "zoom": "/media/revive/pages/30-4800.webp"
         },
         {
           "id": "32",
@@ -1033,7 +1033,7 @@
             "webp": "/media/revive/pages/32-640.webp 640w, /media/revive/pages/32-1280.webp 1280w, /media/revive/pages/32-2400.webp 2400w"
           },
           "src": "/media/revive/pages/32-1280.webp",
-          "zoom": "/media/revive/pages/32-2400.webp"
+          "zoom": "/media/revive/pages/32-4800.webp"
         },
         {
           "id": "34",
@@ -1046,7 +1046,7 @@
             "webp": "/media/revive/pages/34-640.webp 640w, /media/revive/pages/34-1280.webp 1280w, /media/revive/pages/34-2400.webp 2400w"
           },
           "src": "/media/revive/pages/34-1280.webp",
-          "zoom": "/media/revive/pages/34-2400.webp"
+          "zoom": "/media/revive/pages/34-4800.webp"
         },
         {
           "id": "36",
@@ -1059,7 +1059,7 @@
             "webp": "/media/revive/pages/36-640.webp 640w, /media/revive/pages/36-1280.webp 1280w, /media/revive/pages/36-2400.webp 2400w"
           },
           "src": "/media/revive/pages/36-1280.webp",
-          "zoom": "/media/revive/pages/36-2400.webp"
+          "zoom": "/media/revive/pages/36-4800.webp"
         }
       ],
       "logo": {

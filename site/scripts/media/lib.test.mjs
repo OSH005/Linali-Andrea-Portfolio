@@ -4,7 +4,7 @@ import path from 'node:path'
 import sharp from 'sharp'
 import { parseOrder, isSpread, widthsFor, buildCollection } from './lib.mjs'
 
-let fx, fxPortrait
+let fx, fxPortrait, fxWide
 
 async function img(file, width, height, withGps = false) {
   fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -20,6 +20,8 @@ beforeAll(async () => {
   await img(path.join(tmp, 'src2/t/pages/01.png'), 500, 700)
   fx = { srcRoot: path.join(tmp, 'src'), outRoot: path.join(tmp, 'out'), urlPrefix: '', alt: { '01-a': 'A garment' } }
   fxPortrait = { srcRoot: path.join(tmp, 'src2'), outRoot: path.join(tmp, 'out2'), urlPrefix: '', alt: {} }
+  await img(path.join(tmp, 'src3/t/pages/04.png'), 5000, 1768)
+  fxWide = { srcRoot: path.join(tmp, 'src3'), outRoot: path.join(tmp, 'out3'), urlPrefix: '', alt: {} }
 })
 
 const fileOf = (url, root = fx.outRoot) => path.join(root, url.replace(/^https?:\/\/[^/]+/, ''))
@@ -46,6 +48,12 @@ test('spread stays one card at 2√2', async () => {
   const m = await buildCollection('t', fx)
   expect(m.pages.map((p) => p.id)).toEqual(['04'])
   expect(Math.abs(m.pages[0].width / m.pages[0].height - 2 * Math.SQRT2)).toBeLessThan(0.01)
+})
+
+test('a large spread gets a 4800px zoom image so its text stays readable', async () => {
+  const p = (await buildCollection('t', fxWide)).pages[0]
+  expect(p.zoom).toMatch(/04-4800\.webp$/)
+  expect((await sharp(fileOf(p.zoom, fxWide.outRoot)).metadata()).width).toBe(4800)
 })
 
 test('non-√2 page is padded, not cropped', async () => {

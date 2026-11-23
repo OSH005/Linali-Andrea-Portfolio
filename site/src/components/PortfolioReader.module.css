@@ -1,0 +1,84 @@
+.reader { display: flex; }
+
+.stack {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.sheets { display: grid; width: min(420px, 80vw); }
+.sheets img {
+  grid-area: 1 / 1;
+  width: 100%;
+  object-fit: cover;
+  background: var(--paper);
+  box-shadow: 0 10px 30px rgb(59 36 24 / 0.16);
+  translate: calc(var(--i) * 8px) calc(var(--i) * -8px);
+  rotate: calc(var(--i) * -1.2deg);
+  transition: translate var(--dur-state) var(--ease-out), rotate var(--dur-state) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .stack:hover .sheets img { translate: calc(var(--i) * 14px) calc(var(--i) * -12px); }
+}
+
+.dialog {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--brown);
+  display: none;
+  opacity: 0;
+  scale: 0.98;
+  transition: opacity var(--dur-close) var(--ease-out), scale var(--dur-close) var(--ease-out), display var(--dur-close) allow-discrete, overlay var(--dur-close) allow-discrete;
+}
+.dialog[open] {
+  display: block;
+  opacity: 1;
+  scale: 1;
+  transition-duration: var(--dur-open);
+}
+@starting-style {
+  .dialog[open] { opacity: 0; scale: 0.98; }
+}
+.dialog::backdrop { background: rgb(33 21 15 / 0.6); }
+
+.bar {
+  position: absolute;
+  inset: auto 0 max(24px, env(safe-area-inset-bottom)) 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  padding-inline: var(--gutter);
+}
+.bar button, .text button { min-height: 44px; padding: 0 var(--s-3); background: none; border: 0; cursor: pointer; }
+
+.zoom {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  background: var(--paper);
+  cursor: zoom-out;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.zoom img { display: block; width: max(100%, 1600px); height: auto; }
+
+.text {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  background: var(--cream);
+  padding: var(--s-9) var(--gutter);
+}
+.text p { max-width: 65ch; margin: 0 auto var(--s-5); }
+.text button { display: block; margin: 0 auto var(--s-6); }
