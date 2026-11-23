@@ -19,7 +19,6 @@ export function parseOrder(fileName) {
 }
 
 export const isSpread = (w, h) => w / h > 2.5
-export const needsPad = (w, h) => Math.abs(w / h - Math.SQRT2) > 0.02
 export const widthsFor = (w) => (w < WIDTHS[0] ? [w] : WIDTHS.filter((x) => x <= w))
 
 // Decoded once, upright, metadata dropped (sharp never copies EXIF unless asked).
@@ -28,14 +27,11 @@ async function load(file) {
 }
 const fromRaw = ({ data, info }) => sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } })
 
-async function crop(img, left, width) {
-  return fromRaw(img).extract({ left, top: 0, width, height: img.info.height }).raw().toBuffer({ resolveWithObject: true })
-}
-
-async function padToSqrt2(img) {
+// Pads on paper colour to the target ratio; never crops.
+async function padTo(img, ratio) {
   const { width: w, height: h } = img.info
-  const W = Math.max(w, Math.round(h * Math.SQRT2))
-  const H = Math.max(h, Math.round(w / Math.SQRT2))
+  const W = Math.max(w, Math.round(h * ratio))
+  const H = Math.max(h, Math.round(w / ratio))
   const x = W - w, y = H - h
   return fromRaw(img)
     .extend({ left: Math.floor(x / 2), right: Math.ceil(x / 2), top: Math.floor(y / 2), bottom: Math.ceil(y / 2), background: PAPER })
@@ -96,12 +92,10 @@ export async function buildCollection(slug, { srcRoot, outRoot, urlPrefix = '', 
     const n = parseOrder(f)
     const img = await load(path.join(dir, 'pages', f))
     const { width: w, height: h } = img.info
-    const half = Math.floor(w / 2)
-    const parts = isSpread(w, h) ? [await crop(img, 0, half), await crop(img, half, w - half)] : [img]
-    for (const [i, part] of parts.entries()) {
-      const page = needsPad(part.info.width, part.info.height) ? await padToSqrt2(part) : part
-      pages.push(await emit(page, { ...ctx, folder: `${slug}/pages`, id: pad2(n + i), order: n + i }))
-    }
+    // A spread is designed across its gutter, so it stays one card at 2√2.
+    const ratio = isSpread(w, h) ? 2 * Math.SQRT2 : Math.SQRT2
+    const page = Math.abs(w / h - ratio) > 0.02 ? await padTo(img, ratio) : img
+    pages.push(await emit(page, { ...ctx, folder: `${slug}/pages`, id: pad2(n), order: n }))
   }
 
   const result = { shoot, pages }

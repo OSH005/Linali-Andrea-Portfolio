@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import sharp from 'sharp'
-import { parseOrder, isSpread, needsPad, widthsFor, buildCollection } from './lib.mjs'
+import { parseOrder, isSpread, widthsFor, buildCollection } from './lib.mjs'
 
 let fx, fxPortrait
 
@@ -35,20 +35,17 @@ test('isSpread', () => {
   expect(isSpread(4960, 3508)).toBe(false)
 })
 
-test('needsPad', () => {
-  expect(needsPad(4960, 3508)).toBe(false)
-  expect(needsPad(1905, 2648)).toBe(true)
-})
-
 test('widthsFor never upscales', () => {
   expect(widthsFor(4000)).toEqual([640, 1280, 2400])
   expect(widthsFor(1200)).toEqual([640])
   expect(widthsFor(500)).toEqual([500])
 })
 
-test('spread splits into two numbered pages', async () => {
+// Spreads are designed across the gutter (text and images cross it), so they stay whole.
+test('spread stays one card at 2√2', async () => {
   const m = await buildCollection('t', fx)
-  expect(m.pages.map((p) => p.id)).toEqual(['04', '05'])
+  expect(m.pages.map((p) => p.id)).toEqual(['04'])
+  expect(Math.abs(m.pages[0].width / m.pages[0].height - 2 * Math.SQRT2)).toBeLessThan(0.01)
 })
 
 test('non-√2 page is padded, not cropped', async () => {

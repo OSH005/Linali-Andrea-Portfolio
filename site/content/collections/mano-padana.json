@@ -1,0 +1,33 @@
+{
+  "credits": {},
+  "rights": {
+    "models": false,
+    "photographer": false,
+    "sensitive": "none",
+    "confirmedBy": null
+  },
+  "palette": {
+    "ground": "#F2E8DA",
+    "ink": "#3B2418",
+    "accent": "#008794"
+  },
+  "featured": true,
+  "slug": "mano-padana",
+  "title": "Mano Padana",
+  "titleNative": "මනෝ පාදන",
+  "season": "SS25",
+  "year": 2025,
+  "order": 1,
+  "moment": "walk",
+  "pageOrder": "provisional",
+  "concept": "Growing up in a society where mental health was an avoided subject, I realized the importance of communicating emotions. මනෝ පාදන, “The Mind’s Steps”, portrays a mental healing journey through cultural aspects. Initially inspired by the traditional art of Kandyan dance, I reflect my culture through design details. Hand-crafted Dumbara fabrics have been utilized to add textural and cultural value to my collection.",
+  "alt": {
+    "01-IMG-20250506-WA0022": "Walking toward the camera under a colonial arcade in a brown Dumbara-woven waistcoat over a white mini dress with appliquéd heart motifs",
+    "02-IMG-20250506-WA0023": "Leaning against a red-brick pillar in the Dumbara-woven waistcoat and white mini dress",
+    "03-IMG-20250506-WA0025": "Back view, walking down a pink colonnade with one arm raised, in the woven waistcoat and white mini dress",
+    "04-IMG-20250506-WA0031": "Standing by the arcade with a woven tote bag and a headscarf, in the waistcoat and white dress",
+    "05-IMG-20250506-WA0033": "Crossing a zebra crossing in Colombo with the woven tote, passers-by behind",
+    "06-IMG-20250506-WA0039": "A distant view of the model crossing a wide street lined with trees"
+  },
+  "pageText": {}
+}

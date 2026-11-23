@@ -1,0 +1,50 @@
+{
+  "credits": {},
+  "rights": {
+    "models": false,
+    "photographer": false,
+    "sensitive": "none",
+    "confirmedBy": null
+  },
+  "palette": {
+    "ground": "#F2E8DA",
+    "ink": "#3B2418",
+    "accent": "#008794"
+  },
+  "featured": true,
+  "slug": "drift",
+  "title": "Drift",
+  "season": "SS27",
+  "year": 2026,
+  "order": 3,
+  "moment": "ring",
+  "carousel": {
+    "preset": "cylinder",
+    "autoplay": "drift",
+    "speed": 8
+  },
+  "pageOrder": "confirmed",
+  "concept": "Drift is a womenswear collection exploring the act of stepping away from social acceleration, the cultural condition of relentless pace that overwhelms people. The concept was born from a personal experience, watching fabric move naturally in coastal wind, and seeing in that movement the breath the body takes when it finally stops rushing. My collection offers the feeling of a calming breath taken to escape the fast paced world.",
+  "alt": {
+    "01-MMS_8188": "Barefoot on dark coastal rocks in an oversized cream shirt with tie sleeves over an indigo crochet skirt and crochet leg warmers",
+    "02-MMS_8260": "Back view of the cream shirt, open at the back, over the indigo crochet skirt against the rocks",
+    "03-MMS_8311": "Standing on a rock above the sea in a cobalt wrap jacket with brown suede fringe over a short white skirt",
+    "04-MMS_8358": "Back view of the cobalt jacket with an openwork crochet back panel and brown fringe, by the sea",
+    "05-MMS_8420": "Reclining on a boulder at the water’s edge in a pale blue macramé dress with long fringe",
+    "06-MMS_8502": "Reclining on a boulder in the pale blue fringed macramé dress, sea and palms behind",
+    "07-MMS_8542": "Against a rock wall, arm raised, in a white cropped halter top with a cobalt tie and an indigo crochet skirt",
+    "08-MMS_8555": "Seated on rocks under palm trees in a white halter top and full indigo crochet trousers",
+    "09-MMS_8586": "On a rock by the sea in a sheer white draped top over a cobalt midi skirt, holding a cream fringed bag",
+    "10-MMS_8588": "Detail of the sheer white draped top, cobalt skirt and cream fringed macramé bag",
+    "11-MMS_8624": "In a rock cave in a pale blue sleeveless tunic with a cobalt scarf and white flared trousers with blue crochet panels",
+    "12-MMS_8665": "Seated on a rock in the pale blue tunic and white trousers with crochet panels at the knee",
+    "13-MMS_8698": "Six models on coastal rocks wearing the full Drift line-up, the sea behind them",
+    "14-MMS_8717_(1)": "Two models by the sea, one in the pale blue fringed macramé dress, one walking past in a cobalt fringed jacket",
+    "15-MMS_8746": "Two models side by side by the sea in white draped tops with crocheted shoulders and cobalt panels",
+    "16-MMS_8760": "Two models among boulders, one in a cobalt-and-white layered look with crochet-panelled trousers, one in a white top and indigo crochet skirt",
+    "17-MMS_8810": "The six looks together among boulders and palms at a tidal pool"
+  },
+  "pageText": {
+    "04": "Drift SS27 · Catwalk collection · Concept\n\nDrift is a womenswear collection exploring the act of stepping away from social acceleration, the cultural condition of relentless pace that overwhelms people. The concept was born from a personal experience, watching fabric move naturally in coastal wind, and seeing in that movement the breath the body takes when it finally stops rushing. My collection offers the feeling of a calming breath taken to escape the fast paced world.\n\nThe collection is constructed through lightweight fabrics and the hand crafted techniques of crochet, macramé and hand embroidery. These slow made techniques were chosen as they cannot be rushed, making the process of creating itself an act of resistance against speed. Fringing details which moves gently with the movement of the body and crochet footwear grounding the body to the earth embrace natural movement. The muse, Dr Asha de Vos, embodies the collection’s philosophy, a Sri Lankan marine biologist who chose depth over speed, staying rooted in her coastline when every convention told her to move on."
+  }
+}

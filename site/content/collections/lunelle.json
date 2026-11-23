@@ -1,0 +1,41 @@
+{
+  "credits": {},
+  "rights": {
+    "models": false,
+    "photographer": false,
+    "sensitive": "pregnancy; ultrasound images",
+    "confirmedBy": null
+  },
+  "palette": {
+    "ground": "#21150F",
+    "ink": "#F2E8DA",
+    "accent": "#E8C4C0"
+  },
+  "featured": true,
+  "slug": "lunelle",
+  "title": "Lunelle",
+  "season": "AW26",
+  "year": 2026,
+  "order": 2,
+  "moment": "orbit",
+  "carousel": {
+    "preset": "orbit",
+    "autoplay": "drift",
+    "speed": 6
+  },
+  "pageOrder": "provisional",
+  "concept": "Lunelle is a maternity collection based on functionality and empowerment, designed for the contemporary woman balancing work, life and motherhood. My collection was inspired by the timeless beauty of the moon, the protection of Artemis: the Greek goddess of childbirth, mother and child sculptures of Henry Moore and the curves of the pregnant body. The stretch marks of her body are compared to the craters of the moon, which are considered symbols of imperfect beauty. Lunelle is a tribute to all the unstoppable mothers!",
+  "alt": {
+    "01-MMS_5485-3": "Beside a large moon artwork on a dark wall, in a white draped crop top tied above the bump and wide brown trousers",
+    "02-MMS_5515-4": "Holding an ultrasound print beside the moon artwork, in the white draped top, a blush wrap and brown trousers",
+    "03-MMS_5537-1": "Close crop of the white draped top tied in a bow over the bump, with a blush sash and brown trousers",
+    "04-MMS_5553-8": "Side view of the bump in the white draped top with a ruched shoulder and a blush wrap",
+    "05-MMS_5585-6": "Back view of the white top with a long asymmetric blush chiffon overskirt over wide brown trousers",
+    "06-MMS_5601-12": "Detail of the hem of the wide brown trousers on wooden stairs",
+    "07-MMS_5608-13": "Wide brown trousers with a blush chiffon wrap, stepping down wooden stairs",
+    "08-MMS_5623-14": "Seated in front of a painted tropical-leaf mural in a blush chiffon cape, white top and brown trousers",
+    "09-MMS_5639-15": "Standing in a dim studio in a blush chiffon cape, an ultrasound print on a stool beside her",
+    "10-MMS_5700-18": "Still life of a white candle and three ultrasound prints on a dark stone stool"
+  },
+  "pageText": {}
+}
