@@ -71,7 +71,7 @@ Every shoot photo needs an `alt` entry describing the garment, not just "model".
 ## 4. Build the media
 
 ```bash
-npm run media -- <slug>
+cd site && npm run media -- <slug>
 ```
 
 It reads `media-src/collections/<slug>`, then:
@@ -80,7 +80,7 @@ It reads `media-src/collections/<slug>`, then:
 - writes AVIF + WebP at 640 / 1280 / 2400 px to `site/public/media/<slug>/` (or to R2 when `MEDIA_BASE_URL` is set, see PLAN.md section 6),
 - writes width, height and a blur placeholder for every image into `site/src/generated/media-manifest.json`.
 
-> If `tools/media/build.mjs` does not exist yet, it is build step 1 in PLAN.md section 9. Write it to exactly the behaviour above, test it on one existing collection, then continue.
+> If `site/scripts/media/build.mjs` does not exist yet, it is build step 1 in PLAN.md section 9. Write it to exactly the behaviour above, test it on one existing collection, then continue.
 
 ## 5. Check it, by looking
 

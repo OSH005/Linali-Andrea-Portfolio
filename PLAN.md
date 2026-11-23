@@ -308,7 +308,7 @@ Loading rules: carousel cards load the 640 version. The deck holds only its smal
 ## 9. Build order (for Claude Code)
 
 0. **Product context:** run `/impeccable init` to write `PRODUCT.md` (who she is, the audience, Experience mode), then keep the tokens from section 4 and the system in section 5b in `DESIGN.md`. Every later step reads these two files, so the design stays consistent across sessions.
-1. **Assets:** move the client folders into `media-src/collections/<slug>/` (section 6), write `tools/media/build.mjs` (`npm run media`), write the four collection JSON files, and build. Test the script on one collection first. Get the page order from the client first. From then on, every new collection follows the add-collection skill.
+1. **Assets:** move the client folders into `media-src/collections/<slug>/` (section 6), write `site/scripts/media/build.mjs` (`cd site && npm run media`), write the four collection JSON files, and build. Test the script on one collection first. Get the page order from the client first. From then on, every new collection follows the add-collection skill.
 2. **Skeleton:** Next + Tailwind + tokens + fonts, every section with **static** content. Must look good with zero motion.
 3. **Components:** Circular Carousel (+ grid toggle + viewer + pause), Tumble Deck (+ overlay, covers, counter, `onIndexChange`, zoom, "Read the text"), Glass Folder. Restyle all to the tokens.
 4. **Motion pass:** Lenis, the thread, manifesto fill, chapter lighting, hero lens, signature drawing. Work chapter by chapter.
