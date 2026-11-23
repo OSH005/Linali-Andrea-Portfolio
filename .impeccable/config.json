@@ -47,6 +47,16 @@
         ],
         "createdAt": "2026-11-23T05:25:38.872Z",
         "reason": "Claude: pooled deck slots get src from paint() at runtime by design"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "moda,serif --file personal/edited/preview.html --reason claude: bodoni moda is design.md's display/body face; the quoted family name in the mock isn't matched by the detector",
+        "createdAt": "2026-11-23T06:15:22.133Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "prime,monospace --file personal/edited/preview.html --reason claude: courier prime is design.md's label face; quoted family name not matched",
+        "createdAt": "2026-11-23T06:15:22.282Z"
       }
     ]
   }
