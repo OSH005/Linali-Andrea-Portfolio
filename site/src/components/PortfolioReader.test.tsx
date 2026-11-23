@@ -1,11 +1,14 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import userEvent from '@testing-library/user-event'
 import PortfolioReader, { counterLabel } from './PortfolioReader'
 import type { MediaImage } from '@/lib/media'
 
 // The deck is exercised in its own test; here it only needs to report an index.
+const seenCards: unknown[] = []
 vi.mock('./tumble-deck/TumbleDeck', () => ({
   default: ({ onIndexChange, cards }: { onIndexChange: (i: number) => void; cards: unknown[] }) => (
+    seenCards.push(cards),
     <div data-testid="deck" data-count={cards.length}>
       <button type="button" onClick={() => onIndexChange(2)}>deck-to-3</button>
       <button type="button" onClick={() => onIndexChange(0)}>deck-to-1</button>
@@ -72,4 +75,33 @@ test('read-the-text only when the page has text', async () => {
 test('defaultOpen opens on mount', () => {
   render(<PortfolioReader {...props} defaultOpen />)
   expect(screen.getByRole('dialog')).toHaveProperty('open', true)
+})
+
+test('passes the deck the same cards array across re-renders', async () => {
+  render(<PortfolioReader {...props} />)
+  await open()
+  const first = seenCards[seenCards.length - 1]
+  await userEvent.click(screen.getByRole('button', { name: 'deck-to-3' }))
+  expect(seenCards[seenCards.length - 1]).toBe(first)
+})
+
+test('a native close (Android back) unlocks scroll and the reader can reopen', async () => {
+  render(<PortfolioReader {...props} />)
+  await open()
+  const d = screen.getByRole('dialog') as HTMLDialogElement
+  d.open = false
+  fireEvent(d, new Event('close'))
+  expect(document.body.style.overflow).toBe('')
+  await open()
+  expect(d).toHaveProperty('open', true)
+})
+
+test('no pages with defaultOpen renders nothing and does not crash', () => {
+  const { container } = render(<PortfolioReader {...props} pages={[]} defaultOpen />)
+  expect(container).toBeEmptyDOMElement()
+})
+
+test('without JavaScript every page is linked', () => {
+  const html = renderToStaticMarkup(<PortfolioReader {...props} />)
+  for (const p of pages) expect(html).toContain('href="' + p.zoom + '"')
 })

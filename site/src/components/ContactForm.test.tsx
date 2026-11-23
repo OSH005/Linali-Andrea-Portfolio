@@ -53,8 +53,15 @@ test('honeypot filled → pretends success, no fetch', async () => {
   vi.stubGlobal('fetch', fetch)
   const { container } = render(<ContactForm endpoint="https://form.example/x" />)
   await fill()
-  ;(container.querySelector('input[name="company"]') as HTMLInputElement).value = 'spam'
+  ;(container.querySelector('input[name="_gotcha"]') as HTMLInputElement).value = 'spam'
   await send()
   expect(fetch).not.toHaveBeenCalled()
   expect(await screen.findByText('Thank you. I’ll reply soon.')).toBeInTheDocument()
+})
+
+test('without JavaScript the form posts to the endpoint, never a GET', () => {
+  const { container } = render(<ContactForm endpoint="https://form.example/x" />)
+  const form = container.querySelector('form')!
+  expect(form.getAttribute('method')).toBe('post')
+  expect(form.getAttribute('action')).toBe('https://form.example/x')
 })

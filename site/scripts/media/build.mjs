@@ -26,7 +26,6 @@ for (const slug of slugs) {
   const json = path.join(site, 'content/collections', `${slug}.json`)
   if (!fs.existsSync(json)) throw new Error(`No collection file: content/collections/${slug}.json`)
   const { alt } = JSON.parse(fs.readFileSync(json, 'utf8'))
-  fs.rmSync(path.join(outRoot, 'media', slug), { recursive: true, force: true })
   const m = await buildCollection(slug, { srcRoot: path.join(mediaSrc, 'collections'), outRoot, urlPrefix, alt })
   manifest.collections[slug] = m
   console.log(`${slug}: ${m.shoot.length} photos, ${m.pages.length} pages${m.cover ? ', cover' : ''}${m.logo ? ', logo' : ''}`)

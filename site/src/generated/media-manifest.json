@@ -337,11 +337,11 @@
         "height": 2000,
         "placeholder": "data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAADwAQCdASoQABAAA4BaJaQAAudcS/Ith4AA/viuJVihmZObdEftGo5Qda3jDF1Tp20WK8AA",
         "srcset": {
-          "avif": "/media/drift/logo-640.avif 640w, /media/drift/logo-1280.avif 1280w",
-          "webp": "/media/drift/logo-640.webp 640w, /media/drift/logo-1280.webp 1280w"
+          "avif": "/media/drift/logo-640.avif 640w, /media/drift/logo-1280.avif 1280w, /media/drift/logo-2000.avif 2000w",
+          "webp": "/media/drift/logo-640.webp 640w, /media/drift/logo-1280.webp 1280w, /media/drift/logo-2000.webp 2000w"
         },
         "src": "/media/drift/logo-1280.webp",
-        "zoom": "/media/drift/logo-1280.webp"
+        "zoom": "/media/drift/logo-2000.webp"
       }
     },
     "lunelle": {
@@ -772,11 +772,11 @@
         "height": 4032,
         "placeholder": "data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAAAQBACdASoQABwAPu1orU2ppqSiMAgBMB2JaQABHuKWUQ24UHXbfAQHAAD+/m28cmdkU+oKxrxsqraD26qKasjb0rknXBxG6/1kxlguLkUWoxpyGn557AAA",
         "srcset": {
-          "avif": "/media/lunelle/cover-640.avif 640w, /media/lunelle/cover-1280.avif 1280w",
-          "webp": "/media/lunelle/cover-640.webp 640w, /media/lunelle/cover-1280.webp 1280w"
+          "avif": "/media/lunelle/cover-640.avif 640w, /media/lunelle/cover-1280.avif 1280w, /media/lunelle/cover-2268.avif 2268w",
+          "webp": "/media/lunelle/cover-640.webp 640w, /media/lunelle/cover-1280.webp 1280w, /media/lunelle/cover-2268.webp 2268w"
         },
         "src": "/media/lunelle/cover-1280.webp",
-        "zoom": "/media/lunelle/cover-1280.webp"
+        "zoom": "/media/lunelle/cover-2268.webp"
       }
     },
     "mano-padana": {
@@ -840,11 +840,11 @@
           "height": 3309,
           "placeholder": "data:image/webp;base64,UklGRooAAABXRUJQVlA4IH4AAABwBACdASoQABgAPu1iqU2ppaOiMAgBMB2JYgCsACK58hW53Z5PfEp8yWX2AAD+vbLdRy7KbqrMXj4+Nv2h3lD9/n0sOhwmZouyjNtRuhlnJhUjq/B+hYXn26lsIOcgezqcyCbBL1uI2xUkLZDJDP1kmsoZtfnwkVMxBOMAAAA=",
           "srcset": {
-            "avif": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-640.avif 640w, /media/mano-padana/shoot/05-IMG-20250506-WA0033-1280.avif 1280w",
-            "webp": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-640.webp 640w, /media/mano-padana/shoot/05-IMG-20250506-WA0033-1280.webp 1280w"
+            "avif": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-640.avif 640w, /media/mano-padana/shoot/05-IMG-20250506-WA0033-1280.avif 1280w, /media/mano-padana/shoot/05-IMG-20250506-WA0033-2206.avif 2206w",
+            "webp": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-640.webp 640w, /media/mano-padana/shoot/05-IMG-20250506-WA0033-1280.webp 1280w, /media/mano-padana/shoot/05-IMG-20250506-WA0033-2206.webp 2206w"
           },
           "src": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-1280.webp",
-          "zoom": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-1280.webp"
+          "zoom": "/media/mano-padana/shoot/05-IMG-20250506-WA0033-2206.webp"
         },
         {
           "id": "06-IMG-20250506-WA0039",
@@ -999,11 +999,11 @@
         "height": 2648,
         "placeholder": "data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAADwAwCdASoQABYAPu1iqU2ppaOiMAgBMB2JZQC7ACIiOoiTYVhAoNoAAM4wdKC3gGLYPt7XEJIvUhCivMqh3ZQeXELGFYvCEe+dJF0cvYxp8cXT0CJJl8n1ndQkY9QtaEaXPmicP0a3p4yh2xumg1M2lBkwMoZxjLLRHcKkzrDmZVbjxh0PDoMHg0mFJTMOlGAAAA==",
         "srcset": {
-          "avif": "/media/mano-padana/cover-640.avif 640w, /media/mano-padana/cover-1280.avif 1280w",
-          "webp": "/media/mano-padana/cover-640.webp 640w, /media/mano-padana/cover-1280.webp 1280w"
+          "avif": "/media/mano-padana/cover-640.avif 640w, /media/mano-padana/cover-1280.avif 1280w, /media/mano-padana/cover-1905.avif 1905w",
+          "webp": "/media/mano-padana/cover-640.webp 640w, /media/mano-padana/cover-1280.webp 1280w, /media/mano-padana/cover-1905.webp 1905w"
         },
         "src": "/media/mano-padana/cover-1280.webp",
-        "zoom": "/media/mano-padana/cover-1280.webp"
+        "zoom": "/media/mano-padana/cover-1905.webp"
       }
     },
     "revive": {
@@ -1069,11 +1069,11 @@
         "height": 2000,
         "placeholder": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAAAQAgCdASoQABAAA4BaJaQAAud6kyCJx8AAAP74sAvRZ/h9lOOvyH36pG5bG/C/nkEkaeEcjrlll4lVpSBGK2nNOwAAAA==",
         "srcset": {
-          "avif": "/media/revive/logo-640.avif 640w, /media/revive/logo-1280.avif 1280w",
-          "webp": "/media/revive/logo-640.webp 640w, /media/revive/logo-1280.webp 1280w"
+          "avif": "/media/revive/logo-640.avif 640w, /media/revive/logo-1280.avif 1280w, /media/revive/logo-2000.avif 2000w",
+          "webp": "/media/revive/logo-640.webp 640w, /media/revive/logo-1280.webp 1280w, /media/revive/logo-2000.webp 2000w"
         },
         "src": "/media/revive/logo-1280.webp",
-        "zoom": "/media/revive/logo-1280.webp"
+        "zoom": "/media/revive/logo-2000.webp"
       }
     }
   },
@@ -1085,11 +1085,11 @@
       "height": 1809,
       "placeholder": "data:image/webp;base64,UklGRvgBAABXRUJQVlA4WAoAAAAQAAAADwAAGQAAQUxQSA0BAAABkGtt22E9z/fN/m3bdmmbB2AbcZcux7CTyrZtJ2XS2bY9M99TzLdXTiEiJgBOgYicZAh4FAi7ze/1kDrDhZX8x4tSCgBSCsz8spTFHngJQKBi2433VPzxZAFSIH3f19VLvtPmh+7buwMR/pQ/f5Kk4t41POvvNb7u8M6bVKSi4v1EAC64aVJx79xILGBIFxbRtngsDQJOiRJFk0PwNoQu7S9NLoUBrYEOKpsf8yA1Lrhp0uIKGP+xGdLDWs0JCIcALtOizVsGhCboPm3afBHjIew5FRW/50NqIt9oWAVDE/uRirTZqZFI+emw2O+h1KKtlMnFGoFSRZIWV2kkiqhzQ8IZ0NTS0tLS3FEAAQBWUDggxAAAAHAEAJ0BKhAAGgA+7WKpTamlo6IwCAEwHYlsAKwMFARoIQDWLEm6UV+3GUe4APnuEniY9WNM4tc5EeS0KKA4c+/7n8yCvOzrEYkU9aZqtE24UQqh3aBXP75k4dOwioN33AHzkXbxZy2j6GTtw7mSJpmz8bTmNfjT78TLcc83fdBOUd98J6h3esraNE0dotfEnN9wt0TcEDKYBu0dqQDT3LCXzIQtVbytsf6B6QslwK/d4+3GorukrVgQdnjlO+WAfs8cgAA=",
       "srcset": {
-        "avif": "/media/personal/balcony-sticker-640.avif 640w",
-        "webp": "/media/personal/balcony-sticker-640.webp 640w"
+        "avif": "/media/personal/balcony-sticker-640.avif 640w, /media/personal/balcony-sticker-1108.avif 1108w",
+        "webp": "/media/personal/balcony-sticker-640.webp 640w, /media/personal/balcony-sticker-1108.webp 1108w"
       },
-      "src": "/media/personal/balcony-sticker-640.webp",
-      "zoom": "/media/personal/balcony-sticker-640.webp"
+      "src": "/media/personal/balcony-sticker-1108.webp",
+      "zoom": "/media/personal/balcony-sticker-1108.webp"
     },
     "beach-graded": {
       "id": "beach-graded",
@@ -1098,11 +1098,11 @@
       "height": 2400,
       "placeholder": "data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAADQAwCdASoQABwAPu1iqU2ppaOiMAgBMB2JZQC/OCHf6plE/E9AYAAA/t6ayY4OrY1UgTeqm96mzlBYU1ASEJX807mVUsIo0DanKBnynWnHg3DScxC+uRAATQ02SAAA",
       "srcset": {
-        "avif": "/media/personal/beach-graded-640.avif 640w, /media/personal/beach-graded-1280.avif 1280w",
-        "webp": "/media/personal/beach-graded-640.webp 640w, /media/personal/beach-graded-1280.webp 1280w"
+        "avif": "/media/personal/beach-graded-640.avif 640w, /media/personal/beach-graded-1280.avif 1280w, /media/personal/beach-graded-1350.avif 1350w",
+        "webp": "/media/personal/beach-graded-640.webp 640w, /media/personal/beach-graded-1280.webp 1280w, /media/personal/beach-graded-1350.webp 1350w"
       },
       "src": "/media/personal/beach-graded-1280.webp",
-      "zoom": "/media/personal/beach-graded-1280.webp"
+      "zoom": "/media/personal/beach-graded-1350.webp"
     },
     "chair-graded": {
       "id": "chair-graded",
@@ -1111,11 +1111,11 @@
       "height": 1600,
       "placeholder": "data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADwAwCdASoQABUAPu1iqU2ppaOiMAgBMB2JYwCsAB9bPtyo74NY/KqgAP35n0s7u/NhY7AGcvP7tdCDQvUanbNXb1vhvQft2R+jwOd3sSVdk26w5yvJhEw2+Y/aCRoo0KPI2ya6/jQK1Y+bmydO9X/SiOYAAA==",
       "srcset": {
-        "avif": "/media/personal/chair-graded-640.avif 640w",
-        "webp": "/media/personal/chair-graded-640.webp 640w"
+        "avif": "/media/personal/chair-graded-640.avif 640w, /media/personal/chair-graded-1200.avif 1200w",
+        "webp": "/media/personal/chair-graded-640.webp 640w, /media/personal/chair-graded-1200.webp 1200w"
       },
-      "src": "/media/personal/chair-graded-640.webp",
-      "zoom": "/media/personal/chair-graded-640.webp"
+      "src": "/media/personal/chair-graded-1200.webp",
+      "zoom": "/media/personal/chair-graded-1200.webp"
     },
     "mirror-graded": {
       "id": "mirror-graded",
@@ -1124,11 +1124,11 @@
       "height": 1920,
       "placeholder": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAAAwBACdASoQABwAPu1kqU2ppaOiMAgBMB2JZQCdMoADKAU10CqqJiDMawAA/sNoRSgds285XfhP1hLWZl+9fuD91pa9PGIvff4tMbBSgbii+cMKJTdk+Fzb/CL7o4i+a2kGpR5IizPvksTq1jipdYGzSPVhPhonHoPdd7n2bcO8Ysr42WQW+T/AbIBWwITpgAA=",
       "srcset": {
-        "avif": "/media/personal/mirror-graded-640.avif 640w",
-        "webp": "/media/personal/mirror-graded-640.webp 640w"
+        "avif": "/media/personal/mirror-graded-640.avif 640w, /media/personal/mirror-graded-1080.avif 1080w",
+        "webp": "/media/personal/mirror-graded-640.webp 640w, /media/personal/mirror-graded-1080.webp 1080w"
       },
-      "src": "/media/personal/mirror-graded-640.webp",
-      "zoom": "/media/personal/mirror-graded-640.webp"
+      "src": "/media/personal/mirror-graded-1080.webp",
+      "zoom": "/media/personal/mirror-graded-1080.webp"
     }
   },
   "brand": {
@@ -1139,11 +1139,11 @@
       "height": 2000,
       "placeholder": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAACwAQCdASoQABAAA4BaJaQAAudU8FAAAP74uBUcXh9cW7VRn8K0hfjSLZkVCIW39/HrrBU0wAA=",
       "srcset": {
-        "avif": "/media/brand/monogram-640.avif 640w, /media/brand/monogram-1280.avif 1280w",
-        "webp": "/media/brand/monogram-640.webp 640w, /media/brand/monogram-1280.webp 1280w"
+        "avif": "/media/brand/monogram-640.avif 640w, /media/brand/monogram-1280.avif 1280w, /media/brand/monogram-2000.avif 2000w",
+        "webp": "/media/brand/monogram-640.webp 640w, /media/brand/monogram-1280.webp 1280w, /media/brand/monogram-2000.webp 2000w"
       },
       "src": "/media/brand/monogram-1280.webp",
-      "zoom": "/media/brand/monogram-1280.webp"
+      "zoom": "/media/brand/monogram-2000.webp"
     }
   }
 }

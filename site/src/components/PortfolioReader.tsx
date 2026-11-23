@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import TumbleDeck from './tumble-deck/TumbleDeck'
 import type { MediaImage } from '@/lib/media'
 import { useDialog } from '@/lib/useDialog'
@@ -20,7 +20,15 @@ export default function PortfolioReader({ title, pages, pageText, background, de
   const [open, setOpen] = useState(false)
   const [index, setIndex] = useState(0)
   const [panel, setPanel] = useState<'zoom' | 'text' | null>(null)
-  const dialog = useDialog(open)
+  const dialog = useDialog(open, () => {
+    setPanel(null)
+    setOpen(false)
+  })
+  // Stable identity: a new array on each render restarted the deck and froze cards mid-fall.
+  const cards = useMemo(
+    () => pages.map((p, i) => ({ src: p.src, alt: `${title} portfolio, page ${i + 1} of ${pages.length}` })),
+    [pages, title],
+  )
 
   useEffect(() => {
     if (defaultOpen) setOpen(true)
@@ -28,7 +36,7 @@ export default function PortfolioReader({ title, pages, pageText, background, de
 
   // Warm the next three pages so they never land blank.
   useEffect(() => {
-    if (!open) return
+    if (!open || !pages.length) return
     for (let k = 1; k <= 3; k++) new Image().src = pages[(index + k) % pages.length].src
   }, [open, index, pages])
 
@@ -59,12 +67,21 @@ export default function PortfolioReader({ title, pages, pageText, background, de
         </span>
         <span className="label">Open the portfolio</span>
       </button>
+      <noscript>
+        <ol className={styles.plain}>
+          {pages.map((p, i) => (
+            <li key={p.id}>
+              <a href={p.zoom}>{title}, page {i + 1}</a>
+            </li>
+          ))}
+        </ol>
+      </noscript>
 
       <dialog ref={dialog} tabIndex={-1} className={styles.dialog} onKeyDown={onKey} onCancel={(e) => (e.preventDefault(), close())} aria-label={`${title} portfolio`} style={{ background }}>
         {open && (
           <>
             <TumbleDeck
-              cards={pages.map((p, i) => ({ src: p.src, alt: `${title} portfolio, spread ${i + 1} of ${pages.length}` }))}
+              cards={cards}
               aspect={aspect}
               depth={4}
               height="100svh"

@@ -11,7 +11,7 @@ export default function ContactForm({ endpoint }: { endpoint?: string }) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
-    if (data.get('company')) return setStatus('sent') // bots fill the hidden field; tell them nothing
+    if (data.get('_gotcha')) return setStatus('sent') // bots fill the hidden field; tell them nothing
     if (!endpoint) {
       setError('The contact form isn’t connected yet.')
       return setStatus('error')
@@ -30,7 +30,7 @@ export default function ContactForm({ endpoint }: { endpoint?: string }) {
   if (status === 'sent') return <p className={styles.thanks}>Thank you. I’ll reply soon.</p>
 
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
+    <form className={styles.form} onSubmit={onSubmit} method="post" action={endpoint}>
       <label className={styles.field}>
         <span className="label">Name</span>
         <input name="name" required autoComplete="name" />
@@ -44,7 +44,7 @@ export default function ContactForm({ endpoint }: { endpoint?: string }) {
         <textarea name="message" required rows={5} />
       </label>
       <label className={styles.trap} aria-hidden="true">
-        Company <input name="company" tabIndex={-1} autoComplete="off" />
+        Leave empty <input name="_gotcha" tabIndex={-1} autoComplete="off" />
       </label>
       {status === 'error' && (
         <p role="alert" className={styles.error}>

@@ -5,7 +5,7 @@ import type { Collection, Moment } from '@/lib/collections'
 import type { CollectionMedia, MediaImage } from '@/lib/media'
 
 vi.mock('./ShootGallery', () => ({
-  default: ({ preset, autoplay }: { preset: string; autoplay: string }) => <div data-testid="gallery" data-preset={preset} data-autoplay={autoplay} />,
+  default: ({ preset, autoplay, initialView }: { preset: string; autoplay: string; initialView?: string }) => <div data-testid="gallery" data-preset={preset} data-autoplay={autoplay} data-view={initialView} />,
 }))
 vi.mock('./PortfolioReader', () => ({ default: () => <div data-testid="reader" /> }))
 vi.mock('./glass-folder/GlassFolder', () => ({
@@ -38,6 +38,7 @@ test('orbit renders the orbit gallery', () => {
 test('gallery renders a still grid', () => {
   renderMoment('gallery', { carousel: undefined })
   expect(screen.getByTestId('gallery').dataset.autoplay).toBe('off')
+  expect(screen.getByTestId('gallery').dataset.view).toBe('grid')
 })
 
 test('walk renders every photo in order', () => {

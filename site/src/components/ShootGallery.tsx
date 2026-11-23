@@ -14,20 +14,22 @@ type Props = {
   speed?: number
   fadeColor: string
   label: string
+  /** 'grid' keeps the still grid after mount (the gallery moment). */
+  initialView?: 'ring' | 'grid'
 }
 
 const two = (n: number) => String(n).padStart(2, '0')
 
-export default function ShootGallery({ images, alt, preset, autoplay, speed, fadeColor, label }: Props) {
+export default function ShootGallery({ images, alt, preset, autoplay, speed, fadeColor, label, initialView = 'ring' }: Props) {
   // Server HTML shows the grid, so every photo is reachable without JavaScript.
   const [view, setView] = useState<'ring' | 'grid'>('grid')
   const [paused, setPaused] = useState(false)
   const [index, setIndex] = useState<number | null>(null)
-  const dialog = useDialog(index !== null)
+  const dialog = useDialog(index !== null, () => setIndex(null))
 
   useEffect(() => {
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) setView('ring')
-  }, [])
+    if (initialView === 'ring' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) setView('ring')
+  }, [initialView])
 
   // Ring cards are 240px wide (each drawn as several slices), so the 640px file is plenty.
   const items = images.map((im) => ({ src: im.srcset.webp.split(' ')[0], alt: alt[im.id] ?? '' }))
@@ -43,6 +45,8 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
   }
 
   const current = index === null ? null : images[index]
+  // Never let the vendored carousel fall back to its demo photos.
+  if (!images.length) return null
 
   return (
     <div className={styles.gallery} aria-label={label} role="group">

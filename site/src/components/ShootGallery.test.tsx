@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ShootGallery from './ShootGallery'
 import type { MediaImage } from '@/lib/media'
@@ -86,4 +86,26 @@ test('locks page scroll while open', async () => {
   expect(document.body.style.overflow).toBe('hidden')
   await userEvent.keyboard('{Escape}')
   expect(document.body.style.overflow).toBe('')
+})
+
+test('a native close unlocks scroll and the viewer can reopen', async () => {
+  render(<ShootGallery {...props} />)
+  await userEvent.click(screen.getByRole('button', { name: 'Grid' }))
+  await userEvent.click(tiles()[0])
+  const d = screen.getByRole('dialog') as HTMLDialogElement
+  d.open = false
+  fireEvent(d, new Event('close'))
+  expect(document.body.style.overflow).toBe('')
+  await userEvent.click(tiles()[1])
+  expect(d).toHaveProperty('open', true)
+})
+
+test('no photos renders nothing (never the carousel demo images)', () => {
+  const { container } = render(<ShootGallery {...props} images={[]} />)
+  expect(container).toBeEmptyDOMElement()
+})
+
+test('initialView grid stays a grid after mount', () => {
+  render(<ShootGallery {...props} initialView="grid" />)
+  expect(pressed('Grid')).toBe('true')
 })

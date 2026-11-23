@@ -119,6 +119,10 @@ export default function TumbleDeckShowcase({
   // Two on the floor, the falling one, the front one, `depth` behind, one fading in.
   const pool = n ? depth + 5 : 0
 
+  // Local edit: cards are read through a ref so a new (equal) array from the parent
+  // does not recreate paint() and tear down a running tumble.
+  const cardsRef = React.useRef(cards)
+  cardsRef.current = cards
   const paint = React.useCallback(() => {
     const { pos } = state.current
     const { gap } = geo.current
@@ -134,7 +138,7 @@ export default function TumbleDeckShowcase({
       const k = base + wrap(j - base, pool)
       if (slotK.current[j] !== k) {
         slotK.current[j] = k
-        const c = cards[wrap(k, n)]
+        const c = cardsRef.current[wrap(k, n)]
         img.src = c.src
         img.alt = c.alt ?? ""
       }
@@ -146,12 +150,13 @@ export default function TumbleDeckShowcase({
       const shade = p.flat ? 0.06 : (-p.angle / 90) * 0.06
       el.style.setProperty("--td-shade", String(shade))
     })
-  }, [depth, pool, cards, n])
+  }, [depth, pool, n])
 
   // New images: re-point every slot on the next paint.
   React.useLayoutEffect(() => {
     slotK.current = []
-  }, [cards])
+    paint()
+  }, [cards, paint])
 
   // Fit: the card, the deck above it and the floor card below all inside the
   // root. Perspective and eye height are fixed ratios of the card height,

@@ -4,7 +4,7 @@ import path from 'node:path'
 import sharp from 'sharp'
 import { parseOrder, isSpread, widthsFor, buildCollection } from './lib.mjs'
 
-let fx, fxPortrait, fxWide
+let fx, fxPortrait, fxWide, fxMixed, tmpRoot
 
 async function img(file, width, height, withGps = false) {
   fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -21,6 +21,10 @@ beforeAll(async () => {
   fx = { srcRoot: path.join(tmp, 'src'), outRoot: path.join(tmp, 'out'), urlPrefix: '', alt: { '01-a': 'A garment' } }
   fxPortrait = { srcRoot: path.join(tmp, 'src2'), outRoot: path.join(tmp, 'out2'), urlPrefix: '', alt: {} }
   await img(path.join(tmp, 'src3/t/pages/04.png'), 5000, 1768)
+  await img(path.join(tmp, 'src4/t/pages/04.png'), 2830, 1000)
+  await img(path.join(tmp, 'src4/t/pages/06.png'), 1414, 1000)
+  fxMixed = { srcRoot: path.join(tmp, 'src4'), outRoot: path.join(tmp, 'out4'), urlPrefix: '', alt: {} }
+  tmpRoot = tmp
   fxWide = { srcRoot: path.join(tmp, 'src3'), outRoot: path.join(tmp, 'out3'), urlPrefix: '', alt: {} }
 })
 
@@ -39,7 +43,8 @@ test('isSpread', () => {
 
 test('widthsFor never upscales', () => {
   expect(widthsFor(4000)).toEqual([640, 1280, 2400])
-  expect(widthsFor(1200)).toEqual([640])
+  expect(widthsFor(1200)).toEqual([640, 1200])
+  expect(widthsFor(1280)).toEqual([640, 1280])
   expect(widthsFor(500)).toEqual([500])
 })
 
@@ -75,4 +80,26 @@ test('urls carry the prefix', async () => {
   const m = await buildCollection('t', { ...fx, urlPrefix: 'https://media.x' })
   expect(m.shoot[0].src.startsWith('https://media.x/media/t/shoot/')).toBe(true)
   expect(fs.existsSync(fileOf(m.shoot[0].src))).toBe(true)
+})
+
+test('mixed spreads and single pages fail instead of cropping in the deck', async () => {
+  await expect(buildCollection('t', fxMixed)).rejects.toThrow('Mixed page ratios in t')
+})
+
+test('a failed build keeps the previous output', async () => {
+  const outRoot = path.join(tmpRoot, 'out5')
+  const keep = path.join(outRoot, 'media/t/shoot/old.webp')
+  fs.mkdirSync(path.dirname(keep), { recursive: true })
+  fs.writeFileSync(keep, 'x')
+  await expect(buildCollection('t', { ...fx, outRoot, alt: {} })).rejects.toThrow('Missing alt')
+  expect(fs.existsSync(keep)).toBe(true)
+})
+
+test('a successful build replaces stale output', async () => {
+  const outRoot = path.join(tmpRoot, 'out6')
+  const stale = path.join(outRoot, 'media/t/shoot/stale.webp')
+  fs.mkdirSync(path.dirname(stale), { recursive: true })
+  fs.writeFileSync(stale, 'x')
+  await buildCollection('t', { ...fx, outRoot })
+  expect(fs.existsSync(stale)).toBe(false)
 })

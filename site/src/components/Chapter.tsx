@@ -24,7 +24,7 @@ function Moment({ collection: c, media }: Props) {
         />
       )
     case 'gallery':
-      return <ShootGallery images={media.shoot} alt={c.alt} preset="cylinder" autoplay="off" fadeColor={c.palette.ground} label={label} />
+      return <ShootGallery images={media.shoot} alt={c.alt} preset="cylinder" autoplay="off" initialView="grid" fadeColor={c.palette.ground} label={label} />
     case 'walk':
       return (
         <ol className={styles.walk} aria-label={label}>

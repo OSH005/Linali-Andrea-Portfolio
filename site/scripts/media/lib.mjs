@@ -19,7 +19,9 @@ export function parseOrder(fileName) {
 }
 
 export const isSpread = (w, h) => w / h > 2.5
-export const widthsFor = (w) => (w < WIDTHS[0] ? [w] : WIDTHS.filter((x) => x <= w))
+// Standard tiers below the source width, plus the source's own width (capped at 2400), never upscaled.
+const MAX = WIDTHS[WIDTHS.length - 1]
+export const widthsFor = (w) => (w < WIDTHS[0] ? [w] : [...WIDTHS.filter((x) => x < Math.min(w, MAX)), Math.min(w, MAX)])
 
 // Decoded once, upright, metadata dropped (sharp never copies EXIF unless asked).
 async function load(file) {
@@ -85,13 +87,26 @@ export async function buildCollection(slug, { srcRoot, outRoot, urlPrefix = '', 
   const shootFiles = list('shoot')
   for (const f of shootFiles) if (!alt[stem(f)]) throw new Error(`Missing alt for ${stem(f)}`)
 
+  // The deck uses one aspect per collection, so spreads and single pages must not mix.
+  const pageFiles = list('pages')
+  const kinds = new Set()
+  for (const f of pageFiles) {
+    const m = await sharp(path.join(dir, 'pages', f)).metadata()
+    const [w, h] = (m.orientation ?? 1) >= 5 ? [m.height, m.width] : [m.width, m.height]
+    kinds.add(isSpread(w, h))
+  }
+  if (kinds.size > 1) throw new Error(`Mixed page ratios in ${slug}: use all spreads or all single pages`)
+
+  // Only now replace the previous output, so a failed build never leaves the site without images.
+  fs.rmSync(path.join(outRoot, 'media', slug), { recursive: true, force: true })
+
   const shoot = []
   for (const f of shootFiles) {
     shoot.push(await buildImage(path.join(dir, 'shoot', f), { ...ctx, folder: `${slug}/shoot`, id: stem(f), order: parseOrder(f) }))
   }
 
   const pages = []
-  for (const f of list('pages')) {
+  for (const f of pageFiles) {
     const n = parseOrder(f)
     const img = await load(path.join(dir, 'pages', f))
     const { width: w, height: h } = img.info
