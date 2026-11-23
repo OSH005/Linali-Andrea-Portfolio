@@ -69,7 +69,7 @@ Verify the headers on the preview deployment with `curl -I`.
 - Turn on **Cloudflare Web Analytics**. It's cookie-free, so no cookie banner is needed. Confirm no other third-party requests are made (check the network log).
 
 **6. Launch checks on the live URL**
-- Lighthouse mobile on `/` and `/work/drift/`.
+- Lighthouse mobile on `/` and `/collections/drift/`.
 - `impeccable shot` at 1440 and 390 for every route.
 - Open-graph previews: test one collection link in a social preview debugger.
 - `sitemap.xml` and `robots.txt` reachable. Submit the sitemap in Google Search Console if I want it (ask).

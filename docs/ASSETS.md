@@ -82,7 +82,7 @@ All edited versions (cutout, sticker, graded, duotone for each of the 5 photos) 
 | Nav | Monogram |
 | Each chapter | Its shoot photos (ring, orbit, walk or grid), then its pages in the Tumble Deck |
 | Revive studio table | Its spreads, as files in three Glass Folders (`studio` in `revive.json`) |
-| `/work` index | First shoot photo, or the logo on paper when there is no shoot |
+| `/work` index (becomes `/collections` in Phase 2) | First shoot photo, or the logo on paper when there is no shoot |
 | Person section | `balcony-sticker`, `beach-graded`, `mirror-graded` (`content/site.json` → `person`) |
 
 ## Still missing from the client

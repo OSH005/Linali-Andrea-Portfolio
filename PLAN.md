@@ -1,6 +1,6 @@
 # Linali Andrea — Portfolio Website Plan
 
-Status: **Phase 1 built** (static site, media pipeline, components; merged to `main`). Next: Phase 2 (motion). See `docs/START-HERE.md`.
+Status: **Phase 1 built** (static site, media pipeline, components; merged to `main`). Next: Phase 2, an **immersive redesign** (decided 2026-11-23 after reviewing Phase 1: home becomes a short motion-led highlight reel featuring 2–3 collections; new `/about`; `/work` becomes `/collections` with full detail pages). Prompt: `docs/prompts/phase-2-immersive.md`. See `docs/START-HERE.md`.
 
 > **Decisions made while building Phase 1 that override this plan** (details in `CLAUDE.md`):
 > - Spreads (Drift, Revive) are **not split**. Their text and images cross the gutter, so each spread is one deck card at ratio 2√2 (2.83). Single pages stay at √2 (1.41). A collection may not mix the two; the media build refuses.

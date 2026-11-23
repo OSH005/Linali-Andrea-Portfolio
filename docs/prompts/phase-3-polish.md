@@ -20,7 +20,7 @@ Create a branch `phase-3-polish` from `main`. Plan with `superpowers:writing-pla
 2. **Counters** (`NN / NN`) in the photo viewer and the reader get `aria-live="polite"`.
 3. **The Mano Padana walk** `<ol>` gets `tabIndex={0}` and a label, so it is keyboard-scrollable in Safari. Skip this if Phase 2's pinned walk already handles it.
 4. **Single-page collections** (Lunelle, Mano Padana) say "page", not "spread". Spreads say "spread".
-5. **Closing a reader that opened on its own** (`/work/<slug>/`) returns focus to the "Open the portfolio" button, not `<body>`.
+5. **Closing a reader that opened on its own** (`/collections/<slug>/`) returns focus to the "Open the portfolio" button, not `<body>`.
 6. **Contact form**: after a successful send, focus and announce the thank-you (`role="status"`).
 7. **Media build input checks**:
    - Error on `.heic`, `.tif`, `.avif` sources ("convert to JPG/PNG first") instead of skipping them silently.
@@ -31,7 +31,7 @@ Create a branch `phase-3-polish` from `main`. Plan with `superpowers:writing-pla
    - Every studio folder page id must exist in the media.
    - `wheel` and `panorama` carousel presets are either supported or rejected, never silently mapped to `cylinder`.
 9. **Skills list**: give `site.json` a `skillsDraft: true` flag, shown the same way as the bio draft marker.
-10. **`/work` images** get `width`/`height` (no layout shift). The footer year is computed in the browser, or stated as the build year on purpose.
+10. **`/collections` images** get `width`/`height` (no layout shift). The footer year is computed in the browser, or stated as the build year on purpose.
 
 ## 2. Real-browser tests (Playwright)
 - Add `@playwright/test` with Chromium. Run it against the static export (`site/out`, served on a local port), as `npm run test:e2e`.
@@ -44,10 +44,10 @@ Create a branch `phase-3-polish` from `main`. Plan with `superpowers:writing-pla
   - **(f)** The contact form posts to a stub endpoint and shows the thank-you.
 
 ## 3. Accessibility and quality audits
-- Run `impeccable audit` and `impeccable critique` on `/`, `/work/` and `/work/drift/`. Fix every material finding; justify anything you keep.
+- Run `impeccable audit` and `impeccable critique` on `/`, `/collections/`, `/collections/drift/` and `/about/`. Fix every material finding; justify anything you keep.
 - Keyboard-only walkthrough of the whole site. Every control reachable, visible focus, no traps except inside open dialogs.
 - Check contrast at every chapter light, including Lunelle (cream on `#21150F`) and the Mano Padana transition.
-- **Lighthouse**, mobile profile, on `/` and `/work/drift/`:
+- **Lighthouse**, mobile profile, on `/` and `/collections/drift/`:
   - Performance ≥ 90
   - Accessibility 100
   - Best practices ≥ 95

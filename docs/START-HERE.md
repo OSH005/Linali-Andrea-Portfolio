@@ -8,7 +8,7 @@ A step-by-step guide to taking Linali Andrea's portfolio from where it is now to
 |---|---|---|
 | 0 | Plan, product brief, design system, edited portraits | ✅ Done |
 | 1 | The site: every section from data, media pipeline, carousel, page deck, folders, contact form, `/work` pages | ✅ Done, on `main` (61 unit tests + 13 build checks green) |
-| 2 | Motion: smooth scroll, hero lens, the thread, chapter moments | ⏭ Next: `docs/prompts/phase-2-motion.md` |
+| 2 | **Immersive redesign**: home becomes a short highlight reel with motion (hero lens, manifesto, featured-collections reel, the thread); new `/about`; `/work` becomes `/collections` with detail pages | ⏭ Next: `docs/prompts/phase-2-immersive.md` |
 | 3 | Polish, accessibility, real-browser tests, SEO, release gate | `docs/prompts/phase-3-polish.md` |
 | 4 | Launch: Cloudflare Pages, form, domain, analytics | `docs/prompts/phase-4-launch.md` |
 
@@ -56,12 +56,13 @@ These don't block development, but some block **launch**. Copy the list into a m
 
 When files arrive, put them where `docs/ASSETS.md` says (originals into `media-src/…`). Ask Claude Code to rebuild the media.
 
-## Step 3: Run Phase 2 (motion)
+## Step 3: Run Phase 2 (immersive redesign)
 1. In Claude Code, open this folder and start a **new session** (a fresh context works best for a whole phase).
-2. Open `docs/prompts/phase-2-motion.md`, copy everything below the line, and paste it as your first message.
-3. Claude will read the project docs and write a plan. **Read the plan and reply "go" or with changes.**
-4. It builds task by task, on a branch `phase-2-motion`, testing as it goes. Long steps (media builds, motion captures) run in the background; let them finish.
-5. At the end it shows screenshots and scores and asks whether to merge. Look at the site (`npm run dev`) before saying yes.
+2. Open `docs/prompts/phase-2-immersive.md`, copy everything below the line, and paste it as your first message.
+3. Claude reads the project docs, then **asks you what you picture for the home page motion** and shows mockups in a browser tab. React to them: this is where the look gets decided.
+4. It writes a short design doc, then a task plan. **Read each and reply "go" or with changes.**
+5. It builds task by task, on a branch `phase-2-immersive`, testing as it goes. Long steps (media builds, motion captures) run in the background; let them finish.
+6. At the end it shows screenshots and scores and asks whether to merge. Look at the site (`npm run dev`) before saying yes.
 
 ## Step 4: Run Phase 3 (polish and release checks)
 Same as step 3, with `docs/prompts/phase-3-polish.md`. Afterwards you'll have:
