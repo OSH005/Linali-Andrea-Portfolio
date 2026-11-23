@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+html,
+body {
+  background: var(--cream);
+  color: var(--brown);
+}
+
+:root {
+  /* Palette (PLAN.md section 4). Teal never carries text under 24px. */
+  --cream: #f2e8da;
+  --brown: #3b2418;
+  --teal: #008794;
+  --paper: #fbf8f3;
+  --brown-muted: #5a4436;
+
+  /* Spacing scale, 4px base */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
+  --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 128px; --s-11: 176px;
+  --gutter: 20px;
+  --content-max: 1440px;
+
+  /* Type */
+  --text-display: clamp(2.5rem, 7vw, 6rem);
+  --text-body: 17px;
+  --text-label: 12px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-press: 140ms;
+  --dur-state: 200ms;
+  --dur-open: 450ms;
+  --dur-close: 300ms;
+}
+
+@media (min-width: 640px) { :root { --gutter: 32px; } }
+@media (min-width: 1024px) { :root { --gutter: 64px; } }
+
+@theme inline {
+  --color-background: var(--cream);
+  --color-foreground: var(--brown);
+  --color-primary: var(--teal);
+  --color-paper: var(--paper);
+  --color-muted: var(--brown-muted);
+  --font-display: var(--font-bodoni);
+  --font-label: var(--font-courier);
+  --font-sinhala: var(--font-noto-sinhala);
+}
+
+body {
+  font-family: var(--font-bodoni), serif;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  caret-color: var(--teal);
+}
+
+/* Browser surfaces carry the design too */
+::selection { background: rgb(0 135 148 / 0.3); color: inherit; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+a { text-underline-offset: 0.2em; }
+html { scrollbar-color: var(--brown-muted) var(--cream); }
+
+.display {
+  font-family: var(--font-bodoni), serif;
+  font-weight: 400;
+  font-size: var(--text-display);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.label {
+  font-family: var(--font-courier), monospace;
+  font-size: var(--text-label);
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--brown-muted);
+  font-variant-numeric: tabular-nums;
+}
+.wrap {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.pressable { transition: scale var(--dur-press) var(--ease-out); }
+.pressable:active { scale: 0.97; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
