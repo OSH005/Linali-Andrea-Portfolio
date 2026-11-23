@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "Personal/edited/preview.html"
+        ],
+        "createdAt": "2026-11-23T04:28:45.900Z",
+        "reason": "Claude: only hit is a decorative aria-hidden ghost word at 6% opacity in a throwaway review mock"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "Personal/edited/preview.html"
+        ],
+        "createdAt": "2026-11-23T04:32:20.639Z",
+        "reason": "User's brief names Cream #F2E8DA as the main colour; deliberate palette, not a default"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "Personal/edited/preview.html"
+        ],
+        "createdAt": "2026-11-23T04:32:20.787Z",
+        "reason": "Claude: headline is roman Bodoni Moda (matches the client's Didone LA monogram); only one word is italic, editorial fashion register"
+      }
+    ]
+  }
+}

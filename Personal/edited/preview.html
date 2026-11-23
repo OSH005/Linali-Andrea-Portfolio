@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portrait treatments</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+  html, body { background: #F2E8DA; }
+  :root { --cream:#F2E8DA; --brown:#3B2418; --teal:#008794; --paper:#FBF8F3; }
+  * { box-sizing: border-box; margin: 0; }
+  body { color: var(--brown); font: 17px/1.55 "Bodoni Moda", serif; -webkit-font-smoothing: antialiased; }
+  ::selection { background: rgb(0 135 148 / .3); }
+  .label { font: 12px/1.2 "Courier Prime", monospace; text-transform: uppercase; letter-spacing: .15em; color: #5a4436; }
+
+  /* Mock: the person */
+  .person { position: relative; min-height: 100svh; padding: 128px 64px; overflow: clip; }
+  .person h2 { font-weight: 400; font-size: clamp(2.5rem, 7vw, 6rem); line-height: .95; letter-spacing: -.03em; max-width: 9ch; position: relative; z-index: 3; }
+  .person h2 em { font-style: italic; }
+  .person p { max-width: 34ch; margin-top: 32px; position: relative; z-index: 3; }
+  .ghost { position: absolute; right: -2vw; top: 6vh; font: italic 400 30vw/.8 "Bodoni Moda", serif; letter-spacing: -.06em; color: var(--brown); opacity: .06; z-index: 0; }
+  .polaroid { position: absolute; background: var(--paper); padding: 12px 12px 44px; box-shadow: 0 10px 30px rgb(59 36 24 / .18); }
+  .polaroid img { display: block; width: 100%; aspect-ratio: 4/5; object-fit: cover; }
+  .beach { width: 300px; right: 33%; top: 150px; rotate: -4deg; z-index: 1; }
+  .beach img { object-position: 50% 70%; }
+  .mirror { width: 230px; right: 6%; bottom: 90px; rotate: 3deg; z-index: 1; }
+  .mirror img { aspect-ratio: 3/5; object-position: 50% 60%; }
+  .tape { position: absolute; width: 90px; height: 26px; background: rgb(242 232 218 / .75); top: -12px; left: calc(50% - 45px); rotate: 2deg; }
+  .figure { position: absolute; right: 14%; bottom: 0; height: 82vh; z-index: 2; filter: drop-shadow(0 2px 0 rgb(59 36 24 / .05)); }
+  .thread { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
+  /* Phone: text first, then a smaller collage stage under it */
+  @media (max-width: 760px) {
+    .person { padding: 64px 20px 0; min-height: 0; display: flex; flex-direction: column; }
+    .person p { margin-top: 20px; }
+    .stage { position: relative; height: 560px; margin: 32px -20px 0; }
+    .beach { width: 190px; left: 16px; right: auto; top: 0; }
+    .mirror { width: 140px; right: 14px; bottom: 120px; }
+    .figure { height: 470px; right: 50%; translate: 50% 0; }
+    .ghost { font-size: 44vw; top: auto; bottom: 380px; }
+    .compare { padding: 64px 20px; }
+    .row { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .row img { height: 240px; }
+  }
+
+  /* Treatment comparison */
+  .compare { padding: 96px 64px 128px; }
+  .compare h3 { font-weight: 400; font-size: 2rem; letter-spacing: -.02em; margin-bottom: 32px; }
+  .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 64px; align-items: end; }
+  .row figure { display: grid; gap: 12px; }
+  .row img { width: 100%; height: 380px; object-fit: contain; background: rgb(59 36 24 / .04); }
+  .row img.full { object-fit: cover; }
+</style>
+</head>
+<body>
+
+<section class="person">
+  <div class="ghost" aria-hidden="true">Linali</div>
+  <svg class="thread" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M -20 860 C 300 840, 520 760, 640 560 S 760 120, 1040 160 S 1300 60, 1480 90" fill="none" stroke="#008794" stroke-width="1.6" stroke-dasharray="10 9" stroke-linecap="round"/>
+  </svg>
+  <h2>Behind the <em>work</em>, a slow hand.</h2>
+  <p>Mock copy for layout only. Linali designs womenswear in Sri Lanka, where hand weaving, crochet and reworked denim carry the story.</p>
+  <div class="stage">
+    <figure class="polaroid beach"><span class="tape"></span><img src="beach-graded.jpg" alt="Linali sitting on a beach at sunset"></figure>
+    <figure class="polaroid mirror"><span class="tape"></span><img src="mirror-graded.jpg" alt="Linali in a grey waistcoat and wide denim, mirror portrait"></figure>
+    <img class="figure" src="balcony-sticker.png" alt="Linali in a leopard top and brown satin skirt">
+  </div>
+</section>
+
+<section class="compare">
+  <h3>Treatments, side by side</h3>
+  <div class="row">
+    <figure><img class="full" src="../IMG_20260220_075945_880.webp" alt=""><span class="label">Mirror · original</span></figure>
+    <figure><img class="full" src="mirror-graded.jpg" alt=""><span class="label">Palette grade</span></figure>
+    <figure><img class="full" src="mirror-duotone.jpg" alt=""><span class="label">Duotone</span></figure>
+    <figure><img src="mirror-sticker.png" alt=""><span class="label">Paper cutout</span></figure>
+  </div>
+  <div class="row">
+    <figure><img src="balcony-sticker.png" alt=""><span class="label">Balcony · cutout</span></figure>
+    <figure><img src="chair-sticker.png" alt=""><span class="label">Chair · cutout</span></figure>
+    <figure><img src="snow-sticker.png" alt=""><span class="label">Snow · cutout (low-res)</span></figure>
+    <figure><img src="beach-sticker.png" alt=""><span class="label">Beach · cutout</span></figure>
+  </div>
+  <div class="row">
+    <figure><img class="full" src="balcony-graded.jpg" alt=""><span class="label">Balcony · grade</span></figure>
+    <figure><img class="full" src="chair-graded.jpg" alt=""><span class="label">Chair · grade</span></figure>
+    <figure><img class="full" src="beach-graded.jpg" alt=""><span class="label">Beach · grade</span></figure>
+    <figure><img class="full" src="beach-duotone.jpg" alt=""><span class="label">Beach · duotone</span></figure>
+  </div>
+</section>
+</body>
+</html>

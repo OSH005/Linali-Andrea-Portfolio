@@ -1,0 +1,11 @@
+Install the Dither Cursor component and use it with the exact configuration below.
+
+```bash
+npx shadcn@latest add @reactbits-starter/dither-cursor-tw
+```
+
+```tsx
+<p />
+```
+
+Docs: https://pro.reactbits.dev/docs/components/dither-cursor

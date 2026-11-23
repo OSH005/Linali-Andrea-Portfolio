@@ -1,0 +1,11 @@
+Install the Stipple Type component and use it with the exact configuration below.
+
+```bash
+npx shadcn@latest add @reactbits-starter/stipple-type-tw
+```
+
+```tsx
+<StippleType />
+```
+
+Docs: https://pro.reactbits.dev/docs/components/stipple-type

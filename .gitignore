@@ -1,0 +1,27 @@
+# Original client media: master copy lives in the client's Drive (PLAN.md section 6)
+media-src/
+Heritage/
+Maternity/
+Denim/
+drift collection/
+Personal/*
+!Personal/edited/
+*.tiff
+
+# Dependencies and builds
+node_modules/
+.next/
+out/
+site/.next/
+site/out/
+
+# Secrets
+.env
+.env.*
+
+# Tool scratch
+.superpowers/
+.impeccable/review/
+.taste-skill/
+shots/
+.impeccable/hook.cache.json
