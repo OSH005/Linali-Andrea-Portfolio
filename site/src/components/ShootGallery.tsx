@@ -29,7 +29,8 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) setView('ring')
   }, [])
 
-  const items = images.map((im) => ({ src: im.src, alt: alt[im.id] ?? '' }))
+  // Ring cards are 240px wide (each drawn as several slices), so the 640px file is plenty.
+  const items = images.map((im) => ({ src: im.srcset.webp.split(' ')[0], alt: alt[im.id] ?? '' }))
   const move = (d: number) => setIndex((i) => (i === null ? i : (i + d + images.length) % images.length))
 
   const onKey = (e: React.KeyboardEvent) => {

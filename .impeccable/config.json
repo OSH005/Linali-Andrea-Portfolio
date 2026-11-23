@@ -29,6 +29,24 @@
         ],
         "createdAt": "2026-11-23T04:32:20.787Z",
         "reason": "Claude: headline is roman Bodoni Moda (matches the client's Didone LA monogram); only one word is italic, editorial fashion register"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "*",
+        "files": [
+          "site/src/components/glass-folder/GlassFolder.tsx"
+        ],
+        "createdAt": "2026-11-23T05:25:38.688Z",
+        "reason": "Claude: vendored component's own folder spring, advisory; vendored code kept verbatim"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "site/src/components/tumble-deck/TumbleDeck.tsx"
+        ],
+        "createdAt": "2026-11-23T05:25:38.872Z",
+        "reason": "Claude: pooled deck slots get src from paint() at runtime by design"
       }
     ]
   }

@@ -6,6 +6,8 @@
   gap: var(--s-8);
 }
 .chapter :global(.label) { color: color-mix(in oklab, var(--ink) 78%, var(--ground)); }
+/* Grid items default to min-width:auto; without this the walk's track widens the page. */
+.chapter > * { min-width: 0; }
 
 .head {
   display: grid;
@@ -36,8 +38,12 @@
   padding: 0 0 var(--s-4);
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: min(80vw, 420px);
+  grid-auto-columns: min(72vw, 360px);
   gap: var(--s-5);
+  /* Bleed to the right edge so the next photo peeks in: the cue that it scrolls. */
+  margin-right: calc(-1 * var(--gutter));
+  padding-right: var(--gutter);
+  scroll-padding-inline: 0 var(--gutter);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain;

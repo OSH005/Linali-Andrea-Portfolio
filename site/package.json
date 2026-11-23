@@ -6,8 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run",
-    "media": "node scripts/media/build.mjs"
+    "test": "vitest run --project ui --project node",
+    "media": "node scripts/media/build.mjs",
+    "test:build": "next build && vitest run --project build"
   },
   "dependencies": {
     "gsap": "^3.15.1",

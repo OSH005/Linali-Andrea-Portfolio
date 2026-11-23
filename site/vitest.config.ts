@@ -16,7 +16,11 @@ export default defineConfig({
       },
       {
         extends: true,
-        test: { name: 'node', environment: 'node', include: ['scripts/**/*.test.mjs'], testTimeout: 60_000 },
+        test: { name: 'node', environment: 'node', include: ['scripts/media/**/*.test.mjs'], testTimeout: 60_000 },
+      },
+      {
+        extends: true,
+        test: { name: 'build', environment: 'node', include: ['scripts/build/**/*.test.mjs'] },
       },
     ],
   },

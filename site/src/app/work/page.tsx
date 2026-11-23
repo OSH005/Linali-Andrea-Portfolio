@@ -17,11 +17,13 @@ export default function WorkIndex() {
         <ul className={styles.list}>
           {getCollections().map((c) => {
             const m = getMedia(c.slug)
-            const img = m.shoot[0] ?? m.cover ?? m.pages[0]
+            // No shoot yet: show the collection's mark on paper rather than a crop of a board.
+            const img = m.shoot[0] ?? m.logo ?? m.cover ?? m.pages[0]
+            const isMark = !m.shoot[0]
             return (
               <li key={c.slug}>
                 <a href={`/work/${c.slug}/`} className={styles.card}>
-                  <img src={img.src} srcSet={img.srcset.webp} sizes="(min-width: 1024px) 25vw, 50vw" alt="" loading="lazy" />
+                  <img className={isMark ? styles.mark : undefined} src={img.src} srcSet={img.srcset.webp} sizes="(min-width: 1024px) 25vw, 50vw" alt="" loading="lazy" />
                   <span className={styles.cardTitle}>{c.title}</span>
                   <span className="label">{c.season}</span>
                 </a>

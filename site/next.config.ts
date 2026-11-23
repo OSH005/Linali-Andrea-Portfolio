@@ -7,7 +7,9 @@ const nextConfig: NextConfig = {
   // cacheComponents/partialPrefetching from the scaffold are off: PPR cannot run in export mode.
   turbopack: {
     rules: {
-      "*.css": {
+      // Only the global stylesheet goes through Tailwind; "*.css" also caught
+      // *.module.css and turned every CSS-module class into undefined.
+      "globals.css": {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
