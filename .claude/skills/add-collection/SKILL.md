@@ -29,8 +29,10 @@ media-src/collections/<slug>/
 ```
 
 - `media-src/` is **git-ignored**. The client's Drive holds the master copy.
-- A page image wider than 2.5:1 is a two-page spread. The media build splits it down the middle automatically. Name it by its first page number.
-- Portfolio pages must be landscape √2 (ratio 1.414) to fit the Tumble Deck without cropping. The media build flags any page that isn't. Fix those by padding to 1.414 on paper colour `#FBF8F3`, never by cropping.
+- A page image wider than 2.5:1 is a two-page spread. It stays **whole** (one deck card, ratio 2√2), because her layouts cross the gutter. Name it by its first page number.
+- Single pages are landscape √2 (ratio 1.414). The media build pads anything off-ratio on paper colour `#FBF8F3`, never crops.
+- A collection is **all spreads or all single pages**. The media build stops with "Mixed page ratios" otherwise; pad singles into spreads in the source files, or split the collection.
+- Accepted source types: `.jpg`, `.jpeg`, `.png`, `.webp`. Convert HEIC/TIFF first (they are skipped).
 
 ## 3. Write the collection file
 
@@ -76,7 +78,8 @@ cd site && npm run media -- <slug>
 
 It reads `media-src/collections/<slug>`, then:
 - strips all EXIF (GPS, camera, dates) and applies rotation,
-- splits spreads, checks page ratios,
+- validates alt text and page ratios first, then replaces the old output (a failed build keeps the previous images),
+- keeps spreads whole and adds a 4800 px zoom for them,
 - writes AVIF + WebP at 640 / 1280 / 2400 px to `site/public/media/<slug>/` (or to R2 when `MEDIA_BASE_URL` is set, see PLAN.md section 6),
 - writes width, height and a blur placeholder for every image into `site/src/generated/media-manifest.json`.
 

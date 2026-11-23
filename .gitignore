@@ -18,6 +18,7 @@ site/out/
 # Secrets
 .env
 .env.*
+!.env.example
 
 # Tool scratch
 .superpowers/

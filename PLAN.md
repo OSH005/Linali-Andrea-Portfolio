@@ -1,6 +1,13 @@
 # Linali Andrea — Portfolio Website Plan
 
-Status: draft for review. Nothing built yet.
+Status: **Phase 1 built** (static site, media pipeline, components; merged to `main`). Next: Phase 2 (motion). See `docs/START-HERE.md`.
+
+> **Decisions made while building Phase 1 that override this plan** (details in `CLAUDE.md`):
+> - Spreads (Drift, Revive) are **not split**. Their text and images cross the gutter, so each spread is one deck card at ratio 2√2 (2.83). Single pages stay at √2 (1.41). A collection may not mix the two; the media build refuses.
+> - The deck takes its aspect from the collection's pages; **no cover cards**. The counter `NN / NN` shows position.
+> - Spreads get an extra **4800 px** zoom image; text at 2400 px is unreadable.
+> - The shoot gallery renders the **grid first** (works without JavaScript) and switches to the ring after load unless reduced motion is on.
+> - "Read the text" exists only where `pageText` is filled (Drift spread 04 for now). Ask the client for the source text of her pages.
 
 ---
 
@@ -34,8 +41,8 @@ The story writes itself: **mind → body → nature → renewal.** It is also ch
 
 ### Image facts that shape the build
 - **564 MB total.** Portfolio pages are 9922×3508 PNGs at 15–25 MB each. They cannot go on the web as they are.
-- Drift and Revive images each hold **two pages** (e.g. "04 | 05"). Split them into single pages for the deck.
-- Every page is a **landscape √2 sheet** (A3/A4 landscape, ratio 1.414). That is good news for the Tumble Deck: one `aspect={1.414}` fits every page with no cropping. The one exception is the Mano Padana cover (portrait, 1905×2648). It stays out of the deck and is used as the chapter image instead.
+- Drift and Revive images each hold **two pages** (e.g. "04 | 05"), designed across the gutter. They stay whole: one deck card per spread.
+- Every page is a **landscape √2 sheet** (A3/A4 landscape, ratio 1.414). Single pages use `aspect` 1.414 and spreads 2.83, taken from the collection's pages. The one exception is the Mano Padana cover (portrait, 1905×2648). It stays out of the deck and is used as the chapter image instead.
 - Pages have **white** backgrounds. On a cream site they will look like white paper, which is good if we treat them as real paper (shadow, book) and bad if we drop them in flat.
 - The page files have random UUID names, so **page order is unknown** except for Drift and Revive, which are numbered. We need the order from the client.
 - `drift collection/Portfolio pages/*.tiff` (77 MB) is probably a duplicate of one of the PNGs. Not checked.
@@ -100,14 +107,14 @@ Each chapter has **its own lighting and its own signature moment**, so nothing r
 |---|---|---|
 | It calls `preventDefault()` on every wheel event over the deck, and the deck **loops forever** | Placed inside the long story page, it traps the scroll: the visitor wheels and can never get past it. All three skills ban scroll-jacking. | **Never place it inline.** On the story page, each chapter shows a closed, static stack of pages with a button: *Open the portfolio*. That opens the deck **full screen** in an overlay (also at `/work/<collection>`). Lenis is paused while it's open (`lenis.stop()`), and there is a visible Close button plus Esc. |
 | `touch-none` on the root | On a phone, a swipe over the deck can't scroll the page | Fine inside the full-screen overlay, where the deck should own the gestures |
-| It's endless, so there's no start or end | The brief says "explore the pages **in order**". An endless loop hides where you are. | Add a front-cover card and a back-cover card (her LA monogram) to the list. Add a **page counter** (`07 / 20`, tabular numerals). |
-| No index callback. Clicking means "next". | No way to show a counter or zoom into the current page | **One small edit to the source:** an `onIndexChange(index)` prop, called from `paint()`. Then a **Zoom** button opens the current page in a pinch-zoom viewer at 2400 px. |
+| It's endless, so there's no start or end | The brief says "explore the pages **in order**". An endless loop hides where you are. | ~~Cover cards~~ (dropped: available covers crop badly). A **page counter** (`07 / 20`, tabular numerals). |
+| No index callback. Clicking means "next". | No way to show a counter or zoom into the current page | **One small edit to the source:** an `onIndexChange(index)` prop, called from `paint()`. Then a **Zoom** button opens the current page in a pinch-zoom viewer (2400 px; 4800 px for spreads). |
 | Card height is capped at 42% of the viewport (max 620 px) | At 1440×900 a page is about **535×378 px**, and on a 390 px phone about **296×209 px**. Her small page text can't be read. | Zoom (above) plus a **"Read the text"** panel with each page's text as real HTML (accessibility, SEO, phones) |
 | `src` is swapped in from JavaScript, with no `srcset` and no preloading | Pages pop in blank, or look soft on retina screens | Pass the 1280 px WebP (crisp at 2× for 535 px). Preload the next 3 pages. |
 | It uses `--color-background`, `--color-foreground` and `--color-primary`, plus Tailwind's `sr-only` and `touch-none` classes | Unstyled without those | Map them to our tokens in Tailwind v4's `@theme`: background is the chapter colour, foreground is brown, primary is teal (the focus ring). |
 | The page shade is pure black (`#000`) | A cold grey cast on cream paper | Change the shade colour to brown `#3B2418`, so the shadow reads as warm |
 
-**Settings:** `aspect={1.414}`, `depth={4}`, `scrollPerCard={240}` (default), `height="100svh"`, `background` set to each chapter's colour (cream, or night brown for Lunelle).
+**Settings (as built):** `aspect` = first page's width ÷ height, `depth={4}`, `scrollPerCard={240}` (default), `height="100svh"`, `background` set to each chapter's colour (cream, or night brown for Lunelle).
 
 Each collection also gets its own URL (`/work/drift` etc.), which opens straight into its deck, so the client can share one portfolio directly on Instagram or LinkedIn.
 
@@ -225,7 +232,7 @@ Linali Andrea Portfolio/
 ├─ media-src/                         ← ORIGINALS. Git-ignored. Master copy stays in the client's Drive.
 │  ├─ collections/<slug>/
 │  │   ├─ shoot/   01-….jpg 02-….jpg   ← number prefix = display order
-│  │   ├─ pages/   01.png 02.png …     ← reading order; spreads wider than 2.5:1 are split automatically
+│  │   ├─ pages/   01.png 02.png …     ← reading order; a spread (wider than 2.5:1) stays one card
 │  │   └─ cover.jpg, logo.svg (optional)
 │  └─ personal/
 ├─ site/                              ← the Next.js app
@@ -256,7 +263,7 @@ Every moment ends in the same "Open the portfolio" stack and Tumble Deck. A coll
 
 ### The media build (`npm run media -- <slug>`)
 - strips all EXIF (GPS, camera, dates) and applies rotation,
-- splits spreads, and flags any portfolio page that isn't ratio 1.414 (padded on paper colour, never cropped),
+- keeps spreads whole (2√2), pads any page off its ratio on paper colour (never crops), and refuses a mix of spreads and single pages,
 - writes **AVIF + WebP** at 640 / 1280 / 2400 px. Portfolio pages use 1280 in the deck and 2400 in the zoom viewer,
 - writes width, height and a blur placeholder for every image into the manifest,
 - **fails if a photo has no alt text** in the JSON.
