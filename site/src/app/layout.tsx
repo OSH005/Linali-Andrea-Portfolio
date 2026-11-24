@@ -1,33 +1,22 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Courier_Prime, Noto_Serif_Sinhala } from "next/font/google";
+import { Gloock, Hanken_Grotesk, DM_Mono, Special_Elite, Noto_Serif_Sinhala } from "next/font/google";
 import "./globals.css";
 
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-});
-
-const courier = Courier_Prime({
-  variable: "--font-courier",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const sinhala = Noto_Serif_Sinhala({
-  variable: "--font-noto-sinhala",
-  subsets: ["sinhala"],
-});
+const gloock = Gloock({ variable: "--font-gloock", subsets: ["latin"], weight: "400" });
+const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"], weight: ["400", "500"] });
+const dmMono = DM_Mono({ variable: "--font-dm-mono", subsets: ["latin"], weight: ["400", "500"] });
+const specialElite = Special_Elite({ variable: "--font-special-elite", subsets: ["latin"], weight: "400" });
+const sinhala = Noto_Serif_Sinhala({ variable: "--font-noto-sinhala", subsets: ["sinhala"] });
 
 export const metadata: Metadata = {
-  title: "Linali Andrea · Womenswear designer",
-  description: "Womenswear designer · Sri Lanka · Slow craft",
+  title: "Linali Andrea · Fashion designer",
+  description: "Fashion designer · Sri Lanka",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  const fonts = [gloock, hanken, dmMono, specialElite, sinhala].map((f) => f.variable).join(" ");
   return (
-    <html lang="en" className={`${bodoni.variable} ${courier.variable} ${sinhala.variable}`}>
+    <html lang="en" className={fonts}>
       <body>{children}</body>
     </html>
   );

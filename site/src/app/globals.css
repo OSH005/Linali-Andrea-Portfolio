@@ -13,6 +13,11 @@ body {
   --teal: #008794;
   --paper: #fbf8f3;
   --brown-muted: #5a4436;
+  --muted: var(--brown-muted);
+  --night: #21150f;
+  --blush: #e8c4c0;
+  --mat: #e6dbc9;
+  --tape: #f2e2b8;
 
   /* Spacing scale, 4px base */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
@@ -43,13 +48,13 @@ body {
   --color-primary: var(--teal);
   --color-paper: var(--paper);
   --color-muted: var(--brown-muted);
-  --font-display: var(--font-bodoni);
-  --font-label: var(--font-courier);
+  --font-display: var(--font-gloock);
+  --font-label: var(--font-dm-mono);
   --font-sinhala: var(--font-noto-sinhala);
 }
 
 body {
-  font-family: var(--font-bodoni), serif;
+  font-family: var(--font-hanken), sans-serif;
   font-size: var(--text-body);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -64,7 +69,7 @@ a { text-underline-offset: 0.2em; }
 html { scrollbar-color: var(--brown-muted) var(--cream); }
 
 .display {
-  font-family: var(--font-bodoni), serif;
+  font-family: var(--font-gloock), serif;
   font-weight: 400;
   font-size: var(--text-display);
   line-height: 0.95;
@@ -72,13 +77,28 @@ html { scrollbar-color: var(--brown-muted) var(--cream); }
   text-wrap: balance;
 }
 .label {
-  font-family: var(--font-courier), monospace;
-  font-size: var(--text-label);
+  font-family: var(--font-dm-mono), monospace;
+  font-weight: 500;
+  font-size: 11px;
   line-height: 1.2;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brown-muted);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+.title-page, .title-section { font-family: var(--font-gloock), serif; font-weight: 400; line-height: 1.05; text-wrap: balance; }
+.title-page { font-size: clamp(34px, 8.4vw, 56px); }
+.title-section { font-size: clamp(24px, 5.4vw, 34px); }
+.lead { font-family: var(--font-hanken), sans-serif; font-size: clamp(17px, 2.8vw, 21px); line-height: 1.6; }
+.body { font-family: var(--font-hanken), sans-serif; font-size: clamp(15px, 2.4vw, 18px); line-height: 1.75; max-width: 58ch; }
+.narr { font-family: var(--font-special-elite), serif; font-size: clamp(18px, 2.9vw, 23px); line-height: 1.6; }
+@media (min-width: 1024px) {
+  .label { font-size: 12px; }
+  .title-page { font-size: 3.6vw; }
+  .title-section { font-size: 1.9vw; }
+  .lead { font-size: clamp(17px, 1.35vw, 20px); }
+  .body { font-size: clamp(15px, 1.15vw, 17px); }
+  .narr { font-size: clamp(17px, 1.75vw, 27px); }
 }
 .wrap {
   width: 100%;
