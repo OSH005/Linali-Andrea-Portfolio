@@ -160,3 +160,35 @@ test('viewer: arrows and thumbnails move, the counter follows', async () => {
   expect(within(dialog).getByText('05 / 17')).toBeInTheDocument()
   expect(within(dialog).getByText('Look 5', { selector: 'p' })).toBeInTheDocument()
 })
+
+test('viewer: the thumbnail strip scrolls on its own and keeps the current thumb in view', async () => {
+  const seen: Element[] = []
+  Element.prototype.scrollIntoView = function () {
+    seen.push(this)
+  }
+  render(<ShootGallery {...props} />)
+  await userEvent.click(screen.getByRole('button', { name: 'Grid' }))
+  await userEvent.click(tiles()[13])
+  const dialog = screen.getByRole('dialog')
+  const strip = within(dialog).getByRole('button', { name: 'Photo 1' }).parentElement!
+  expect(strip).toHaveAttribute('data-lenis-prevent')
+  await userEvent.keyboard('{ArrowRight}')
+  expect(seen.at(-1)).toBe(within(dialog).getByRole('button', { name: 'Photo 15' }))
+})
+
+test('viewer: a touch swipe steps; a mouse drag or a drag on the thumbnails does not', async () => {
+  render(<ShootGallery {...props} />)
+  await userEvent.click(screen.getByRole('button', { name: 'Grid' }))
+  await userEvent.click(tiles()[0])
+  const dialog = screen.getByRole('dialog')
+  const drag = (el: Element, pointerType: string) => {
+    fireEvent.pointerDown(el, { clientX: 300, pointerType })
+    fireEvent.pointerUp(el, { clientX: 100, pointerType })
+  }
+  drag(dialog, 'mouse')
+  expect(within(dialog).getByText('01 / 17')).toBeInTheDocument()
+  drag(within(dialog).getByRole('button', { name: 'Photo 3' }), 'touch')
+  expect(within(dialog).getByText('01 / 17')).toBeInTheDocument()
+  drag(dialog, 'touch')
+  expect(within(dialog).getByText('02 / 17')).toBeInTheDocument()
+})

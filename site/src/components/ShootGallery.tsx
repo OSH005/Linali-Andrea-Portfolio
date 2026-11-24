@@ -42,6 +42,7 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
   const from = useRef<DOMRect | null>(null) // where the viewer opens from
   const dir = useRef(0)
   const swipe = useRef<number | null>(null)
+  const thumbs = useRef<HTMLDivElement>(null)
 
   useEffect(() => setView(on && initialView === 'ring' ? 'ring' : 'grid'), [on, initialView])
 
@@ -98,6 +99,11 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
       img.animate([{ transform: k }, { transform: 'none' }], { duration: 600, easing: EXPO })
     } else if (dir.current) img.animate([{ transform: `translateX(${dir.current * 6}%)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 450, easing: EXPO })
   }, [index, on])
+
+  // the strip scrolls; the current thumb is kept in view
+  useEffect(() => {
+    if (index !== null) thumbs.current?.children[index]?.scrollIntoView?.({ inline: 'center', block: 'nearest' })
+  }, [index])
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowRight') move(1)
@@ -176,7 +182,8 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
         className={styles.viewer}
         onKeyDown={onKey}
         onCancel={(e) => (e.preventDefault(), setIndex(null))}
-        onPointerDown={(e) => (swipe.current = e.clientX)}
+        // a finger swipe steps; a mouse drag (selecting the caption) or a drag along the thumbnails doesn't
+        onPointerDown={(e) => (swipe.current = e.pointerType === 'touch' && !(e.target as Element).closest(`.${styles.thumbs}`) ? e.clientX : null)}
         onPointerUp={(e) => {
           const x0 = swipe.current
           swipe.current = null
@@ -204,7 +211,7 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
               →
             </button>
             <p className={styles.vcap}>{alt[current.id] ?? ''}</p>
-            <div className={styles.thumbs}>
+            <div ref={thumbs} className={styles.thumbs} data-lenis-prevent>
               {images.map((im, i) => (
                 <button key={im.id} type="button" aria-label={`Photo ${i + 1}`} aria-current={i === index || undefined} onClick={() => move(i - index!)}>
                   <img src={im.srcset.webp.split(' ')[0]} alt="" loading="lazy" width={im.width} height={im.height} />

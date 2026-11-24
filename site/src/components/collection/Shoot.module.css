@@ -1,5 +1,5 @@
 .shoot { background: var(--paper); overflow-x: clip; }
-.pin { padding: 84px 24px 64px; }
+.pin { padding: 84px 24px 96px; } /* room under the caption for the floating switch */
 .pin :global(.label) { margin: 0; }
 .h2 { margin: 8px 0 0; }
 .spacer { display: none; }

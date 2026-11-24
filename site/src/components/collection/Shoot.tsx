@@ -18,13 +18,17 @@ export default function Shoot({ d }: { d: CollectionData }) {
   useEffect(() => {
     if (!on) return
     const el = pin.current!
-    const check = () => setFits(el.offsetHeight <= innerHeight)
+    // decided in the ring view only (the pin is the ring's), so showing the grid never flips it
+    const check = () => void (el.querySelector('[data-view="grid"]') || setFits(el.offsetHeight <= innerHeight))
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(check)
     ro?.observe(el)
+    const mo = new MutationObserver(check) // the ring replaces the server's grid after mount
+    mo.observe(el, { subtree: true, attributeFilter: ['data-view'] })
     addEventListener('resize', check)
     check()
     return () => {
       ro?.disconnect()
+      mo.disconnect()
       removeEventListener('resize', check)
     }
   }, [on])
