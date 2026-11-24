@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react'
+import { useLenis } from './motion/lenisContext'
 
 // Opens/closes a native <dialog> as a modal, locks page scroll while open,
 // and returns focus to whatever opened it. A close the browser makes on its
@@ -8,6 +9,7 @@ export function useDialog(open: boolean, onClose: () => void) {
   const ref = useRef<HTMLDialogElement>(null)
   const opener = useRef<HTMLElement | null>(null)
   const active = useRef(false)
+  const lenis = useLenis()
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
 
@@ -44,6 +46,13 @@ export function useDialog(open: boolean, onClose: () => void) {
     d.addEventListener('close', onNativeClose)
     return () => d.removeEventListener('close', onNativeClose)
   }, [])
+
+  // body overflow doesn't stop Lenis's window.scrollTo, so stop it while open.
+  useEffect(() => {
+    if (!open || !lenis) return
+    lenis.stop()
+    return () => lenis.start()
+  }, [open, lenis])
 
   useEffect(() => () => void (active.current && (document.body.style.overflow = '')), [])
   return ref

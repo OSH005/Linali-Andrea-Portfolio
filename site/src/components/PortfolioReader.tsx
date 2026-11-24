@@ -101,12 +101,12 @@ export default function PortfolioReader({ title, pages, pageText, background, de
               <button type="button" className="label pressable" onClick={close}>Close</button>
             </div>
             {panel === 'zoom' && (
-              <div className={styles.zoom} onClick={() => setPanel(null)}>
+              <div className={styles.zoom} data-lenis-prevent onClick={() => setPanel(null)}>
                 <img src={page.zoom} alt={label} />
               </div>
             )}
             {panel === 'text' && text && (
-              <div className={styles.text} role="document">
+              <div className={styles.text} data-lenis-prevent role="document">
                 <button type="button" className="label pressable" onClick={() => setPanel(null)}>Back to the pages</button>
                 {text.split('\n\n').map((para, i) => <p key={i}>{para}</p>)}
               </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Gloock, Hanken_Grotesk, DM_Mono, Special_Elite, Noto_Serif_Sinhala } from "next/font/google";
 import "./globals.css";
+import "lenis/dist/lenis.css";
 import SmoothScroll from "@/lib/motion/SmoothScroll";
 
 const gloock = Gloock({ variable: "--font-gloock", subsets: ["latin"], weight: "400" });

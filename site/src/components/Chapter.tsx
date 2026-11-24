@@ -27,7 +27,7 @@ function Moment({ collection: c, media }: Props) {
       return <ShootGallery images={media.shoot} alt={c.alt} preset="cylinder" autoplay="off" initialView="grid" fadeColor={c.palette.ground} label={label} />
     case 'walk':
       return (
-        <ol className={styles.walk} aria-label={label}>
+        <ol className={styles.walk} data-lenis-prevent aria-label={label}>
           {media.shoot.map((im) => (
             <li key={im.id}>
               <picture>
