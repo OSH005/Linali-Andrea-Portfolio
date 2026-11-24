@@ -1,0 +1,20 @@
+/* Next collection (mockup `x-next`): label, then one hairlined row: name + season, her photograph at the end. */
+.next { background: var(--cream); padding: 72px 24px 64px; }
+.next > :global(.label) { margin: 0; }
+.nx {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 12px; padding: 18px 0;
+  border-block: 1px solid rgb(59 36 24 / 0.16); color: inherit; text-decoration: none;
+}
+.t { margin: 0; font: 400 clamp(28px, 6.4vw, 42px) / 1.05 var(--font-gloock), serif; letter-spacing: -0.015em; transition: translate 0.5s var(--ease-out); }
+.nx > span { flex: none; }
+.meta { display: block; margin-top: 10px; }
+.pic { flex: 0 1 auto; min-width: 0; }
+.pic img { display: block; height: 84px; width: auto; max-width: 100%; object-fit: cover; box-shadow: 0 10px 24px rgb(59 36 24 / 0.2); }
+@media (min-width: 600px) { .next { padding-inline: 32px; } }
+@media (min-width: 1024px) {
+  .next { padding: 9vw 4.5% 8vw; }
+  .nx { gap: 2vw; margin-top: 1vw; padding: 1.6vw 0; }
+  .t { font-size: 2.8vw; }
+  .pic img { height: 7vw; }
+}
+@media (hover: hover) and (pointer: fine) { .nx:hover .t { translate: 1vw 0; } }

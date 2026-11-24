@@ -1,0 +1,36 @@
+/* In my words (mockup `x-words`). Phones: the text, then the film as two rows rolling sideways. */
+.words { background: var(--cream); padding: 72px 0 64px; overflow-x: clip; }
+.grid { padding: 0 24px; }
+.l h2, .l p { margin: 0; }
+.l .ws { margin-top: 8px; }
+.tx { margin-top: 18px; }
+.tx p { margin: 0 0 1em; max-width: 58ch; }
+.tx p:last-child { margin-bottom: 0; }
+
+.film {
+  display: flex; flex-direction: column; gap: 8px; margin: 30px -24px 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.col { display: flex; gap: 8px; height: clamp(110px, 20vw, 170px); width: max-content; will-change: transform; }
+.ph { display: contents; }
+.col img { display: block; height: 100%; width: auto; }
+
+@media (min-width: 600px) { .grid { padding: 0 32px; } .film { margin-inline: -32px; } }
+
+/* desktop: label · text · a two-column film as tall as the text (at least half a screen), rolling up and down */
+@media (min-width: 1024px) {
+  .words { padding: 7.5vw 0; }
+  .grid { padding: 0 4.5%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 1.6vw; }
+  .grid > * { min-width: 0; }
+  .l { grid-column: 1 / span 3; }
+  .tx { grid-column: 4 / span 5; margin: 0; align-self: start; }
+  .film {
+    grid-column: 9 / span 4; flex-direction: row; gap: 1vw; margin: 0;
+    contain: size; min-height: 50svh; /* its photos don't count: the row is as tall as the text, at least 50svh */
+    -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+    mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+  }
+  .col { flex: 1; min-width: 0; flex-direction: column; gap: 1vw; height: auto; width: auto; }
+  .col img { width: 100%; height: auto; }
+}

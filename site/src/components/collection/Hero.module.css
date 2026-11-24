@@ -1,0 +1,60 @@
+/* The collection's opening (mockup `x-hero`). Phones first: one photo at 66% of the screen, the text under it on the dark ground. */
+.hero { position: relative; min-height: 100svh; overflow: hidden; background: var(--night); color: var(--cream); }
+.hero :global(.label) { color: rgb(242 232 218 / 0.78); }
+
+.strip { display: none; }
+.oneWrap { height: 66svh; overflow: hidden; }
+.one, .one picture, .one img { display: block; width: 100%; height: 100%; }
+.one img { object-fit: cover; }
+.shade { display: none; }
+
+.text { position: relative; padding: 22px 24px 48px; }
+.title { margin: 8px 0 0; letter-spacing: -0.02em; }
+.si { display: block; margin-top: 6px; font: 400 16px/1.3 var(--font-noto-sinhala), serif; letter-spacing: 0; }
+.first { margin: 12px 0 0; max-width: 40ch; }
+.jump { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.jump a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px;
+  font: 500 14px var(--font-hanken), sans-serif; text-decoration: none; text-shadow: none;
+  background: var(--cream); color: var(--brown);
+}
+.jump a + a { background: transparent; color: var(--cream); box-shadow: inset 0 0 0 1px rgb(242 232 218 / 0.6); }
+.jump a:focus-visible { outline-color: var(--cream); }
+@media (hover: hover) and (pointer: fine) {
+  .jump a { transition: background-color var(--dur-state) var(--ease-out), scale var(--dur-press) var(--ease-out); }
+  .jump a:hover { background: var(--paper); }
+  .jump a + a:hover { background: rgb(242 232 218 / 0.12); }
+}
+
+/* the filmstrip: every photo at full strip height, in proportion (never cropped) */
+.ph, .copy { display: contents; }
+.strip img { display: block; height: 100%; width: auto; max-width: none; }
+.strip, .copy { gap: 10px; }
+
+/* tablets (not a phone turned sideways): the strip, shorter, the text under it */
+@media (min-width: 600px) and (min-height: 600px) {
+  .strip { display: flex; height: 62svh; width: max-content; will-change: transform; }
+  .oneWrap { display: none; }
+  .text { padding: 28px 32px 56px; }
+}
+
+/* desktop: the strip fills the screen; the text sits bottom-left over a dark radial shade */
+@media (min-width: 1024px) {
+  .hero { height: 100svh; min-height: 0; }
+  .strip { position: absolute; left: 0; top: 0; height: 100%; }
+  .shade {
+    display: block; position: absolute; inset: 0;
+    background:
+      radial-gradient(105% 95% at 0% 100%, rgb(20 14 10 / 0.8), rgb(20 14 10 / 0.35) 45%, rgb(20 14 10 / 0) 75%),
+      linear-gradient(180deg, rgb(20 14 10 / 0) 55%, rgb(20 14 10 / 0.35));
+  }
+  .text {
+    position: absolute; left: 4.5%; bottom: 9%; max-width: 44%; padding: 0;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 4px 14px rgb(0 0 0 / 0.45), 0 10px 40px rgb(0 0 0 / 0.35);
+  }
+  .hero :global(.label) { color: var(--cream); }
+  .title { margin-top: 0.8vw; }
+  .si { margin-top: 0.5vw; font-size: 1.4vw; }
+  .first { margin-top: 1.4vw; }
+  .jump { gap: 1.2vw; margin-top: 2vw; }
+}

@@ -1,0 +1,13 @@
+.shoot { background: var(--paper); overflow-x: clip; }
+.pin { padding: 84px 24px 64px; }
+.pin :global(.label) { margin: 0; }
+.h2 { margin: 8px 0 0; }
+.spacer { display: none; }
+@media (min-width: 600px) { .pin { padding-inline: 32px; } }
+@media (min-width: 1024px) {
+  .pin { padding: 11vw 4.5% 6vw; }
+  .h2 { margin-top: 0.8vw; }
+}
+/* pinned (motion on, ring view, it fits the screen): the ring stays while 1.1 screens of scroll turn it */
+.shoot[data-pin]:has([data-view="ring"]) .pin { position: sticky; top: 0; }
+.shoot[data-pin]:has([data-view="ring"]) .spacer { display: block; height: 110svh; }

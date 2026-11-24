@@ -1,9 +1,13 @@
 import type { Metadata } from 'next'
-import Chapter from '@/components/Chapter'
 import Footer from '@/components/Footer'
+import PortfolioReader from '@/components/PortfolioReader'
+import Hero from '@/components/collection/Hero'
+import InMyWords from '@/components/collection/InMyWords'
+import Shoot from '@/components/collection/Shoot'
+import SectionSwitch from '@/components/collection/SectionSwitch'
+import NextCollection from '@/components/collection/NextCollection'
+import { collectionData } from '@/components/collection/data'
 import { getCollection, getCollections } from '@/lib/collections'
-import { getMedia } from '@/lib/media'
-import Photo from '@/components/home/Photo'
 import styles from '../collections.module.css'
 
 export const dynamicParams = false
@@ -17,19 +21,24 @@ export async function generateMetadata(props: PageProps<'/collections/[slug]'>):
   return { title: `${c.title} ${c.season} · Linali Andrea`, description: c.concept.split('. ')[0] + '.' }
 }
 
+/** One template for every collection (spec 7.2): hero, in my words, the shoot (if any), the portfolio, the next one, contact. */
 export default async function CollectionPage(props: PageProps<'/collections/[slug]'>) {
-  const c = getCollection((await props.params).slug)!
-  const m = getMedia(c.slug), hero = m[c.lead.from].find((i) => i.order === c.lead.desktop[0])!
+  const d = collectionData((await props.params).slug)
   return (
     <>
       <main>
-        <nav className={`wrap ${styles.back}`} aria-label="Breadcrumb">
-          <a href="/collections/">All collections</a>
-        </nav>
-        {/* the index's follow frame lands here (view-transition-name: collection-photo); Task 12's hero keeps the name */}
-        <Photo p={{ ...hero, alt: c.alt[hero.id] ?? '' }} className={`${styles.hero} vt-photo`} sizes="100vw" eager />
-        {/* the hero is not repeated in the gallery (a portfolio page stays in the book) */}
-        <Chapter collection={c} media={{ ...m, shoot: m.shoot.filter((i) => i !== hero) }} defaultOpen />
+        <Hero d={d} />
+        <InMyWords d={d} />
+        {d.shoot.length > 0 && <Shoot d={d} />}
+        <section id="portfolio" className={styles.port} aria-labelledby="portfolio-title">
+          <p className="label">The portfolio</p>
+          <h2 id="portfolio-title" className={`title-section ${styles.h2}`}>
+            {d.pagesHeading}
+          </h2>
+          <PortfolioReader title={d.title} pages={d.pages} pageText={d.pageText} background="#EDE2D2" />
+        </section>
+        <NextCollection next={d.next} />
+        {d.shoot.length > 0 && <SectionSwitch />}
       </main>
       <Footer variant="flow" />
     </>

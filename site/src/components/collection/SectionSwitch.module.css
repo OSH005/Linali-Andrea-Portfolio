@@ -1,0 +1,19 @@
+.fl {
+  position: fixed; left: 0; right: 0; bottom: 20px; z-index: 45; width: fit-content; margin-inline: auto;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 4px; border-radius: 999px;
+  background: rgb(251 248 243 / 0.94); box-shadow: 0 10px 26px rgb(59 36 24 / 0.22); color: var(--brown);
+  opacity: 0; translate: 0 30px; pointer-events: none;
+  transition: opacity 0.4s var(--ease-out), translate 0.4s var(--ease-out);
+}
+.fl[data-on] { opacity: 1; translate: 0 0; pointer-events: auto; }
+.fl::before {
+  content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px;
+  background: var(--brown); transition: translate 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.fl[data-cur="portfolio"]::before { translate: 100% 0; }
+.fl a {
+  position: relative; display: grid; place-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px;
+  font: 400 14px var(--font-hanken), sans-serif; color: inherit; text-decoration: none; white-space: nowrap; transition: color 0.3s;
+}
+.fl a[aria-current] { color: var(--cream); }
+@media (min-width: 1024px) { .fl { bottom: 3.5svh; } }
