@@ -18,7 +18,7 @@ export default function Hero() {
           <img src={mono.srcset.webp.split(' ')[0]} alt="" width={48} height={48} />
         </a>
         <ul>
-          <li><a href="/work/">Work</a></li>
+          <li><a href="/collections/">Work</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>

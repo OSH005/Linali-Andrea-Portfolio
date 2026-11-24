@@ -1,6 +1,6 @@
 ---
 name: add-collection
-description: Add a new fashion collection to Linali Andrea's portfolio site (shoot photos, portfolio pages, story text) so it appears as a chapter, in the /work index and at /work/<slug>. Use when the user says "add a collection", "new collection", "upload the X shoot", or drops a new folder of collection images.
+description: Add a new fashion collection to Linali Andrea's portfolio site (shoot photos, portfolio pages, story text) so it appears as a chapter, in the /collections index and at /collections/<slug>. Use when the user says "add a collection", "new collection", "upload the X shoot", or drops a new folder of collection images.
 ---
 
 # Add a collection
@@ -66,7 +66,7 @@ media-src/collections/<slug>/
 | Only sketches and pages, no shoot | `studio` | Glass Folders on the studio table, marked "In progress" |
 | Anything else | `gallery` | Plain grid + viewer, always safe |
 
-Never give two neighbouring featured chapters the same moment. Keep at most **4 `featured` collections** on the home story; the rest live in `/work`. Mark the oldest featured one `false` when adding a fifth.
+Never give two neighbouring featured chapters the same moment. Keep at most **4 `featured` collections** on the home story; the rest live in `/collections`. Mark the oldest featured one `false` when adding a fifth.
 
 Every shoot photo needs an `alt` entry describing the garment, not just "model". The media build fails on a missing alt.
 
@@ -87,7 +87,7 @@ It reads `media-src/collections/<slug>`, then:
 
 ## 5. Check it, by looking
 
-1. Run the site. Open the chapter on the home page and `/work/<slug>`.
+1. Run the site. Open the chapter on the home page and `/collections/<slug>`.
 2. Screenshot at 1440, 1024, 768, 390 and 320 wide, and look at every shot.
 3. Check: the carousel or walk shows every photo; the deck opens, counts pages in order, and zooms; "Read the text" has the page text; the chapter's palette passes contrast (body text ≥ 4.5:1); reduced motion still shows everything.
 4. Score with the rubric in PLAN.md section 5b. Fix anything under 7 before calling it done.

@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const out = path.resolve(import.meta.dirname, '../../out')
-const pages = ['index.html', 'work/index.html', 'work/drift/index.html', 'work/lunelle/index.html', 'work/mano-padana/index.html', 'work/revive/index.html']
+const pages = ['index.html', 'collections/index.html', ...['drift', 'lunelle', 'mano-padana', 'revive'].map((s) => `collections/${s}/index.html`), 'about/index.html']
 
 test.each(pages)('%s exists', (p) => {
   expect(fs.existsSync(path.join(out, p))).toBe(true)
@@ -12,6 +12,11 @@ test.each(pages)('%s exists', (p) => {
 test.each(pages)('%s has no undefined class names (CSS modules compiled)', (p) => {
   const html = fs.readFileSync(path.join(out, p), 'utf8')
   expect(html).not.toMatch(/class="[^"]*\bundefined\b/)
+})
+
+test('/work redirects to /collections and no page links to /work', () => {
+  expect(fs.readFileSync(path.join(out, '_redirects'), 'utf8')).toBe('/work/* /collections/:splat 301\n')
+  for (const p of pages) expect(fs.readFileSync(path.join(out, p), 'utf8')).not.toContain('href="/work')
 })
 
 test('every image URL in the manifest exists in the export', () => {
