@@ -1,0 +1,1498 @@
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Special+Elite&family=Noto+Serif+Sinhala:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  .tabs { display:flex; gap:8px; margin:0 0 18px; font:13px system-ui,sans-serif }
+  .tabs button { font:14px system-ui,sans-serif; padding:7px 16px; border-radius:999px; border:1px solid #666; background:#2a2a2a; color:#ddd; cursor:pointer }
+  .tabs { flex-wrap:wrap; align-items:center }
+  body.sz-tablet .hm .stage.phone { width:768px; height:1024px; border-radius:26px }
+  body.sz-tablet .hm .stage.desk { aspect-ratio:4/3; flex:none; width:1024px }
+  body.sz-laptop .hm .stage.desk { aspect-ratio:16/10 }
+  .tabs button[aria-pressed="true"] { background:#F2E8DA; color:#3B2418; border-color:#F2E8DA }
+  /* ---- header: one strip of fabric. Left and bare on the landing; centred, sewn on, everywhere after ---- */
+  .hm .nav { position:absolute; z-index:40; top:2cqw; left:0; right:0; pointer-events:none }
+  .hm .phone .nav { top:14px }
+  .hm .navbar { position:relative; display:inline-flex; align-items:center; padding:6px 18px 6px 8px; color:#3B2418; font-size:14px; white-space:nowrap; will-change:transform; pointer-events:auto; --stitch:#008794 }
+  .hm .phone .navbar { padding:5px 14px 5px 6px; font-size:15px }
+  .hm .navbar .nb { position:absolute; left:0; top:0; overflow:visible; z-index:-1; pointer-events:none }
+  .hm .navbar .mono { position:relative; width:44px; height:44px; display:grid; place-items:center; transition:transform .35s cubic-bezier(.2,.8,.2,1) }
+  .hm .phone .navbar .mono { width:36px; height:36px }
+  .hm .navbar .mono img { display:block; grid-area:1/1 }
+  .hm .navbar .chap { overflow:hidden; height:18px; font:500 11px/18px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; box-sizing:content-box; border-right:1px solid color-mix(in srgb, currentColor 22%, transparent) }
+  .hm .navbar .roll { width:max-content; will-change:transform }
+  .hm .navbar .roll span { display:block; width:max-content; height:18px }
+  .hm .navbar .roll b { font-weight:500; opacity:.55; margin-right:.7em }
+  .hm .navbar .links { display:flex; align-items:center; overflow:hidden; padding:6px 4px; margin:-6px -4px }
+  .hm .navbar .lk { position:relative; display:inline-block; margin:0 11px; transition:transform .35s cubic-bezier(.2,.8,.2,1); cursor:pointer }
+  .hm .navbar .lk::after { content:""; position:absolute; left:0; right:0; bottom:-4px; height:1.5px; background:repeating-linear-gradient(90deg, var(--stitch) 0 4px, transparent 4px 7px); transform:scaleX(0); transform-origin:0 50%; transition:transform .45s cubic-bezier(.2,.8,.2,1) }
+  .hm .navbar .lk:hover::after, .hm .navbar .lk.on::after { transform:scaleX(1) }
+  .hm .navbar .mo { font:500 11px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; margin-left:6px; padding-left:16px; border-left:1px solid color-mix(in srgb, currentColor 22%, transparent) }
+</style>
+<div class="tabs" role="group" aria-label="Page">
+  <button type="button" data-tab="pg-home" aria-pressed="true">Home</button>
+  <button type="button" data-tab="pg-col" aria-pressed="false">Collections</button>
+  <button type="button" data-tab="pg-det" aria-pressed="false">Inside a collection</button>
+  <button type="button" data-tab="pg-about" aria-pressed="false">About</button>
+  <span style="margin-left:auto;color:#aaa">Screens:</span>
+  <button type="button" data-size="phone" aria-pressed="true">Phone + 16:9</button>
+  <button type="button" data-size="tablet" aria-pressed="false">Tablet 768×1024 + 1024×768</button>
+  <button type="button" data-size="laptop" aria-pressed="false">Laptop 16:10</button>
+</div>
+<script>
+// Shared header. One component on every page: monogram · chapter roll · links.
+window.LANav = (() => {
+  const F = '/files/'
+  const clamp = (v) => Math.min(1, Math.max(0, v)), lerp = (a, b, t) => a + (b - a) * t, sg = (v, a, b) => clamp((v - a) / (b - a))
+  const mix = (a, b, t) => a.map((v, i) => Math.round(lerp(v, b[i], t)))
+  // a pill whose long edges ripple like fabric; o insets it (the stitch line runs 4 px inside the edge)
+  const fabric = (w, h, o, amp, ph) => {
+    const r = h / 2 - o, n = Math.max(8, Math.round(w / 12)), ed = (i, bot) => { const t = i / n, env = Math.sin(Math.PI * t); return `${(h / 2 + (w - h) * t).toFixed(1)} ${((bot ? h - o : o) + amp * env * Math.sin(t * 8.5 + ph + (bot ? 1.3 : 0))).toFixed(2)}` }
+    let d = `M${ed(0)}`
+    for (let i = 1; i <= n; i++) d += ` L${ed(i)}`
+    d += ` A${r} ${r} 0 0 1 ${ed(n, 1)}`
+    for (let i = n - 1; i >= 0; i--) d += ` L${ed(i, 1)}`
+    return d + ` A${r} ${r} 0 0 1 ${ed(0)} Z`
+  }
+  const html = (phone, chaps, active) => `<div class="nav"><div class="navbar">
+    <svg class="nb" aria-hidden="true"><path class="nb-f"/><path class="nb-s" pathLength="100" fill="none" stroke-width="1" stroke-linecap="round" stroke-opacity=".8"/></svg>
+    <span class="mono"><img src="${F}mono.png" alt="Linali Andrea, home"><img class="mc" src="${F}mono-cream.png" alt="" style="opacity:0"></span>
+    <div class="chap" aria-hidden="true"><div class="roll">${chaps.map(([n, t]) => `<span>${n ? `<b>${n}</b>` : ''}${t}</span>`).join('')}</div></div>
+    <div class="links">${phone ? '<span class="lk">Menu</span>' : ['Collections', 'About', 'Contact'].map((l) => `<span class="lk${l === active ? ' on' : ''}">${l}</span>`).join('') + '<span class="mo">Motion on</span>'}</div>
+  </div></div>`
+  function init(s) {
+    const q = (c) => s.el.querySelector(c), bar = q('.navbar')
+    // magnetic pull toward the cursor, at most 6 px
+    if (!s.phone) bar.querySelectorAll('.lk, .mono').forEach((el) => {
+      el.addEventListener('mousemove', (e) => { const r = el.getBoundingClientRect(), dx = e.clientX - r.left - r.width / 2, dy = e.clientY - r.top - r.height / 2; el.style.transform = `translate(${Math.max(-6, Math.min(6, dx * .3))}px, ${Math.max(-4, Math.min(4, dy * .4))}px)` })
+      el.addEventListener('mouseleave', () => { el.style.transform = '' })
+    })
+    return { bar, svg: q('.nb'), fill: q('.nb-f'), st: q('.nb-s'), chap: q('.chap'), roll: q('.roll'), spans: [...q('.roll').children], links: q('.links'), imgs: [...q('.mono').children], open: 1, v: 0, py: null, cf: 0, dk: 0, k: -1 }
+  }
+  function paint(s, o) {
+    const n = s.nav || (s.nav = init(s)), { W, phone, dock, dark, chap, y, dt, now } = o
+    const dy = n.py == null ? 0 : y - n.py; n.py = y
+    n.v = lerp(n.v, dt ? dy / dt : 0, .12)
+    // headroom: past the landing it slides away while you scroll down, and returns the moment you scroll up
+    if (dock < 1 || y < (o.keep ?? 160)) n.hid = 0; else if (n.v > 140) n.hid = 1; else if (n.v < -50) n.hid = 0
+    n.hk = lerp(n.hk || 0, n.hid || 0, .14)
+    // chapter roll
+    n.cf = lerp(n.cf, chap, .14)
+    const c0 = Math.floor(n.cf), c1 = Math.min(n.spans.length - 1, c0 + 1), cw = lerp(n.spans[c0].offsetWidth, n.spans[c1].offsetWidth, n.cf - c0)
+    Object.assign(n.chap.style, { width: cw * dock + 'px', marginLeft: 6 * dock + 'px', paddingRight: 14 * dock + 'px', marginRight: (phone ? 10 : 4) * dock + 'px', opacity: dock, borderRightWidth: dock > .02 ? '1px' : '0' })
+    n.roll.style.transform = `translateY(${-n.cf * 18}px)`
+    n.spans.forEach((sp, i) => { sp.style.opacity = 1 - Math.min(1, Math.abs(i - n.cf) * 1.3) })
+    // day / night ink
+    n.dk = lerp(n.dk, dark, .08)
+    n.bar.style.color = `rgb(${mix([59, 36, 24], [242, 232, 218], n.dk)})`
+    const stc = `rgb(${mix([0, 135, 148], [232, 196, 192], n.dk)})`; n.bar.style.setProperty('--stitch', stc)
+    const mh = lerp(phone ? 36 : 44, phone ? 26 : 30, dock) + 'px'; n.imgs.forEach((im, i) => { im.style.height = mh; im.style.opacity = i ? n.dk : 1 - n.dk })
+    // position: from x0 (left, landing) to the centre
+    const bw = n.bar.offsetWidth, bh = n.bar.offsetHeight, x1 = (W - bw) / 2
+    n.bar.style.transform = `translateX(${o.x0 == null ? x1 : lerp(o.x0, x1, dock)}px) translateY(${-n.hk * (bh + 44)}px)`
+    // the fabric: breathes a little at rest, ripples with scroll speed
+    const amp = (.35 + Math.min(3.6, Math.abs(n.v) / 450)) * dock, ph = now * 1.5 + y * .005
+    n.svg.setAttribute('width', bw); n.svg.setAttribute('height', bh)
+    n.fill.setAttribute('d', fabric(bw, bh, 0, amp, ph))
+    n.fill.setAttribute('fill', `rgb(${mix([251, 248, 243], [38, 25, 18], n.dk)})`); n.fill.setAttribute('fill-opacity', lerp(.95, .86, n.dk) * clamp(dock * 1.5))
+    n.svg.style.filter = `drop-shadow(0 6px 16px rgb(59 36 24 / ${(.16 * dock).toFixed(3)}))`
+    n.st.setAttribute('d', fabric(bw, bh, 4, amp * .85, ph)); n.st.setAttribute('stroke', stc)
+    // sewn on, one stitch at a time, as it forms; once sewn the stitches run with the scroll
+    const N = 120, k = Math.round(sg(dock, .35, 1) * N)
+    if (k !== n.k) { n.k = k; n.st.setAttribute('stroke-dasharray', k >= N ? '.5 .3333' : k ? Array(k).fill('.5 .3333').join(' ') + ' 0 100' : '0 100'); n.st.setAttribute('stroke-dashoffset', 0) }
+    if (k >= N) n.st.setAttribute('stroke-dashoffset', (-(y * .002) % .8333).toFixed(4))
+  }
+  return { html, paint }
+})()
+document.querySelectorAll('[data-size]').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-size]').forEach((x) => x.setAttribute('aria-pressed', x === b))
+  document.body.classList.remove('sz-tablet', 'sz-laptop'); if (b.dataset.size !== 'phone') document.body.classList.add('sz-' + b.dataset.size)
+  const t = b.dataset.size === 'tablet'
+  document.querySelectorAll('.stage.phone').forEach((st) => { const l = st.previousElementSibling; if (l) l.textContent = t ? 'Tablet, portrait (768 × 1024)' : 'Phone (390 × 844)' })
+  document.querySelectorAll('.stage.desk').forEach((st) => { const l = st.previousElementSibling; if (l) l.textContent = t ? 'Tablet, landscape (1024 × 768)' : b.dataset.size === 'laptop' ? 'Laptop (16:10)' : 'Desktop (16:9)' })
+  document.querySelectorAll('.pg').forEach((p) => { if (p.offsetParent) p.dispatchEvent(new Event('show')) })
+}))
+document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-pressed', x === b))
+  document.querySelectorAll('.pg').forEach((p) => { p.style.display = p.id === b.dataset.tab ? '' : 'none' })
+  document.getElementById(b.dataset.tab).dispatchEvent(new Event('show'))
+}))
+</script>
+<style>
+  .hm { --cream:#F2E8DA; --brown:#3B2418; --muted:#5A4436; --teal:#008794; --paper:#FBF8F3; --night:#21150F; --blush:#E8C4C0 }
+  .hm .row { display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap }
+  .hm .stage { position:relative; overflow:hidden; background:var(--cream); color:var(--brown); border-radius:4px; touch-action:none; font-family:'Hanken Grotesk',sans-serif; contain:paint; container-type:size }
+  .hm .desk { aspect-ratio:16/9 }
+  .hm .phone { width:390px; height:844px; border-radius:34px; outline:10px solid #111; outline-offset:-1px }
+  .hm .lbl { font:12px system-ui,sans-serif; color:#888; margin:0 0 6px }
+  .hm .layer { position:absolute; inset:0; overflow:hidden; will-change:transform }
+  .hm .print { position:absolute; overflow:hidden; will-change:transform,clip-path }
+  .hm .print img, .hm .card img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; will-change:transform,clip-path }
+  /* ---- type scale (desktop in container units = vw on the real site; phone in px) ---- */
+  .hm .label { font:500 12px/1.2 'DM Mono',monospace; letter-spacing:.14em; text-transform:uppercase }
+  .hm .phone .label { font-size:11px }
+  .hm .title { margin:0; font:400 5.2cqw/.94 'Gloock',serif; letter-spacing:-.02em }
+  .hm .phone .title { font-size:clamp(38px,7.6cqw,60px) }
+  .hm .body { font-size:clamp(15px,1.25cqw,19px); line-height:1.55; max-width:34ch }
+  .hm .phone .body { font-size:clamp(16px,2.4cqw,19px); max-width:46ch }
+  .hm .narr { font:400 clamp(17px,1.75cqw,27px)/1.45 'Special Elite',monospace; letter-spacing:.005em; max-width:30ch; margin:0 }
+  .hm .phone .narr { font-size:clamp(18px,2.9cqw,23px); line-height:1.42 }
+  .hm .w { display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:.1em; margin-bottom:-.1em }
+  .hm .w > i { display:inline-block; font-style:normal; will-change:transform }
+  /* ---- opening ---- */
+  .hm .g { position:absolute; inset:0 }
+  .hm .cols { position:absolute; z-index:1; display:flex; gap:1.2%; overflow:hidden; will-change:transform }
+  .hm .desk .cols { left:45%; right:2%; top:-4%; bottom:-4% } .hm .phone .cols { left:-4%; right:-4%; top:47%; bottom:-2%; gap:2% }
+  .hm .col { flex:1; display:flex; flex-direction:column; gap:12px; will-change:transform }
+  .hm .col img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover }
+  .hm .col img.l { aspect-ratio:4/3 }
+  .hm .figure { position:absolute; bottom:0; z-index:4; filter:drop-shadow(0 16px 30px rgb(59 36 24 / .22)); transform-origin:50% 100%; will-change:transform,opacity }
+  .hm .desk .figure { left:50%; height:106%; bottom:-9% } .hm .phone .figure { right:-3%; height:60%; bottom:-7% }
+  .hm .hero { position:absolute; z-index:3 }
+  .hm .desk .hero { left:4.5%; top:20%; width:42% } .hm .phone .hero { left:24px; right:24px; top:92px }
+  .hm .name { margin:0; font:400 9.2cqw/.86 'Gloock',serif; letter-spacing:-.035em }
+  .hm .phone .name { font-size:clamp(58px,12cqw,100px) }
+  .hm .hero .label { margin-top:20px; color:var(--muted) }
+  .hm .phone .hero .label { margin-top:14px }
+  .hm .manif { margin:4.2cqw 0 0; font:400 2.45cqw/1.14 'Gloock',serif; letter-spacing:-.01em; max-width:17ch }
+  .hm .phone .manif { font-size:clamp(23px,4.6cqw,38px); margin-top:22px; max-width:15ch }
+  /* ---- chapter text column ---- */
+  .hm .txt { position:absolute; z-index:5 }
+  .hm .desk .txt { left:4.5%; top:50%; width:36%; transform:translateY(-50%) } .hm .phone .txt { left:24px; right:24px; bottom:28px }
+  .hm .txt .label.first { margin-bottom:14px }
+  .hm .sinh { font-family:'Noto Serif Sinhala',serif; font-size:.36em; display:block; margin-top:.35em; letter-spacing:0 }
+  .hm .steps { position:relative; margin-top:28px; min-height:7.4em }
+  .hm .phone .steps { margin-top:14px; min-height:5.2em }
+  .hm .steps p { position:absolute; inset:0 0 auto 0; margin:0 }
+  .hm .count { margin-top:20px; color:inherit; opacity:.7 }
+  .hm .phone .count { margin-top:12px }
+  /* Revive */
+  .hm .board { position:absolute; z-index:3 }
+  .hm .desk .board { left:40%; right:3.5%; top:14% } .hm .phone .board { top:128px; left:0 }
+  .hm .board .half { position:absolute; inset:0; will-change:transform }
+  .hm .board img { display:block; width:100%; box-shadow:0 14px 30px rgb(59 36 24 / .18) }
+  .hm .phone .board img { height:100%; width:auto }
+  .hm .board .half img { position:absolute; inset:0 }
+  .hm .board svg { position:absolute; inset:-4% 0; width:100%; height:108%; overflow:visible; z-index:2 }
+  .hm .pile { position:absolute; z-index:2; box-shadow:0 14px 30px rgb(59 36 24 / .16) }
+  .hm .desk .pile { left:56%; width:40%; top:60% } .hm .phone .pile { left:14%; width:74%; top:452px }
+  .hm .logo { display:block; width:15cqw; margin-bottom:22px }
+  .hm .phone .logo { width:150px; margin-bottom:12px }
+  .hm .night { position:absolute; inset:0; background:#21150F; opacity:0; z-index:8; pointer-events:none }
+  .hm .tearshadow { position:absolute; left:0; right:0; height:6%; z-index:9; pointer-events:none; filter:blur(6px); background:rgb(33 21 15 / .45) }
+  /* Lunelle */
+  .hm .disc { position:absolute; z-index:1 }
+  .hm .desk .disc { left:34%; top:-14%; height:128%; aspect-ratio:1 } .hm .phone .disc { left:-40%; top:48%; width:180%; aspect-ratio:1 }
+  .hm .ln .print { z-index:2; box-shadow:0 24px 60px rgb(0 0 0 / .4) }
+  .hm .ring { position:absolute; z-index:3; border-radius:50%; border:1.5px solid rgb(232 196 192 / .7); pointer-events:none }
+  .hm .phases { display:flex; gap:12px; margin-top:20px }
+  .hm .phases svg { width:22px; height:22px }
+  .hm .phone .ln .txt .phases { display:none }
+  .hm .phone .ln .txt { top:calc(64% + 20px); bottom:auto }
+  .hm .phasebar { position:absolute; z-index:6; left:24px; right:24px; bottom:22px; display:flex; align-items:center; justify-content:space-between; color:rgb(242 232 218 / .4) }
+  .hm .phasebar::before { content:""; position:absolute; left:14px; right:14px; top:50%; height:1px; background:rgb(232 196 192 / .25) }
+  .hm .phasebar span { position:relative; background:#21150F; padding:0 6px; display:grid; place-items:center; transition:none }
+  .hm .phasebar svg { width:50px; height:50px; display:block; overflow:visible }
+  .hm .phasebar .ph-l { position:absolute; left:0; top:38px; font:500 10px 'DM Mono',monospace; letter-spacing:.14em; color:#E8C4C0; background:none; padding:0 }
+  .hm .desk .ln .txt { width:30% }
+  /* Drift */
+  .hm .dintro { position:absolute; inset:0; z-index:4; overflow:hidden }
+  .hm .dintro .veil { position:absolute; inset:0; background:rgb(20 26 34 / .2) }
+  .hm .dtitle { position:absolute; right:3%; top:15%; width:24cqw; text-align:center; z-index:3 }
+  .hm .phone .dtitle { left:0; right:0; width:auto; top:auto; bottom:9%; text-shadow:0 1px 2px rgb(0 0 0 / .5), 0 4px 14px rgb(0 0 0 / .45) }
+  .hm .dlogo-in { display:block; margin:0 auto; width:100%; will-change:transform; filter:drop-shadow(0 0 18px rgb(251 248 243 / .55)) }
+  .hm .phone .dlogo-in { width:290px; filter:drop-shadow(0 2px 3px rgb(0 0 0 / .5)) drop-shadow(0 8px 26px rgb(0 0 0 / .45)) }
+  .hm .dtitle .label { margin-top:1.2cqw; letter-spacing:.22em; color:var(--brown) }
+  .hm .desk .dtitle .label { position:absolute; left:0; right:0; top:-2.4cqw; margin:0 }
+  .hm .phone .dtitle .label { margin-top:12px; color:var(--cream) }
+  .hm .track { position:absolute; left:0; display:flex; will-change:transform; z-index:2; gap:14px; align-items:stretch }
+  .hm .desk .track { top:0; height:100% } .hm .phone .track { top:64px; height:480px; gap:10px }
+  .hm .card { position:relative; flex:none; overflow:hidden; background:#cfd6da; will-change:transform }
+  .hm .panel { position:relative; flex:none; display:flex; flex-direction:column; justify-content:center; box-sizing:border-box }
+  .hm .dlogo { width:min(22cqw,330px); margin:0 0 2.4cqw -1cqw; display:block }
+  .hm .overlay { position:absolute; left:6%; right:10%; bottom:10%; z-index:3; color:var(--cream); font-size:clamp(18px,1.9cqw,29px); max-width:26ch }
+  .hm .card .shade { position:absolute; inset:0; background:rgb(20 26 34 / .22); z-index:2 }
+  .hm .overlay { text-shadow:0 1px 2px rgb(0 0 0 / .5), 0 4px 14px rgb(0 0 0 / .45), 0 10px 40px rgb(0 0 0 / .35) }
+  .hm .bignum { position:absolute; font:400 44cqh/.8 'Gloock',serif; color:transparent; -webkit-text-stroke:1.4px rgb(59 36 24 / .22); z-index:0; pointer-events:none; will-change:transform; left:12%; top:16% }
+  .hm .lookname { font:400 4.2cqw/.92 'Gloock',serif; letter-spacing:-.02em; position:relative; z-index:1; margin-top:14px }
+  .hm .lookdesc { position:relative; z-index:1; margin-top:22px; font-size:clamp(15px,1.3cqw,20px); max-width:24ch }
+  .hm .cta { display:inline-block; background:var(--brown); color:var(--cream); border-radius:999px; padding:15px 30px; font-weight:500; font-size:15px }
+  .hm .stitch { position:absolute; left:0; right:0; bottom:3%; height:2px; z-index:6; pointer-events:none }
+  .hm .phone .stitch { bottom:auto }
+  .hm .prog { position:absolute; left:4.5%; bottom:5.5%; z-index:7 }
+  .hm .phone .prog { left:auto; right:24px; bottom:auto; top:38px; display:none }
+  .hm .caps { position:absolute; left:24px; right:24px; bottom:22px; z-index:5 }
+  .hm .lookidx { position:absolute; left:24px; right:24px; bottom:18px; z-index:6; display:flex; gap:10px; will-change:opacity,transform }
+  .hm .lt { flex:1; position:relative }
+  .hm .lt { max-width:90px } .hm .lookidx { justify-content:center }
+  .hm .lt img { display:block; width:100%; aspect-ratio:2/3; object-fit:cover; will-change:transform,opacity; box-shadow:0 4px 10px rgb(59 36 24 / .18) }
+  .hm .lt b { display:block; margin-top:6px; font:500 10px 'DM Mono',monospace; letter-spacing:.12em; font-weight:500; text-align:center }
+  .hm .lt i { position:absolute; left:0; right:0; bottom:-6px; height:2px; background:repeating-linear-gradient(90deg,#008794 0 6px,transparent 6px 10px); opacity:0 }
+  .hm .cap { position:absolute; inset:0 }
+  .hm .cap .lookname { font-size:clamp(36px,6.6cqw,54px); margin-top:8px }
+  .hm .cap .lookdesc { margin-top:10px; max-width:40ch }
+  .hm .cap .bignum { font-size:210px; left:auto; right:-6px; top:-40px; -webkit-text-stroke:1.2px rgb(59 36 24 / .18) }
+  .hm .cap .dlogo { width:132px; margin:0 0 10px -4px }
+  /* foam + footer */
+  .hm .foam { position:absolute; inset:-12% 0; z-index:20; pointer-events:none; display:none }
+  .hm .foam img { width:100%; height:100%; object-fit:cover; will-change:transform }
+  .hm .foot { position:absolute; left:2%; right:2%; bottom:0; height:80%; z-index:30; background:var(--brown); color:var(--cream); border-radius:28px 28px 0 0; padding:6cqw 6cqw; box-sizing:border-box; will-change:transform }
+  .hm .phone .foot { left:0; right:0; height:84%; padding:44px 24px }
+  .hm .foot h4 { margin:0; font:400 5cqw/.96 'Gloock',serif; letter-spacing:-.02em }
+  .hm .phone .foot h4 { font-size:42px }
+  .hm .fields { display:grid; grid-template-columns:1fr 1fr; gap:3cqw 4cqw; margin-top:4.5cqw; max-width:70% }
+  .hm .phone .fields { grid-template-columns:1fr; gap:26px; margin-top:36px; max-width:none }
+  .hm .fields span { display:block; border-bottom:1px solid rgb(242 232 218 / .55); padding:0 0 10px }
+  .hm .send { display:inline-block; margin-top:3.5cqw; background:var(--cream); color:var(--brown); border-radius:999px; padding:15px 32px; font-weight:500; font-size:15px }
+  .hm .phone .send { margin-top:32px }
+  /* page chrome */
+  .hm .ctl { display:flex; gap:10px; align-items:center; margin:14px 0 4px; font:13px system-ui,sans-serif; color:#aaa; flex-wrap:wrap }
+  .hm .ctl input { flex:1; min-width:240px }
+  .hm .ctl button { font:13px system-ui,sans-serif; padding:4px 11px; border-radius:999px; border:1px solid #666; background:#2a2a2a; color:#ddd; cursor:pointer }
+  .hm .note { font:13px/1.55 system-ui,sans-serif; color:#aaa; margin:8px 0 0; max-width:960px }
+  .hm .note b { color:#ddd }
+  .hm table { border-collapse:collapse; font:12px/1.4 system-ui,sans-serif; color:#bbb; margin-top:8px }
+  .hm td, .hm th { padding:3px 10px; border-bottom:1px solid #333; text-align:left }
+  .hm .ok { color:#6fcf97 } .hm .no { color:#f2994a }
+</style>
+
+<div class="hm pg" id="pg-home">
+<h2>Home, v11</h2>
+<p class="subtitle">From the first screen to the footer. Wheel over either screen (it scrolls like the real site), drag the slider, or jump. The phone is at real size.</p>
+<div class="ctl">Jump to:
+  <button type="button" data-j="op">Opening</button><button type="button" data-j="mp">Mano Padana</button><button type="button" data-j="rv">Revive</button><button type="button" data-j="ln">Lunelle</button><button type="button" data-j="dIn">Drift</button><button type="button" data-j="looks">Drift · looks</button><button type="button" data-j="foot">Contact</button>
+  <button type="button" id="Play" style="margin-left:auto">▶ play all (about 75 s)</button>
+</div>
+<div class="row">
+  <div style="flex:1 1 560px"><p class="lbl">Desktop</p><div class="stage desk" id="D"></div></div>
+  <div><p class="lbl">Phone (real size, 390 × 844)</p><div class="stage phone" id="P"></div></div>
+</div>
+<div class="ctl"><input type="range" min="0" max="1000" value="0" id="S"></div>
+
+
+<p class="note"><b>What changed.</b> She now stands flush with the bottom of the screen: no paper border, her skirt runs off the edge. In Drift, the script logo writes itself across the sky above the six models (on the phone, in cream over the dark rock). The header is now a soft strip of fabric. It forms and sews itself on as you leave the landing, ripples a little while you scroll, tucks its links away while you scroll down and brings them back the moment you pause or scroll up. It names the chapter you're in and turns to night over dark scenes.</p>
+</div>
+
+<script>
+(() => {
+  const F = '/files/'
+  const READ = { enter: .32, perWord: .0737, exit: .12, photo: .28 }   // in viewport heights; perWord ≈ 250 px/s at 3.8 words/s on a 900 px screen
+  const wc = (s) => s.trim().split(/\s+/).length
+  const MANIF = 'I strongly believe that fashion is the best form of self expression.'
+  const MP = ['Growing up in a society where mental health was an avoided subject, I realized the importance of communicating emotions.', 'මනෝ පාදන, “The Mind’s Steps”, portrays a mental healing journey through cultural aspects.', 'Initially inspired by the traditional art of Kandyan dance, I reflect my culture through design details.', 'Hand-crafted Dumbara fabrics have been utilized to add textural and cultural value to my collection.']
+  const RV = ['Denim is one of the most wasted materials in fashion; worn, torn, and thrown away before its potential runs out.', 'This project asks what happens if we treat it the way SPAB treats old buildings: not restored to look new, but repaired and given new life.', 'Revive takes that same idea into denim reconstruction, to prove that discarded denim jeans have more life left in them.']
+  const LN = ['Lunelle is a maternity collection based on functionality and empowerment, designed for the contemporary woman balancing work, life and motherhood.', 'My collection was inspired by the timeless beauty of the moon, the protection of Artemis: the Greek goddess of childbirth,', 'mother and child sculptures of Henry Moore and the curves of the pregnant body.', 'The stretch marks of her body are compared to the craters of the moon, which are considered symbols of imperfect beauty.', 'Lunelle is a tribute to all the unstoppable mothers!']
+  const LNP = [['l01', 'l02', 1], ['l09', 'l08', 0], ['l04', 'l03', 0], ['l05', 'l07', 0], ['l10', 'l06', 0]]
+  const SP = ['Drift is a womenswear collection exploring the act of stepping away from social acceleration, the relentless pace that overwhelms people.', 'The concept was born from a personal experience, watching fabric move naturally in coastal wind,', 'and seeing in that movement the breath the body takes when it finally stops rushing.', 'My collection offers the feeling of a calming breath taken to escape the fast paced world.']
+  // corrected order (client): halter, cobalt jacket, tunic, cream shirt, macramé dress, draped top
+  const LOOKS = [['d07', 'd08', 'White cropped halter top with a cobalt tie, and indigo crochet.'], ['d03', 'd04', 'Cobalt wrap jacket with brown suede fringe and an openwork crochet back, over a short white skirt.'], ['d11', 'd12', 'Pale blue sleeveless tunic with a cobalt scarf, and white flared trousers with blue crochet panels.'], ['d01', 'd02', 'Oversized cream shirt with tie sleeves, over an indigo crochet skirt and crochet leg warmers.'], ['d06', 'd05', 'Pale blue macramé dress with long fringe.'], ['d09', 'd10', 'Sheer white draped top over a cobalt midi skirt, with a cream fringed macramé bag.']]
+  const AR = { d01: .645, d02: .654, d03: .676, d04: .667, d05: 1.5, d06: .667, d07: .667, d08: .667, d09: .667, d10: .667, d11: .667, d12: .667, d13: 1.5, d14: .667, d15: .667, d16: .667, d17: .667, 'inspE-6': 2.14 }
+  const words = (s) => s.split(' ').map((w) => `<span class="w"><i>${w}</i></span>`).join(' ')
+  const pad2 = (n) => String(n).padStart(2, '0')
+  const jag = []; for (let y = 0; y <= 100; y += 5) jag.push([50 + Math.sin(y * 1.7) * 1.6 + Math.sin(y * .53) * 1.1, y])
+  const leftPoly = `polygon(0 0, ${jag.map(([x, y]) => `${x}% ${y}%`).join(', ')}, 0 100%)`, rightPoly = `polygon(100% 0, ${jag.map(([x, y]) => `${x}% ${y}%`).join(', ')}, 100% 100%)`
+  const stitches = jag.slice(1, -1).map(([x, y], i) => `<path data-s="${i}" d="M${x - 2.4} ${y - 1.6} L${x + 2.4} ${y + 1.6} M${x + 2.4} ${y - 1.6} L${x - 2.4} ${y + 1.6}" stroke="#008794" vector-effect="non-scaling-stroke" style="stroke-width:2.4px" fill="none" opacity="0"/>`).join('')
+  const litPath = (ph) => `M10 1 A9 9 0 0 1 10 19 A${Math.abs(9 * (1 - 2 * ph)).toFixed(2)} 9 0 0 ${ph < .5 ? 0 : 1} 10 1`
+  const moonThumb = (ph, img, id) => `<svg viewBox="0 0 20 20"><defs><clipPath id="${id}"><path d="${litPath(ph)}"/></clipPath></defs><circle cx="10" cy="10" r="9" fill="#2A1C14"/><image href="${img}" x="1" y="1" width="18" height="18" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/><circle cx="10" cy="10" r="9.6" fill="none" stroke="currentColor" stroke-width=".45"/></svg>`
+  const moonIcon = (ph) => `<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1"/><path d="M10 1.5 A8.5 8.5 0 0 1 10 18.5 A${Math.abs(8.5 * (1 - 2 * ph)).toFixed(2)} 8.5 0 0 ${ph < .5 ? 0 : 1} 10 1.5" fill="currentColor"/></svg>`
+  const tearEdge = [...Array(41).keys()].map((i) => [i * 2.5, (i % 2 ? -1.6 : 1.2) + Math.sin(i * 1.9) * 1.4 + Math.sin(i * .37) * 1.2])
+  const colSets = [[1, 4, 6, 3], [5, 7, 1, 6], [3, 6, 4, 7]]
+
+  // Drift strip. Desktop: photos + text panels. Phone: photos only; each carries the caption shown under the strip.
+  const DSTRIP = [['img', 'd13', null, 'lead'], ['text', 0, 'sp0'], ['img', 'd14'], ['img', 'inspE-6', 'sp1', 1], ['img', 'd05', 'sp2', 2], ['text', 3, 'sp3']]
+  LOOKS.forEach(([a, b], i) => DSTRIP.push(['look', i, 'look' + i], ['img', a], ['img', b]))
+  DSTRIP.push(['img', 'd16'], ['img', 'd17'], ['img', 'd15'], ['end', 0, 'end'])
+  const PSTRIP = [['d17', 'lead'], ['d14', 'sp0'], ['inspE-6', 'sp1'], ['d05', 'sp2'], ['d06', 'sp3']]
+  LOOKS.forEach(([a, b], i) => PSTRIP.push([a, 'look' + i], [b, 'look' + i]))
+  PSTRIP.push(['d16', 'end'], ['d13', 'end'], ['d15', 'end'])
+  const lookWords = (i) => 2 + wc(LOOKS[i][2])
+  const TEXTW = { lead: 4, sp0: wc(SP[0]), sp1: wc(SP[1]), sp2: wc(SP[2]), sp3: wc(SP[3]), end: 5 }
+  LOOKS.forEach((_, i) => { TEXTW['look' + i] = lookWords(i) })
+  const CAPS = { lead: `<div class="label">Drift · SS27</div><h3 class="title" style="margin-top:10px">${words('My graduate collection')}</h3>` }
+  SP.forEach((s, i) => { CAPS['sp' + i] = `${i === 0 ? `<img class="dlogo" src="${F}drift-logo-brown.png" alt="Drift">` : ''}<p class="narr">${words(s)}</p>` })
+  LOOKS.forEach(([, , d], i) => { CAPS['look' + i] = `<div class="bignum">${pad2(i + 1)}</div><div class="label" style="position:relative">Look ${pad2(i + 1)} / 06</div><div class="lookname">${words('Look ' + pad2(i + 1))}</div><p class="lookdesc narr">${words(d)}</p>` })
+  CAPS.end = `<h3 class="title">${words('Six looks, six models.')}</h3><div style="margin-top:18px"><span class="cta">Explore the collection →</span></div>`
+
+  let trkTop = 64
+  function build(el, phone) {
+    const strip = phone
+      ? PSTRIP.map(([a, cap], i) => `<div class="card" data-ar="${AR[a]}" data-cap="${cap}" ${i === 0 ? 'data-lead="1"' : ''}><img src="${F}${a}.jpg" alt=""></div>`).join('')
+      : DSTRIP.map(([k, a, id, b]) => {
+        if (k === 'img') return `<div class="card" data-ar="${AR[a]}" ${id ? `data-id="${id}"` : ''}><img src="${F}${a}.jpg" alt="">${typeof b === 'number' ? `<div class="shade"></div><p class="narr overlay">${words(SP[b])}</p>` : ''}</div>`
+        if (k === 'text') return `<div class="panel" data-w="${a === 0 ? 1.05 : .95}" data-id="${id}">${a === 0 ? `<img class="dlogo" src="${F}drift-logo-brown.png" alt="Drift">` : ''}<p class="narr">${words(SP[a])}</p></div>`
+        if (k === 'look') return `<div class="panel lookp" data-w=".66" data-id="${id}"><div class="bignum">${pad2(a + 1)}</div><div class="label" style="position:relative;z-index:1">Look ${pad2(a + 1)} / 06</div><div class="lookname">${words('Look ' + pad2(a + 1))}</div><p class="lookdesc narr">${words(LOOKS[a][2])}</p></div>`
+        return `<div class="panel" data-w=".85" data-id="end"><div class="label">Drift · SS27 · Graduate collection</div><h3 class="title" style="margin-top:14px">${words('Six looks, six models.')}</h3><div style="margin-top:30px"><span class="cta">Explore the collection →</span></div></div>`
+      }).join('')
+    el.innerHTML = `
+      <div class="layer rv" style="background:#F2E8DA">
+        <img class="pile" src="${F}rev-34s.jpg" alt="">
+        <div class="board"><img src="${F}rev-30.jpg" alt="" style="visibility:hidden"><div class="half l" style="clip-path:${leftPoly}"><img src="${F}rev-30.jpg" alt=""></div><div class="half r" style="clip-path:${rightPoly}"><img src="${F}rev-30.jpg" alt=""></div><svg viewBox="0 0 100 100" preserveAspectRatio="none">${stitches}</svg></div>
+        <div class="txt" ${phone ? '' : 'style="width:30%"'}><img class="logo" src="${F}rev-logo-t.png" alt="Revive SS27"><div class="label">SS27 · Denim reconstruction</div><div class="steps body">${RV.map((s) => `<p>${words(s)}</p>`).join('')}</div><div class="label count"></div></div><div class="night"></div></div>
+      <div class="tearshadow"></div>
+      <div class="layer mp"><div class="g"></div>
+        <div class="cols">${colSets.map((c) => `<div class="col">${[...c, ...c].map((i) => `<img src="${F}inspE-${i}.jpg" class="${i === 6 ? 'l' : ''}" alt="">`).join('')}</div>`).join('')}</div>
+        <div class="print pr" style="box-shadow:0 18px 40px rgb(0 0 0 / .25)">${[1, 2, 3, 4].map((i) => `<img src="${F}mpE-0${i}.jpg" alt="">`).join('')}</div>
+        <div class="hero"><h1 class="name">${words('Linali')}<br>${words('Andrea')}</h1><div class="label">Fashion designer · Sri Lanka</div><p class="manif">${MANIF.split(' ').map((w) => `<span>${w}</span>`).join(' ')}</p></div>
+        <img class="figure" src="${F}herF.png" alt="">
+        <div class="txt mpt"><div class="label first">SS25 · The Mind’s Steps</div><h3 class="title">Mano Padana<span class="sinh">මනෝ පාදන</span></h3><div class="steps body">${MP.map((s) => `<p>${words(s)}</p>`).join('')}</div><div class="label count"></div></div></div>
+      <div class="layer ln" style="background:#21150F;color:#F2E8DA">
+        <svg class="disc" viewBox="0 0 100 100"><defs><mask id="dm${+phone}"><circle cx="50" cy="50" r="49" fill="#fff"/><circle class="dsh" cx="50" cy="50" r="50" fill="#000"/></mask></defs><circle cx="50" cy="50" r="49" fill="#2A1C14"/><circle cx="50" cy="50" r="49" fill="#E8C4C0" fill-opacity=".16" mask="url(#dm${+phone})"/></svg>
+        ${LNP.map(([m, s, land], i) => `<div class="print lm" data-i="${i}"><img src="${F}${m}.jpg" alt=""></div><div class="print ls" data-i="${i}" data-land="${land}"><img src="${F}${s}.jpg" alt=""></div>`).join('')}
+        <div class="ring"></div>${phone ? `<div class="phasebar">${[.18, .34, .5, .72, .999].map((ph, i) => `<span>${moonThumb(ph, F + LNP[i][0] + '.jpg', 'mt' + i)}</span>`).join("")}</div>` : ""}
+        <div class="txt"><div class="label first" style="color:#E8C4C0">AW26 · Maternity</div><h3 class="title">${words('Lunelle')}</h3><div class="steps body">${LN.map((s) => `<p>${words(s)}</p>`).join('')}</div><div class="phases">${[.12, .3, .5, .72, 1].map((ph) => `<span>${moonIcon(Math.min(ph, .999))}</span>`).join('')}</div></div></div>
+      <div class="layer dr" style="background:#F2E8DA">
+        <div class="track">${strip}</div>
+        ${phone ? `<div class="lookidx">${LOOKS.map(([a], i) => `<div class="lt"><img src="${F}${a}.jpg" alt=""><b>${pad2(i + 1)}</b><i></i></div>`).join('')}</div>` : ''}${phone ? `<div class="caps">${Object.entries(CAPS).map(([k, h]) => `<div class="cap" data-k="${k}">${h}</div>`).join('')}</div>` : ''}
+        <div class="dintro"><div class="veil"></div><div class="dtitle"><img class="dlogo-in" src="${F}drift-logo-${phone ? 'cream' : 'brown'}.png" alt="Drift, SS27, Linali Andrea"><div class="label">Graduate collection</div></div></div>
+        <svg class="stitch" preserveAspectRatio="none"><line x1="0" y1="1" x2="100%" y2="1" stroke="#008794" stroke-width="2.5" stroke-dasharray="14 10"/></svg>
+        <div class="prog label"></div>
+      </div>
+      <div class="foam"><img src="${F}inspE-5.jpg" alt=""></div>
+      <div class="foot"><h4>Let’s make something together.</h4><div class="fields label"><span>Name</span><span>Email</span><span style="grid-column:1/-1">Message</span></div><div class="send">Send message</div></div>
+      ${LANav.html(phone, HCH, '')}`
+    const m1 = new Map(), m2 = new Map(), q = (s) => m1.get(s) || (m1.set(s, el.querySelector(s)), m1.get(s)), qa = (s) => m2.get(s) || (m2.set(s, [...el.querySelectorAll(s)]), m2.get(s))
+    const S = { el, phone, q, qa, colOff: [0, 0, 0], leg: new Set() }
+    S.layout = () => {
+      const W = el.clientWidth, H = el.clientHeight, gap = phone ? 10 : 14, ch = phone ? Math.round(H * .569) : H
+      // ---- strip geometry
+      let pos = 0; S.items = []
+      qa('.track > *').forEach((c) => {
+        const size = c.classList.contains('card') ? ch * +c.dataset.ar : H * +c.dataset.w
+        c.style.width = size + 'px'
+        if (!c.classList.contains('card')) c.style.padding = '0 ' + Math.round(H * .08) + 'px'
+        const ov = c.querySelector('.overlay'); if (ov) ov.style.left = ((Math.max(0, (size - W) / 2) + W * .06) / size * 100) + '%'
+        S.items.push({ c, start: pos, size, id: c.dataset.id || c.dataset.cap }); pos += size + gap
+      })
+      S.stripLen = pos - gap; S.W = W; S.H = H; S.ch = ch
+      if (phone) {
+        trkTop = 64; q('.caps').style.top = trkTop + ch + 32 + 'px'; q('.stitch').style.top = trkTop + ch + 13 + 'px'; q('.track').style.height = ch + 'px'
+        // Revive's board and the pile under it scale with the screen
+        const bh = Math.round(H * .427), b = q('.board'); b.style.height = bh + 'px'; b.style.width = bh * 2.83 + 'px'; S.bh = bh; q('.pile').style.top = 128 + bh - 36 + 'px'
+      }
+      // photo windows keep the photo's own shape on any screen (they were sized for 16:9)
+      S.mpw = 86 * H / W * .667; S.mpa = 30 * H / W * .667; S.lnw = 100 * H / W * .667
+      // ---- timeline in wheel units (the original pacing: 13 500 units of wheel travel for the whole page)
+      let y = 0; const T = {}
+      const add = (k, len) => { T[k] = [y, y + len]; y += len }
+      const steps = (k, n, len) => { T[k] = [...Array(n).keys()].map((i) => [y + i * len / n, y + (i + 1) * len / n]); T[k + "All"] = [y, y + len]; y += len }
+      add("op", 300); add("manif", 500); T.manifFill = T.manif[0] + 350; add("open", 700)
+      steps("mp", 4, 1380); add("tear", 420); steps("rv", 3, 1020); add("rise", 600); steps("ln", 5, 1680); add("foam", 420); add("dIn", 480); add("strip", 5400); add("foot", 600)
+      T.looks = [T.strip[0] + 5400 * .36, 0]
+      S.T = T; S.total = y
+    }
+    S.layout()
+    return S
+  }
+  const HCH = [['00', 'Linali Andrea'], ['01', 'Mano Padana'], ['02', 'Revive'], ['03', 'Lunelle'], ['04', 'Drift'], ['—', 'Get in touch']]
+  const D = build(document.getElementById('D'), false), P = build(document.getElementById('P'), true)
+  let fontsReady = false; document.fonts.ready.then(() => { fontsReady = true; D.layout(); P.layout() }); setInterval(() => { D.layout(); P.layout() }, 1000)
+
+  const clamp = (v) => Math.min(1, Math.max(0, v)), sg = (v, a, b) => clamp((v - a) / (b - a)), inS = (v, [a, b]) => clamp((v - a) / (b - a))
+  const out3 = (t) => 1 - Math.pow(1 - t, 3), out4 = (t) => 1 - Math.pow(1 - t, 4), inOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  const back = (t) => { const c = 1.4; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2) }
+  const lerp = (a, b, t) => a + (b - a) * t
+  const mix = (a, b, t) => a.map((v, i) => Math.round(lerp(v, b[i], t)))
+  const lum = ([r, g, b]) => { const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4) }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b) }
+  const setRect = (el, r) => Object.assign(el.style, { left: r[0] + '%', top: r[1] + '%', width: r[2] + '%', height: r[3] + '%' })
+  const rlerp = (a, b, t) => a.map((v, i) => lerp(v, b[i], t))
+  const show = (el, on) => { el.style.display = on ? '' : 'none' }
+  const wsCache = new WeakMap(), rise = (c, k, st = .03) => { if (!c) return; let ws = wsCache.get(c); if (!ws) { ws = [...c.querySelectorAll('.w > i')]; wsCache.set(c, ws) } ws.forEach((w, j) => { const v = out4(clamp(k * (1 + ws.length * st) - j * st)); w.style.transform = `translateY(${(1 - v) * 110}%)` }) }
+  // steps: which sentence is current, how far it has risen; marks it legible once fully risen and on screen
+  function runSteps(s, id, txtEl, y, segs, live) {
+    let si = segs.findIndex(([a, b]) => y < b); if (si < 0) si = segs.length - 1
+    const [a, b] = segs[si], k = clamp((y - a) / ((b - a) * .3))
+    ;[...txtEl.querySelectorAll('.steps p')].forEach((el, i) => { el.style.visibility = i === si ? 'visible' : 'hidden'; if (i === si) rise(el, k, .018) })
+    const c = txtEl.querySelector('.count'); if (c) c.textContent = `${pad2(si + 1)} / ${pad2(segs.length)}`
+    if (live && k >= 1 && y >= a && y < b) s.leg.add(`${id}${si}`)
+    return { si, k, within: (y - a) / (b - a) }
+  }
+  const stripX = (s, y) => { const kf = s.kf; if (y <= kf[0][0]) return 0; for (let i = 1; i < kf.length; i++) if (y <= kf[i][0]) { const [y0, x0] = kf[i - 1], [y1, x1] = kf[i]; return lerp(x0, x1, y1 === y0 ? 1 : (y - y0) / (y1 - y0)) } return kf[kf.length - 1][1] }
+
+  function paint(s, y, dt, now) {
+    const { q, qa, phone, T, W, H } = s
+    s.leg.clear()
+    // ---------- OPENING: her, the moodboard columns, her sentence, then the window into Mano Padana
+    const mp = q('.mp'); show(mp, y < T.tear[1])
+    const open = inS(y, T.open), opn = inOut(sg(open, 0, .65)), split = inOut(sg(open, .65, 1))
+    const intro = out3(clamp(now / 1.3))
+    rise(q('.name'), clamp(now / 1.1), .08)
+    const hero = q('.hero'); hero.style.opacity = 1 - sg(open, .05, .3); hero.style.transform = `translateY(${-out3(sg(open, 0, .4)) * 50}px)`
+    const fill = inS(y, [T.manif[0], T.manifFill]) * wc(MANIF)
+    qa('.manif span').forEach((w, i) => { w.style.color = `rgb(59 36 24 / ${.18 + .82 * clamp(fill - i)})` })
+    if (fill >= wc(MANIF) && open < .05 && y > T.manif[0]) s.leg.add('manif')
+    const fig = q('.figure'); fig.style.transform = `translateY(${(1 - intro) * 24}px) scale(${lerp(1, .86, opn)})`; fig.style.opacity = 1 - sg(open, .25, .55)
+    const away = inOut(sg(open, 0, .45)), cols = q('.cols')
+    qa('.col').forEach((c, i) => { const dir = i % 2 ? 1 : -1; s.colOff[i] = (s.colOff[i] + dir * (1.2 + i * .4) * dt) % 50; c.style.transform = `translateY(${(dir < 0 ? s.colOff[i] : s.colOff[i] - 50) - away * (40 + i * 12)}%)` })
+    cols.style.opacity = 1 - sg(open, .3, .5); cols.style.transform = `translateY(${(1 - intro) * 40}px)`
+    // ground: cream → her board's charcoal as the window opens, then the step colours
+    const MPG = [[31, 30, 28], [94, 89, 83], [242, 232, 218], [59, 36, 24]]
+    const mps = runSteps(s, 'mp', q('.mpt'), Math.max(y, T.mp[0][0]), T.mp, y >= T.mp[0][0]); if (y < T.mp[0][0]) mps.k = 0
+    const gk = mps.si === 0 ? 0 : inOut(clamp(mps.k)), mg = mix(MPG[Math.max(0, mps.si - 1)], MPG[mps.si], mps.si === 0 ? 1 : gk)
+    const ground = mix([242, 232, 218], mg, inOut(sg(open, .1, .6)))
+    q('.mp .g').style.background = `rgb(${ground})`
+    const mpt = q('.mpt'); mpt.style.color = lum(ground) > .3 ? '#3B2418' : '#F2E8DA'; mpt.style.opacity = sg(open, .8, 1)
+    if (y < T.mp[0][0]) rise(qa('.mpt .steps p')[0], 0)
+    const A = phone ? [60, 62, 20, 13.9] : [66, 40, s.mpa, 30], B = phone ? [0, 0, 100, 69.3] : [50 - s.mpw / 2, 7, s.mpw, 86], C = phone ? [0, 0, 100, 69.3] : [Math.min(58, 96 - s.mpw), 7, s.mpw, 86]
+    const pr = q('.mp .pr'); setRect(pr, rlerp(rlerp(A, B, opn), C, split)); pr.style.opacity = sg(open, .02, .1)
+    qa('.mp .pr img').forEach((im, i) => {
+      const k = i === 0 ? 1 : (mps.si > i ? 1 : mps.si === i ? inOut(mps.k) : 0), next = mps.si > i ? 1 : (mps.si === i + 1 ? inOut(mps.k) : 0)
+      if (phone) { im.style.transform = `translateY(${(1 - k) * 100}%) scale(${lerp(1.1, 1, k) * lerp(1, .9, next)})`; im.style.transformOrigin = '50% 0' }
+      else { im.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`; im.style.transform = `scale(${lerp(1.15, 1, k)})` }
+    })
+    // ---------- TEAR into Revive
+    const tear = inOut(inS(y, T.tear)), ey = lerp(103, -12, tear)
+    mp.style.clipPath = tear > 0 ? `polygon(0 0, 100% 0, ${tearEdge.slice().reverse().map(([x, d]) => `${x}% ${ey + d}%`).join(', ')})` : 'none'
+    mp.style.transform = `translateY(${-tear * 8}%) rotate(${-tear * 1.6}deg)`; mp.style.transformOrigin = '0 0'
+    const ts = q('.tearshadow'); show(ts, tear > 0 && tear < 1); ts.style.top = `${ey - 2 - tear * 8}%`
+    const rv = q('.rv'); show(rv, y > T.tear[0] && y < T.rise[1])
+    rv.style.transform = `scale(${lerp(1.08, 1, out3(tear))})`
+    const rvs = runSteps(s, 'rv', q('.rv .txt'), y, T.rv, y < T.rise[0])
+    const join = inOut(inS(y, [T.rv[0][0], T.rv[2][0] + (T.rv[2][1] - T.rv[2][0]) * .5]))
+    q('.half.l').style.transform = `translate(${-(1 - join) * 7}%, ${(1 - join) * 3}%) rotate(${-(1 - join) * 4}deg)`
+    q('.half.r').style.transform = `translate(${(1 - join) * 7}%, ${-(1 - join) * 2}%) rotate(${(1 - join) * 3}deg)`
+    const st = qa('[data-s]'), sewn = inS(y, [T.rv[0][0] + 250, T.rv[2][1] - 150]) * st.length
+    st.forEach((el, i) => el.setAttribute('opacity', clamp(sewn - i)))
+    if (phone) q('.pile').style.transform = `translate(${(1 - join) * 10 - join * 6}%, ${(1 - join) * 40}%) rotate(${-4 + join * 1.5}deg)`; else q('.pile').style.transform = `translate(${(1 - join) * 4}%, ${(1 - join) * 10}%) rotate(${3 - join * 1.5}deg)`
+    if (phone) { const bw = s.bh * 2.83, pan = inOut(inS(y, [T.tear[0] + 150, T.rvAll[1]])); q('.board').style.transform = `translateX(${lerp(24, W - bw - 24, pan)}px)` }
+    // ---------- MOONRISE into Lunelle
+    const rise1 = inS(y, T.rise)
+    q('.rv .night').style.opacity = inOut(sg(rise1, 0, .45))
+    if (rise1 > 0) rv.style.transform = `scale(${lerp(1, .9, inOut(rise1))}) translateY(${-rise1 * 4}%)`
+    const ln = q('.ln'); show(ln, y > T.rise[0] + 60 && y < T.foam[1])
+    ln.style.background = rise1 < .4 ? 'transparent' : '#21150F'
+    const lns = runSteps(s, 'ln', q('.ln .txt'), Math.max(y, T.ln[0][0]), T.ln, y >= T.ln[0][0] && y < T.foam[0]); if (y < T.ln[0][0]) { lns.k = 0; rise(qa('.ln .steps p')[0], 0) }
+    const li = lns.si, lsp = y >= T.ln[0][0] ? li + clamp(lns.k) : 0
+    const mainR = phone ? [0, 0, 100, 64] : [100 - s.lnw, 0, s.lnw, 100]
+    const secR = (land) => phone ? (land ? [40, 43, 56, 17.3] : [58, 35, 38, 26.3]) : (land ? [37, 60, 24, 28.4] : [45, 44, 19, 50.7])
+    const moonY = lerp(150, 50, out3(sg(rise1, .1, .65))), moonR = lerp(17, 120, inOut(sg(rise1, .6, 1)))
+    qa('.lm').forEach((m, i) => {
+      setRect(m, mainR); const im = m.querySelector('img'); if (phone) im.style.objectPosition = '50% 30%'
+      if (y < T.ln[0][0]) { show(m, i === 0); m.style.clipPath = `circle(${moonR}% at 50% ${moonY}%)`; im.style.transform = `scale(${lerp(1.3, 1, inOut(rise1))})`; m.style.zIndex = 2; return }
+      const k = i === 0 ? 1 : (li > i ? 1 : li === i ? inOut(clamp(lns.k)) : 0)
+      show(m, i <= li && i >= li - 1); m.style.zIndex = 2 + i
+      m.style.clipPath = i === 0 ? 'none' : `circle(${k * 120}% at 50% 42%)`
+      im.style.transform = `scale(${lerp(1.25, 1, k) * (i < li ? 1.05 : 1)})`
+    })
+    const ring = q('.ring'); show(ring, rise1 > 0 && rise1 < 1)
+    if (rise1 > 0) { const bw = mainR[2] / 100 * W, bh = mainR[3] / 100 * H, cx = mainR[0] / 100 * W + bw / 2, cy = mainR[1] / 100 * H + moonY / 100 * bh, rad = moonR / 100 * Math.hypot(bw, bh) / Math.SQRT2; Object.assign(ring.style, { left: cx - rad - 8 + 'px', top: cy - rad - 8 + 'px', width: 2 * rad + 16 + 'px', height: 2 * rad + 16 + 'px', opacity: 1 - sg(rise1, .55, .8) }) }
+    qa('.ls').forEach((m, i) => {
+      const land = m.dataset.land === '1'; setRect(m, secR(land)); m.style.zIndex = 8 + i
+      const k = li > i ? 1 : li === i ? inOut(clamp(lns.k * 1.2)) : 0, out = 0
+      show(m, y >= T.ln[0][0] && i === li)
+      const drift = clamp(lns.within || 0)
+      m.style.transform = `translateY(${(1 - out3(k)) * 50 + lerp(6, -6, drift)}%)`
+      m.style.clipPath = `inset(0 0 ${(1 - k) * 100}% 0)`
+      m.style.boxShadow = '0 24px 50px rgb(0 0 0 / .45)'
+    })
+    const ltx = q('.ln .txt'); ltx.style.opacity = sg(rise1, .85, 1); rise(ltx.querySelector('.title'), sg(rise1, .8, 1))
+    q('.dsh').setAttribute('cx', 50 - lerp(.1, 1, inOut(inS(y, [T.rise[0], T.ln[4][0]]))) * 100)
+    q('.disc').style.transform = `translateY(${lerp(30, 0, out3(rise1))}%)`
+    qa('.phases span').forEach((sp, i) => { sp.style.color = i === li ? '#E8C4C0' : 'rgb(242 232 218 / .35)' })
+    if (phone) { const pb = q('.phasebar'); pb.style.opacity = sg(rise1, .85, 1); qa('.phasebar span').forEach((sp, i) => { sp.style.color = i === li ? '#E8C4C0' : 'rgb(242 232 218 / .38)'; sp.style.transform = `scale(${i === li ? 1.14 : 1})`; sp.style.opacity = i === li ? 1 : .55 }) }
+    // ---------- FOAM into Drift
+    const fo = inS(y, T.foam), fm = q('.foam'), up = inOut(sg(fo, 0, .5)), off = inOut(sg(fo, .5, 1))
+    show(fm, fo > 0 && fo < 1)
+    fm.style.clipPath = off > 0 ? `ellipse(170% ${lerp(130, 0, off)}% at 50% -30%)` : `ellipse(170% ${up * 130}% at 50% 135%)`
+    fm.querySelector('img').style.transform = `translateY(${lerp(8, -8, fo)}%) scale(1.1)`
+    s.el.style.background = fo > 0 && fo < 1 ? '#21150F' : ''
+    ln.style.transform = fo > 0 ? `scale(${lerp(1, .93, up)})` : ''
+    // ---------- DRIFT
+    const dr = q('.dr'); show(dr, fo > .5 || y > T.foam[1])
+    const din = inS(y, T.dIn), lead = s.items[0]
+    const shrink = inOut(sg(din, .62, 1)), trk = q('.track')
+    if (phone) { trk.style.top = lerp(0, trkTop, shrink) + 'px'; trk.style.height = lerp(H, s.ch, shrink) + 'px' }
+    const lead0 = lerp(W, lead.size, shrink); lead.c.style.width = lead0 + 'px'
+    lead.c.querySelector('img').style.transform = `scale(${lerp(1.16, 1.04, out3(sg(din, 0, .5)))})`
+    const intr = q('.dintro'); show(intr, din < 1); intr.style.opacity = 1 - sg(din, .62, .85)
+    // the script is "written": a soft-edged mask sweeps left to right, the way a pen would cross it
+    const pen = lerp(-14, 114, out3(sg(din, .04, .46))), lg = q('.dlogo-in'), mk = `linear-gradient(104deg, #000 ${pen - 14}%, transparent ${pen}%)`
+    lg.style.webkitMaskImage = lg.style.maskImage = mk
+    lg.style.transform = `translateY(${(1 - out3(sg(din, .04, .5))) * 18}px) scale(${lerp(1.04, 1, out3(sg(din, .04, .6)))})`
+    q('.dtitle .label').style.opacity = sg(din, .36, .5)
+    const x = inS(y, T.strip) * (s.stripLen - W)
+    trk.style.transform = `translateX(${-x}px)`
+    s.vel = lerp(s.vel || 0, dt ? (x - (s.px || 0)) / W : 0, .25); s.px = x
+    const skew = Math.max(-.6, Math.min(.6, s.vel * 6))
+    let best = null, bestD = 1e9
+    s.items.forEach((it, i) => {
+      const size = i === 0 ? lead0 : it.size, start = i === 0 ? 0 : it.start - lead.size + lead0
+      const rel = (start + size / 2 - x - W / 2) / W
+      if (Math.abs(rel) < Math.abs(bestD)) { bestD = rel; best = it }
+      if (Math.abs(rel) > 1.6) return
+      const c = it.c, onScreen = start - x >= -2 && start + size - x <= W + 2
+      if (c.classList.contains('card')) {
+        const im = c.querySelector('img')
+        if (i > 0) im.style.transform = `translateX(${rel * (phone ? -3.5 : -4.5)}%) scale(1.08)`
+        c.style.transform = `skewX(${-skew}deg)`
+        const ov = c.querySelector('.overlay'); if (ov) { const k = clamp((.55 - Math.abs(rel)) / .3); rise(ov, k, .02); const o0 = start + parseFloat(ov.style.left) / 100 * size, o1 = o0 + Math.min(size * .84, W * .42); if (k >= 1 && o0 - x >= 0 && o1 - x <= W) s.leg.add(it.id) }
+      } else {
+        const k = clamp((.6 - Math.abs(rel)) / .3)
+        ;[...c.querySelectorAll('.narr, .lookname, .title')].forEach((el) => rise(el, k, .02))
+        if (k >= 1 && onScreen && it.id) s.leg.add(it.id)
+        const bn = c.querySelector('.bignum'); if (bn) bn.style.transform = `translateX(${rel * 30}%)`
+      }
+    })
+    if (phone) {
+      const key = din < .9 ? null : best.c.dataset.cap
+      if (key !== s.capKey) { s.capKey = key; s.capT = now }
+      const kk = clamp((now - (s.capT || 0)) / .75)
+      qa('.cap').forEach((c) => { const on = c.dataset.k === key; c.style.display = on ? '' : 'none'; if (on) { rise(c, kk, .025); const bn = c.querySelector('.bignum'); if (bn) bn.style.transform = `translateX(${bestD * -100}px)` } })
+      if (key && kk >= 1) s.leg.add(key)
+      const idx = q('.lookidx'), cur = key && /^look\d/.test(key) ? +key.slice(4) : -1, showIdx = din >= .9 && key !== 'sp0'
+      s.idxK = lerp(s.idxK || 0, showIdx ? 1 : 0, .15); idx.style.opacity = s.idxK; idx.style.transform = `translateY(${(1 - s.idxK) * 14}px)`
+      qa('.lt').forEach((t, i) => { const on = i === cur; t.querySelector('img').style.opacity = cur < 0 ? .8 : on ? 1 : .42; t.style.transform = `translateY(${on ? -6 : 0}px)`; t.querySelector('i').style.opacity = on ? 1 : 0; t.querySelector('b').style.opacity = on ? 1 : .55 })
+    }
+    q('.stitch line').style.strokeDashoffset = -x * .6
+    q('.stitch').style.opacity = sg(din, .8, 1)
+    const lookIdx = best && /^look\d/.test(best.id || '') ? +best.id.slice(4) : -1
+    q('.prog').textContent = !phone && din >= 1 && lookIdx >= 0 ? `Look ${pad2(lookIdx + 1)} / 06` : ''
+    // ---------- HEADER: left on the landing; past it, glides to the centre and sews itself into one piece of fabric
+    const dock = inOut(inS(y, [T.open[0] - 100, T.open[0] + 300]))
+    const chap = y < T.open[1] ? 0 : y < T.tear[0] + 200 ? 1 : y < T.rise[0] + 300 ? 2 : y < T.foam[0] + 200 ? 3 : y < T.foot[0] + 200 ? 4 : 5
+    const dark = y < T.tear[0] ? (lum(ground) < .3 ? 1 : 0) : (y > T.rise[0] + 250 && y < T.foam[1]) || y > T.foot[0] + 360 ? 1 : 0
+    LANav.paint(s, { W, phone, dock, dark, chap, y, dt, now, x0: phone ? 8 : W * .045 - 8 })
+    // ---------- FOOTER
+    q('.foot').style.transform = `translateY(${(1 - out3(inS(y, T.foot))) * 104}%)`
+  }
+
+  // ---------- smooth scrolling (Lenis-like): wheel moves a target in px, the page eases towards it
+  const st = [D, P].map((s) => ({ s, target: 0, y: 0 }))
+  st.forEach((o) => o.s.el.addEventListener('wheel', (e) => { e.preventDefault(); const slow = o.y > o.s.T.dIn[0] && o.y < o.s.T.strip[1] ? .65 : 1; o.target = Math.max(0, Math.min(o.s.total, o.target + e.deltaY * slow)); syncSlider(o) }, { passive: false }))
+  const Sl = document.getElementById('S')
+  const syncSlider = (o) => { Sl.value = o.target / o.s.total * 1000; const f = o.target / o.s.total; st.forEach((p) => { if (p !== o) p.target = f * p.s.total }) }
+  Sl.addEventListener('input', () => st.forEach((o) => { o.target = Sl.value / 1000 * o.s.total }))
+  document.querySelectorAll('.hm [data-j]').forEach((b) => b.addEventListener('click', () => st.forEach((o) => { const k = b.dataset.j, v = o.s.T[k]; const yv = Array.isArray(v[0]) ? v[0][0] : v[0]; o.target = o.y = yv + 2; Sl.value = o.target / o.s.total * 1000 })))
+  let playing = null
+  document.getElementById('Play').addEventListener('click', () => { playing = playing ? null : performance.now() })
+  let last = performance.now(), t0 = last, paused = false
+  function tick(t) {
+    const dt = Math.min(.05, (t - last) / 1000); last = t
+    st.forEach((o) => {
+      if (playing) o.target = Math.min(o.s.total, o.target + o.s.total / 75 * dt)
+      const drift = o.y > o.s.T.dIn[0] && o.y < o.s.T.strip[1]
+      o.y = lerp(o.y, o.target, drift ? .07 : .1)
+      if (!paused && o.s.el.offsetParent) paint(o.s, o.y, dt, (t - t0) / 1000)
+    })
+    if (playing) Sl.value = st[0].target / st[0].s.total * 1000
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+
+})()
+</script>
+
+<style>
+  /* ================= COLLECTIONS (v12: one type scale, a 12-column grid) =================
+     scale, perfect fourth from 17 px at 1440: 12 label · 17 body · 23 · 37 page title · 63 row title */
+  .hm .c-layer { position:absolute; inset:0; will-change:transform }
+  .hm .c-head { position:absolute; left:4.5%; right:4.5%; top:15% }
+  .hm .phone .c-head { left:24px; right:24px; top:96px }
+  .hm .c-h1 { margin:.8cqw 0 0; font:400 1.9cqw/1.15 'Gloock',serif; letter-spacing:-.01em }
+  .hm .phone .c-h1 { margin-top:8px; font-size:clamp(22px,4.8cqw,32px); line-height:1.18 }
+  .hm .c-list { position:absolute; left:4.5%; right:4.5%; top:28%; margin:0; padding:0; list-style:none; border-bottom:1px solid rgb(59 36 24 / .16) }
+  .hm .c-row { position:relative; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:1.6cqw; align-items:center; padding:1.25cqw 0; border-top:1px solid rgb(59 36 24 / .16); cursor:pointer }
+  .hm .c-n { grid-column:1; align-self:start; padding-top:.45cqw; font:400 1.2cqw/1 'Gloock',serif; color:var(--muted) }
+  .hm .c-tw { grid-column:2 / span 6 }
+  .hm .c-t { margin:0; font:400 3.2cqw/1 'Gloock',serif; letter-spacing:-.02em; white-space:nowrap; will-change:transform }
+  .hm .c-meta { margin-top:.9cqw; color:var(--muted) }
+  .hm .c-meta .si { font:400 13px 'Noto Serif Sinhala',serif; letter-spacing:0; text-transform:none }
+  .hm .c-lw { grid-column:8 / span 4 }
+  .hm .c-line { margin:0; font-size:clamp(14px,1.18cqw,18px); line-height:1.5; max-width:28ch }
+  .hm .c-cnt { margin-top:.8cqw; color:var(--muted) }
+  .hm .c-go { grid-column:12; justify-self:end; width:3.4cqw; height:3.4cqw; border-radius:50%; border:1px solid rgb(59 36 24 / .35); display:grid; place-items:center; font-size:1.3cqw; will-change:transform }
+  .hm .c-sew { position:absolute; left:0; right:0; bottom:-1px; height:2px; background:repeating-linear-gradient(90deg,#008794 0 9px,transparent 9px 15px); transform:scaleX(0); transform-origin:0 50%; will-change:transform }
+  .hm .c-frame { position:absolute; left:0; top:0; z-index:20; overflow:hidden; pointer-events:none; will-change:transform,clip-path; box-shadow:0 30px 60px rgb(59 36 24 / .28); border-radius:3px }
+  .hm .c-set { position:absolute; inset:0; will-change:transform }
+  .hm .c-set img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; will-change:transform,clip-path }
+  .hm .c-open { position:absolute; left:4.5%; bottom:9%; z-index:21; color:var(--cream); pointer-events:none; text-shadow:0 1px 2px rgb(0 0 0 / .5), 0 4px 14px rgb(0 0 0 / .45), 0 10px 40px rgb(0 0 0 / .35) }
+  .hm .phone .c-open { left:24px; bottom:60px }
+  .hm .c-open .title { font-size:3.6cqw; margin-top:.8cqw }
+  .hm .phone .c-open .title { font-size:34px }
+  /* seasons thread */
+  .hm .c-sea { background:var(--paper) }
+  .hm .c-sea .label.top { position:absolute; left:4.5%; top:15% }
+  .hm .c-sea .title { position:absolute; left:4.5%; top:18.5%; font-size:1.9cqw }
+  .hm .phone .c-sea .label.top { left:24px; top:96px } .hm .phone .c-sea .title { left:24px; top:116px; font-size:24px; max-width:12em }
+  .hm .c-thread { position:absolute; left:0; top:44%; width:100%; height:3px; overflow:visible }
+  .hm .phone .c-thread { top:39% }
+  .hm .c-node { position:absolute; top:44%; transform:translate(-50%,-50%); width:12px; height:12px; border-radius:50%; background:var(--brown); box-shadow:0 0 0 5px var(--paper) }
+  .hm .phone .c-node { top:39% }
+  .hm .c-yr { position:absolute; bottom:calc(56% + 2cqw); transform:translateX(-50%); font:400 1.6cqw/1 'Gloock',serif; overflow:hidden; padding-bottom:.1em }
+  .hm .phone .c-yr { bottom:auto; top:calc(39% - 42px); font-size:clamp(20px,3.6cqw,28px) }
+  .hm .c-yr i { display:inline-block; font-style:normal; will-change:transform }
+  .hm .c-tag { position:absolute; top:44%; width:12.5cqw; transform-origin:50% 0; will-change:transform }
+  .hm .phone .c-tag { top:39%; width:clamp(74px,15cqw,130px) }
+  .hm .c-tag .str { display:block; width:1px; height:3cqw; margin:0 auto; background:var(--brown); opacity:.6 }
+  .hm .phone .c-tag .str { height:22px }
+  .hm .c-tag .pol { background:#fff; padding:6% 6% 0; box-shadow:0 12px 26px rgb(59 36 24 / .2) }
+  .hm .c-tag img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover }
+  .hm .c-tag .label { display:block; padding:.7cqw 0 .8cqw; font-size:10px; text-align:center; white-space:nowrap }
+  .hm .phone .c-tag .label { font-size:8.5px; letter-spacing:.08em; padding:6px 0 }
+  /* phone focus rail */
+  .hm .c-prow { position:absolute; left:24px; right:24px; top:0; will-change:transform; border-top:1px solid rgb(59 36 24 / .16) }
+  .hm .c-pimg { position:absolute; left:0; top:14px; overflow:hidden; will-change:width,height; border-radius:2px }
+  .hm .c-pimg img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; will-change:transform,clip-path }
+  .hm .c-pm { position:absolute; left:72px; top:18px; color:var(--muted); will-change:transform; white-space:nowrap }
+  .hm .c-pt { position:absolute; left:72px; top:38px; margin:0; font:400 22px/1 'Gloock',serif; letter-spacing:-.015em; white-space:nowrap; transform-origin:0 0; will-change:transform }
+  .hm .c-pl { position:absolute; left:0; right:0; margin:0; font-size:16px; line-height:1.5 }
+  .hm .c-pc { position:absolute; left:0; color:var(--muted) }
+  .hm .c-pgo { position:absolute; right:0; font-weight:500; font-size:15px }
+  .hm .c-pgo::after { content:""; display:block; height:2px; margin-top:4px; background:repeating-linear-gradient(90deg,#008794 0 7px,transparent 7px 11px) }
+
+  /* ================= ABOUT (v14: quiet type, facts from her CV, a thread map of her skills) ================= */
+  .hm .a-scroll { position:absolute; left:0; right:0; top:0; will-change:transform }
+  .hm .a-hero { position:relative; overflow:hidden; background:var(--cream) }
+  .hm .a-d { position:absolute; will-change:transform }
+  .hm .a-hero .txt2 { position:absolute; left:4.5%; top:33%; width:34%; z-index:5 }
+  .hm .phone .a-hero .txt2 { left:24px; right:24px; top:92px; width:auto }
+  .hm .a-name { margin:.9cqw 0 0; font:400 3.6cqw/1 'Gloock',serif; letter-spacing:-.015em }
+  .hm .phone .a-name { margin-top:8px; font-size:clamp(36px,8.6cqw,58px) }
+  .hm .a-role { margin-top:1cqw; color:var(--muted) }
+  .hm .phone .a-role { margin-top:10px }
+  .hm .a-quote { margin:1.8cqw 0 0; font-size:clamp(15px,1.15cqw,18px); line-height:1.6; max-width:32ch }
+  .hm .phone .a-quote { margin-top:14px; font-size:15px; max-width:26ch }
+  .hm .a-go { display:inline-block; margin-top:1.8cqw; font-weight:500; font-size:15px }
+  .hm .a-go::after { content:""; display:block; height:2px; margin-top:5px; background:repeating-linear-gradient(90deg,#008794 0 7px,transparent 7px 11px) }
+  .hm .phone .a-go { display:none }
+  .hm .a-fig { bottom:-9%; left:50%; height:106%; z-index:4; filter:drop-shadow(0 16px 30px rgb(59 36 24 / .22)); transform-origin:50% 100% }
+  .hm .phone .a-fig { left:auto; right:-6%; height:62%; bottom:-7% }
+  .hm .pola { background:#fff; padding:.55cqw .55cqw 2.4cqw; box-shadow:0 18px 36px rgb(59 36 24 / .22); box-sizing:border-box }
+  .hm .phone .pola { padding:6px 6px 26px }
+  .hm .pola img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover }
+  .hm .pola .tape { position:absolute; left:32%; top:-5%; width:36%; height:9%; background:rgb(233 220 196 / .82); box-shadow:0 1px 2px rgb(0 0 0 / .08) }
+  .hm .a-insp { box-shadow:0 10px 24px rgb(59 36 24 / .14) }
+  .hm .a-insp img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover }
+  /* about her: text stays still; the photographs around it move */
+  .hm .a-about { background:var(--paper); padding:8% 0 6% }
+  .hm .phone .a-about { padding:76px 0 56px }
+  .hm .a-grid { padding:0 4.5%; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:1.6cqw }
+  .hm .phone .a-grid { padding:0 24px; display:block }
+  .hm .a-c1 { grid-column:1 / span 3 } .hm .a-c2 { grid-column:4 / span 5 } .hm .a-c3 { grid-column:9 / span 4; margin:0 }
+  .hm .a-chip { display:inline-block; margin-top:12px; font:500 10px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; padding:6px 10px; border:1.5px dashed #008794; border-radius:999px }
+  .hm .a-c2 p { margin:0 0 1.1em; font-size:clamp(15px,1.15cqw,17px); line-height:1.75; max-width:58ch }
+  .hm .a-c2 p:first-child { font-size:clamp(17px,1.35cqw,20px); line-height:1.6 }
+  .hm .phone .a-c2 { margin-top:22px } .hm .phone .a-c2 p { font-size:clamp(15px,2.4cqw,18px) } .hm .phone .a-c2 p:first-child { font-size:clamp(17px,2.8cqw,21px) }
+  .hm .a-c3 > div { padding:1.1cqw 0; border-top:1px solid rgb(59 36 24 / .16) }
+  .hm .phone .a-c3 { margin-top:26px } .hm .phone .a-c3 > div { padding:14px 0 }
+  .hm .a-c3 dt { color:var(--muted) }
+  .hm .a-c3 dd { margin:0 }
+  .hm .a-c3 b { display:block; margin-top:6px; font-weight:500; font-size:15px; line-height:1.35 }
+  .hm .a-c3 span { display:block; margin-top:3px; font-size:13px; line-height:1.5; color:var(--muted) }
+  .hm .a-link { display:inline-block; margin-top:4px; font-weight:500; font-size:15px }
+  .hm .a-link::after { content:""; display:block; height:2px; margin-top:4px; background:repeating-linear-gradient(90deg,#008794 0 7px,transparent 7px 11px) }
+  /* her moodboard: fixed frames that change photograph in turn (nothing to measure, nothing to drift off screen) */
+  .hm .a-mood { padding:0 4.5%; margin-top:6% }
+  .hm .phone .a-mood { padding:0 24px; margin-top:44px }
+  .hm .a-mf { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:1.2cqw; margin-top:1cqw }
+  .hm .phone .a-mf { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px }
+  .hm .a-fr { position:relative; aspect-ratio:3/4; overflow:hidden; background:#E7DCCB }
+  .hm .a-fr img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; will-change:transform,clip-path }
+  /* skills: her skills as sewing-pattern pieces laid on a cutting mat. Text is still; pieces settle, seams sew in */
+  .hm .a-skills { background:var(--cream); padding:8% 0 7% }
+  .hm .phone .a-skills { padding:76px 0 56px }
+  .hm .a-sg { padding:0 4.5%; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:1.6cqw; align-items:start }
+  .hm .phone .a-sg { padding:0 24px; display:block }
+  .hm .a-s1 { grid-column:1 / span 3 }
+  .hm .a-s1 h2 { margin:.8cqw 0 0; font:400 1.9cqw/1.15 'Gloock',serif; letter-spacing:-.01em }
+  .hm .phone .a-s1 h2 { margin-top:8px; font-size:clamp(24px,5.4cqw,34px) }
+  .hm .a-hint { margin:.8cqw 0 0; font-size:14px; line-height:1.55; color:var(--muted); max-width:24ch }
+  .hm .phone .a-hint { margin-top:8px; max-width:none }
+  .hm .a-mat { grid-column:4 / span 9; position:relative; display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:26px 22px; align-items:start; padding:44px 26px 84px; border-radius:6px; background-color:#E6DBC9; background-image:linear-gradient(rgb(59 36 24 / .1) 1px, transparent 1px), linear-gradient(90deg, rgb(59 36 24 / .1) 1px, transparent 1px), linear-gradient(rgb(59 36 24 / .05) 1px, transparent 1px), linear-gradient(90deg, rgb(59 36 24 / .05) 1px, transparent 1px); background-size:10cqw 10cqw, 10cqw 10cqw, 2cqw 2cqw, 2cqw 2cqw; box-shadow:inset 0 0 0 1px rgb(59 36 24 / .12) }
+  .hm .phone .a-mat { margin:24px -8px 0; padding:30px 14px 26px; gap:16px; background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px }
+  .hm .a-mrul { position:absolute; left:0; right:0; top:0; height:1.1cqw; background:repeating-linear-gradient(90deg, rgb(59 36 24 / .35) 0 1px, transparent 1px 2cqw) left bottom / 100% 60% no-repeat, repeating-linear-gradient(90deg, rgb(59 36 24 / .5) 0 1px, transparent 1px 10cqw) left bottom / 100% 100% no-repeat }
+  .hm .phone .a-mrul { height:10px; background-size:100% 60%, 100% 100% }
+  .hm .pc { position:relative; margin:0; height:var(--ph); will-change:transform; filter:drop-shadow(0 10px 16px rgb(59 36 24 / .16)); transition:filter .35s }
+  .hm .phone .pc { width:min(100%, 470px) }
+  .hm .phone .pc:nth-of-type(even) { justify-self:end }
+  .hm .pc svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+  .hm .pc .f { fill:#FBF8F3; stroke:rgb(59 36 24 / .55); stroke-width:1; vector-effect:non-scaling-stroke }
+  .hm .pc .sa { fill:none; stroke:#008794; stroke-width:1; stroke-dasharray:5 4; vector-effect:non-scaling-stroke; opacity:.8 }
+  .hm .pc .fold { fill:none; stroke:rgb(59 36 24 / .45); stroke-width:1; stroke-dasharray:2 3; vector-effect:non-scaling-stroke }
+  .hm .pc figcaption { position:absolute; display:flex; align-items:center; gap:8px; white-space:nowrap; color:var(--brown) }
+  .hm .pc figcaption .g { display:inline-block; width:3.2cqw; min-width:34px; height:1px; background:var(--brown); position:relative }
+  .hm .pc figcaption .g::before, .hm .pc figcaption .g::after { content:""; position:absolute; top:-3px; border:3.5px solid transparent }
+  .hm .pc figcaption .g::before { left:-3px; border-right:5px solid var(--brown); border-left:0 } .hm .pc figcaption .g::after { right:-3px; border-left:5px solid var(--brown); border-right:0 }
+  .hm .pc h3 { position:absolute; margin:0; font:400 20px/1 'Gloock',serif }
+  /* everything on a piece sits on its centre line */
+  .hm .pc figcaption { justify-content:center }
+  .hm .pc h3 { text-align:center }
+  .hm .pc .cut { text-align:center }
+  .hm .pc ul { text-align:center }
+  .hm .pc ul { position:absolute; margin:0; padding:0; list-style:none; font-size:15px; line-height:1.45 }
+  .hm .pc li { padding:1px 0 }
+  .hm .pc .cut { position:absolute; color:var(--muted); font-size:10px }
+  .hm .a-tape { position:absolute; right:26px; bottom:14px; width:190px; height:66px; overflow:visible; pointer-events:none }
+  .hm .phone .a-tape { position:relative; right:auto; bottom:auto; display:block; width:70%; height:70px; margin:4px 0 0 auto; justify-self:end }
+</style>
+
+<!-- ================= COLLECTIONS PAGE ================= -->
+<div class="hm pg" id="pg-col" style="display:none">
+<h2>Collections, v3</h2>
+<p class="subtitle">Desktop: move the mouse over the list, then click a row. Wheel over either screen, or drag the slider.</p>
+<div class="ctl"><button type="button" class="replay">↺ replay the entrance</button></div>
+<div class="row">
+  <div style="flex:1 1 560px"><p class="lbl">Desktop</p><div class="stage desk"></div></div>
+  <div><p class="lbl">Phone (390 × 844)</p><div class="stage phone"></div></div>
+</div>
+<div class="ctl"><input type="range" min="0" max="1000" value="0" class="sl"></div>
+<p class="note"><b>What changed, and why.</b> The old version had three big sizes fighting: the page title (56 px), the row titles (48 px) and the outlined titles, and a tiny line of text floating far to the right. Now there is one type scale (12 · 17 · 23 · 37 · 63 px at 1440 wide): the page title steps down to a quiet 37 px heading, so the four collection names are clearly the largest thing on the page. Each row sits on a 12-column grid: number, name with its season and theme directly under it (and the Sinhala name for Mano Padana), then her line with what's inside ("17 photographs · 8 spreads"), and an arrow button that fills on hover. Hovered rows no longer turn into thin outlines (hard to read); the others simply fade. The phone uses the same scale: 30 px heading, 26 px names opening to 34 px.</p>
+</div>
+
+<!-- ================= ABOUT PAGE ================= -->
+<div class="hm pg" id="pg-about" style="display:none">
+<h2>About, v5</h2>
+<p class="subtitle">Wheel over either screen, or drag the slider. On desktop, point at a skill.</p>
+<div class="ctl"><button type="button" class="replay">↺ replay the entrance</button></div>
+<div class="row">
+  <div style="flex:1 1 560px"><p class="lbl">Desktop</p><div class="stage desk"></div></div>
+  <div><p class="lbl">Phone (390 × 844)</p><div class="stage phone"></div></div>
+</div>
+<div class="ctl"><input type="range" min="0" max="1000" value="0" class="sl"></div>
+<p class="note"><b>About her</b> is now one short paragraph and three facts (studying, experience, recognition), plus a LinkedIn link. Her title is "Fashion designer". <b>Her moodboard</b> sits in fixed frames that change photograph in turn, so nothing has to slide in from off-screen on a phone. <b>Skills</b> are sewing-pattern pieces on her cutting mat: Craft on a bodice front (cut 1 on fold), Design on a skirt panel, Tools on a sleeve, People on a patch pocket. Each has a grain-line arrow and a seam allowance that sews itself in once the pieces have settled; a tape measure lies across the corner. The pieces drop onto the mat one after another and lift when you point at them; the text itself never moves. On the phone they lie one under another down the mat. <b>The contact card</b> now follows the end of the page like the next block, so it can no longer slide over the last section.</p>
+</div>
+
+<script>
+(() => {
+  const F = '/files/'
+  const clamp = (v) => Math.min(1, Math.max(0, v)), sg = (v, a, b) => clamp((v - a) / (b - a)), inS = (v, [a, b]) => clamp((v - a) / (b - a))
+  const out3 = (t) => 1 - Math.pow(1 - t, 3), out4 = (t) => 1 - Math.pow(1 - t, 4), inOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  const back = (t) => { const c = 1.5; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2) }
+  const spring = (t) => t <= 0 ? 0 : 1 - Math.exp(-5.5 * t) * Math.cos(9 * t)
+  const lerp = (a, b, t) => a + (b - a) * t, mix = (a, b, t) => a.map((v, i) => Math.round(lerp(v, b[i], t)))
+  const words = (s) => s.split(' ').map((w) => `<span class="w"><i>${w}</i></span>`).join(' ')
+  const wsCache = new WeakMap(), rise = (c, k, st = .03) => { if (!c) return; let ws = wsCache.get(c); if (!ws) { ws = [...c.querySelectorAll('.w > i')]; wsCache.set(c, ws) } ws.forEach((w, j) => { const v = out4(clamp(k * (1 + ws.length * st) - j * st)); w.style.transform = `translateY(${(1 - v) * 110}%)` }) }
+  const pad2 = (n) => String(n).padStart(2, '0')
+  const foot = `<div class="foot"><h4>Let’s make something together.</h4><div class="fields label"><span>Name</span><span>Email</span><span style="grid-column:1/-1">Message</span></div><div class="send">Send message</div></div>`
+
+  // one smooth-scroll loop per page: the wheel moves a target, the page eases towards it (Lenis-like, lerp .1)
+  function engine(pg, stages) {
+    const st = stages.map((s) => ({ s, target: 0, y: 0 })), Sl = pg.querySelector('.sl')
+    st.forEach((o) => o.s.el.addEventListener('wheel', (e) => { e.preventDefault(); o.target = Math.max(0, Math.min(o.s.total, o.target + e.deltaY)); const f = o.target / o.s.total; Sl.value = f * 1000; st.forEach((p) => { if (p !== o) p.target = f * p.s.total }) }, { passive: false }))
+    Sl.addEventListener('input', () => st.forEach((o) => { o.target = Sl.value / 1000 * o.s.total }))
+    let last = performance.now(), t0 = last
+    const restart = () => { t0 = performance.now(); st.forEach((o) => { o.s.layout(); o.target = o.y = 0 }); Sl.value = 0 }
+    pg.addEventListener('show', restart); pg.querySelector('.replay').addEventListener('click', restart)
+    document.fonts.ready.then(() => st.forEach((o) => o.s.layout()))
+    function tick(t) {
+      const dt = Math.min(.05, (t - last) / 1000); last = t
+      if (pg.offsetParent) st.forEach((o) => { o.y = lerp(o.y, o.target, .1); o.s.paint(o.s, o.y, dt, (t - t0) / 1000) })
+      requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
+  const mouse = (s) => {
+    s.mx = s.el.clientWidth * .7; s.my = s.el.clientHeight * .5; s.mIn = false
+    s.el.addEventListener('mousemove', (e) => { const r = s.el.getBoundingClientRect(); s.mx = e.clientX - r.left; s.my = e.clientY - r.top; s.mIn = true })
+    s.el.addEventListener('mouseleave', () => { s.mIn = false })
+  }
+
+  // ======================= COLLECTIONS =======================
+  const COLS = [
+    { slug: 'mano-padana', n: '01', title: 'Mano Padana', sinh: 'මනෝ පාදන', season: 'SS25', theme: 'Mind', line: 'A mental healing journey through cultural aspects.', cnt: '6 photographs · 10 pages', imgs: ['mpE-01', 'mpE-03', 'mpE-04'], tint: [233, 226, 216] },
+    { slug: 'revive', n: '02', title: 'Revive', season: 'SS27', theme: 'Renewal', line: 'Discarded denim jeans have more life left in them.', cnt: 'Portfolio · 4 spreads', imgs: ['rev-34s', 'cr-denim', 'rev-30'], tint: [226, 230, 233] },
+    { slug: 'lunelle', n: '03', title: 'Lunelle', season: 'AW26', theme: 'Body', line: 'A tribute to all the unstoppable mothers.', cnt: '10 photographs · 22 pages', imgs: ['l01', 'l05', 'l10'], tint: [241, 225, 220] },
+    { slug: 'drift', n: '04', title: 'Drift', season: 'SS27', theme: 'Nature', line: 'A calming breath taken to escape the fast paced world.', cnt: '17 photographs · 8 spreads', imgs: ['d07', 'd03', 'd06'], tint: [223, 233, 235] },
+  ]
+  const SEAS = [['SS25', .16, [0]], ['AW26', .44, [2]], ['SS27', .77, [1, 3]]]
+  const imgSet = (c) => c.imgs.map((m) => `<img src="${F}${m}.jpg" alt="">`).join('')
+
+  function colBuild(el, phone) {
+    const s = { el, phone, ra: [0, 0, 0, 0], rd: [0, 0, 0, 0], tint: [242, 232, 218], fv: 0, fpos: 0, cur: 0, act: -1, fx: 0, fy: 0, op: null, swing: {} }
+    const head = `<div class="c-head"><div class="label">Collections · 04</div><h1 class="c-h1">${words('Four collections, in the order of my journey.')}</h1></div>`
+    const meta = (c) => `${c.season} · ${c.theme}${c.sinh ? ` · <span class="si">${c.sinh}</span>` : ''}`
+    const seasons = `<div class="c-layer c-sea"><div class="label top">Seasons</div><h2 class="title">${words('Three seasons, four collections.')}</h2>
+      <svg class="c-thread" preserveAspectRatio="none"><line x1="0" y1="1.5" x2="100%" y2="1.5" stroke="#008794" stroke-width="2.5" stroke-dasharray="14 10"/></svg>
+      ${SEAS.map(([yr, x, cs]) => `<div class="c-yr" style="left:${x * 100}%"><i>${yr}</i></div><div class="c-node" style="left:${x * 100}%"></div>` + cs.map((ci, j) => `<div class="c-tag" data-c="${ci}" data-x="${x}" data-o="${cs.length > 1 ? (j ? 1 : -1) : 0}"><span class="str"></span><div class="pol"><img src="${F}${COLS[ci].imgs[0]}.jpg" alt=""><span class="label">${COLS[ci].title}</span></div></div>`).join('')).join('')}</div>`
+    const nav = LANav.html(phone, [['', 'Collections'], ['', 'Seasons'], ['—', 'Get in touch']], 'Collections')
+    if (!phone) {
+      el.innerHTML = `<div class="c-layer c-main">${head}<ol class="c-list">${COLS.map((c, i) => `<li class="c-row" data-i="${i}"><span class="c-sew"></span><span class="c-n">${c.n}</span><div class="c-tw"><h2 class="c-t">${words(c.title)}</h2><div class="label c-meta">${meta(c)}</div></div><div class="c-lw"><p class="c-line">${c.line}</p><div class="label c-cnt">${c.cnt}</div></div><span class="c-go">→</span></li>`).join('')}</ol></div>
+        ${seasons}
+        <div class="c-frame">${COLS.map((c) => `<div class="c-set">${imgSet(c)}</div>`).join('')}</div>
+        <div class="c-open"><div class="label">Opening the collection</div><h2 class="title"></h2></div>
+        ${foot}${nav}`
+      mouse(s)
+      el.addEventListener('click', () => { if (s.act >= 0 && !s.op) { s.op = { i: s.act, t: s.now, r: s.fr }; el.querySelector('.c-open .title').innerHTML = words(COLS[s.act].title) } })
+    } else {
+      el.innerHTML = `<div class="c-layer c-main">${head}${COLS.map((c, i) => `<div class="c-prow" data-i="${i}"><div class="c-pimg">${imgSet(c)}</div><div class="label c-pm">${c.n} · ${meta(c)}</div><h2 class="c-pt">${c.title}</h2><p class="c-pl">${c.line}</p><span class="label c-pc">${c.cnt}</span><span class="c-pgo">Open →</span></div>`).join('')}</div>
+        ${seasons}<div class="c-open"><div class="label">Opening the collection</div><h2 class="title"></h2></div>
+        ${foot}${nav}`
+      el.addEventListener('click', () => { const i = Math.round(s.u || 0); if (!s.op) { s.op = { i, t: s.now }; el.querySelector('.c-open .title').innerHTML = words(COLS[i].title) } })
+    }
+    const q = (c) => el.querySelector(c), qa = (c) => [...el.querySelectorAll(c)]
+    Object.assign(s, { q, qa })
+    s.layout = () => {
+      s.W = el.clientWidth; s.H = el.clientHeight
+      if (phone) { s.yR = 120 + 3 * 470; s.total = s.yR + s.H * 1.6 + 600 } else s.total = s.H * 1.6 + 600
+    }
+    s.layout()
+    return s
+  }
+
+  function colPaint(s, y, dt, now) {
+    const { q, qa, phone, W, H } = s; s.now = now
+    let off, sec
+    if (!phone) { off = Math.min(y, H); sec = off; q('.c-main').style.transform = `translateY(${-off}px)` }
+    else { sec = Math.min(H, Math.max(0, y - s.yR)); q('.c-main').style.transform = `translateY(${-sec}px)` }
+    q('.c-sea').style.transform = `translateY(${H - sec}px)`
+    rise(q('.c-h1'), clamp((now - .15) / .9), .04)
+    // ---- the page transition (click): the photo opens to fill the screen, then the mock opens that collection
+    let opE = 0
+    if (s.op) {
+      const t = now - s.op.t; opE = t < .9 ? inOut(t / .9) : 1
+      if (t > 1.9 && !s.op.done) { s.op.done = true; window.openCollection && window.openCollection(COLS[s.op.i].slug) }
+      if (t > 2.6) s.op = null
+    }
+    const ov = q('.c-open'); ov.style.display = opE > .5 ? '' : 'none'; rise(ov.querySelector('.title'), sg(opE, .6, 1), .05); ov.querySelector('.label').style.opacity = sg(opE, .7, 1)
+    if (!phone) {
+      if (!s.op) {
+        s.act = -1
+        if (s.mIn && off < H * .3) { const sr = s.el.getBoundingClientRect(); qa('.c-row').forEach((r, i) => { const b = r.getBoundingClientRect(); if (s.my >= b.top - sr.top && s.my < b.bottom - sr.top) s.act = i }) }
+      }
+      const act = s.op ? s.op.i : s.act
+      qa('.c-row').forEach((r, i) => {
+        const k0 = clamp((now - .35 - i * .12) / .9)
+        rise(r.querySelector('.c-t'), k0, .04)
+        s.ra[i] = lerp(s.ra[i], act === i ? 1 : 0, .14); s.rd[i] = lerp(s.rd[i], act >= 0 && act !== i ? 1 : 0, .14)
+        r.style.opacity = sg(k0, 0, .5) * (1 - .66 * s.rd[i])
+        r.querySelector('.c-t').style.transform = `translateX(${s.ra[i] * W * .01}px)`
+        const go = r.querySelector('.c-go'); go.style.background = `rgb(59 36 24 / ${s.ra[i]})`; go.style.color = s.ra[i] > .5 ? '#F2E8DA' : ''; go.style.transform = `translateX(${s.ra[i] * W * .006}px)`
+        r.querySelector('.c-sew').style.transform = `scaleX(${out3(s.ra[i])})`
+      })
+      s.tint = s.tint.map((v, j) => lerp(v, act >= 0 ? COLS[act].tint[j] : [242, 232, 218][j], .06)); s.el.style.background = `rgb(${s.tint.map(Math.round)})`
+      // ---- the cursor frame: follows with weight, tilts with speed, rolls between collections like film
+      const fw = W * .17, fh = fw * 1.25, pfx = s.fx
+      s.fx = lerp(s.fx || s.mx, s.mx, .12); s.fy = lerp(s.fy || s.my, s.my, .12)
+      const vx = s.fx - pfx
+      s.fv = lerp(s.fv, act >= 0 ? 1 : 0, act >= 0 ? .12 : .18)
+      if (act >= 0) s.cur = act
+      s.fpos = lerp(s.fpos, s.cur, .11)
+      const fr = s.fr = [s.fx + fw * .25, s.fy - fh / 2, fw, fh], r0 = s.op ? s.op.r : fr
+      const R = opE > 0 ? [lerp(r0[0], 0, opE), lerp(r0[1], 0, opE), lerp(r0[2], W, opE), lerp(r0[3], H, opE)] : fr
+      const fm = q('.c-frame'), e = out3(s.fv), rot = Math.max(-7, Math.min(7, vx * .35)) * (1 - opE)
+      Object.assign(fm.style, { width: R[2] + 'px', height: R[3] + 'px', transform: `translate(${R[0]}px, ${R[1]}px) rotate(${rot}deg) skewX(${Math.max(-5, Math.min(5, -vx * .18)) * (1 - opE)}deg) scale(${opE ? 1 : lerp(.7, 1, e)})`, clipPath: opE ? 'none' : `inset(${(1 - e) * 50}% ${(1 - e) * 50}% round 3px)`, borderRadius: lerp(3, 0, opE) + 'px', display: e < .01 && !opE ? 'none' : '' })
+      const cyc = Math.floor(now / 1.15), kk = out3(clamp((now % 1.15) / .6))
+      qa('.c-set').forEach((set, j) => {
+        set.style.transform = `translateY(${(j - s.fpos) * 100}%)`
+        ;[...set.children].forEach((im, m) => {
+          const c = cyc % 3, prev = (c + 2) % 3, par = `translateX(${-vx * .4}px) scale(${lerp(1.12, 1.02, opE)})`
+          if (s.op || j !== s.cur) { im.style.display = m === 0 ? '' : 'none'; im.style.clipPath = 'none'; im.style.transform = par; return }
+          im.style.display = m === c || m === prev ? '' : 'none'; im.style.zIndex = m === c ? 2 : 1
+          im.style.clipPath = m === c ? `inset(0 0 0 ${(1 - kk) * 100}%)` : 'none'
+          im.style.transform = m === c ? `translateX(${-vx * .4}px) scale(${lerp(1.2, 1.12, kk)})` : par
+        })
+      })
+    } else {
+      // ---- phone focus rail: the row in focus grows its thumbnail into the full photograph
+      s.el.style.background = ''
+      const u = s.u = 3 * inOut(clamp((y - 120) / (3 * 470))), head = q('.c-head')
+      head.style.transform = `translateY(${-Math.min(y, 120) * 1.1}px)`; head.style.opacity = 1 - sg(y, 40, 140)
+      const side = W > 600, railTop = (head.offsetTop + head.offsetHeight + 22) - Math.min(y, 120) * 1.05, CH = 92, iw = side ? Math.round((W - 48) * .46) : W - 48, ih = side ? Math.round(Math.min(iw * 1.3, H * .56)) : Math.round(Math.min(iw * 1.12, H * .52)), EX = (side ? ih + 40 : ih + 166) - CH, tx = side ? iw + 28 : 0
+      let acc = railTop - CH * u
+      qa('.c-prow').forEach((r, i) => {
+        const f = inOut(clamp(1 - Math.abs(u - i))), h = CH + EX * f
+        r.style.transform = `translateY(${acc}px)`; r.style.height = h + 'px'; acc += h
+        const im = r.querySelector('.c-pimg'); im.style.width = lerp(56, iw, f) + 'px'; im.style.height = lerp(68, ih, f) + 'px'
+        const by = side ? ih - 210 : ih
+        r.querySelector('.c-pm').style.transform = `translate(${lerp(0, tx - 72, f)}px, ${lerp(0, by + 6, f)}px)`
+        r.querySelector('.c-pt').style.transform = `translate(${lerp(0, tx - 72, f)}px, ${lerp(0, by + 10, f)}px) scale(${lerp(1, side ? 1.6 : 1.27, f)})`
+        const pl = r.querySelector('.c-pl'), pc = r.querySelector('.c-pc'), go = r.querySelector('.c-pgo')
+        pl.style.top = (side ? ih - 110 : ih + 96) + 'px'; pc.style.top = go.style.top = (side ? ih - 30 : ih + 146) + 'px'; pl.style.left = pc.style.left = tx + 'px'
+        ;[pl, pc, go].forEach((n) => { n.style.opacity = sg(f, .6, 1); n.style.transform = `translateY(${(1 - sg(f, .5, 1)) * 14}px)` })
+        const k0 = clamp((now - .3 - i * .1) / .8); r.style.opacity = sg(k0, 0, .6); if (k0 < 1) r.style.transform += ` translateY(${(1 - out3(k0)) * 30}px)`
+        const cyc = Math.floor(now / 1.6), kk = out3(clamp((now % 1.6) / .7)), c = cyc % 3, prev = (c + 2) % 3
+        ;[...im.children].forEach((g, m) => {
+          if (f < .5) { g.style.display = m === 0 ? '' : 'none'; g.style.clipPath = 'none'; g.style.transform = 'scale(1.06)'; return }
+          g.style.display = m === c || m === prev ? '' : 'none'; g.style.zIndex = m === c ? 2 : 1
+          g.style.clipPath = m === c ? `inset(${(1 - kk) * 100}% 0 0 0)` : 'none'; g.style.transform = `translateY(${(u - i) * -6}%) scale(${m === c ? lerp(1.18, 1.1, kk) : 1.1})`
+        })
+      })
+      if (s.op) {
+        const r = qa('.c-prow')[s.op.i], im = r.querySelector('.c-pimg'), b = im.getBoundingClientRect(), sr = s.el.getBoundingClientRect()
+        if (!s.op.r) s.op.r = [b.left - sr.left, b.top - sr.top, b.width, b.height]
+        const r0 = s.op.r, fm = s.fm || (s.fm = Object.assign(document.createElement('div'), { className: 'c-frame' }))
+        if (!fm.parentNode) { s.el.appendChild(fm); fm.innerHTML = `<div class="c-set"><img src="${F}${COLS[s.op.i].imgs[0]}.jpg" alt=""></div>` }
+        Object.assign(fm.style, { width: lerp(r0[2], W, opE) + 'px', height: lerp(r0[3], H, opE) + 'px', transform: `translate(${lerp(r0[0], 0, opE)}px, ${lerp(r0[1], 0, opE)}px)`, display: opE > 0 ? '' : 'none' })
+      } else if (s.fm && s.fm.parentNode) s.fm.remove()
+    }
+    // ---- seasons: the thread sews across; each collection swings on it as the needle passes
+    const p0 = phone ? s.yR + H * .55 : H * .55, sp = clamp((y - p0) / (H * .85))
+    rise(q('.c-sea .title'), sg(sec, H * .5, H * .95), .05)
+    q('.c-thread').style.clipPath = `inset(-20px ${(1 - sp) * 100}% -20px 0)`
+    qa('.c-yr i').forEach((yr, i) => { const k = sg(sp, SEAS[i][1] - .04, SEAS[i][1] + .06); yr.style.transform = `translateY(${(1 - out3(k)) * 110}%)` })
+    qa('.c-tag').forEach((t, i) => {
+      const x = +t.dataset.x, o = +t.dataset.o, reached = sp > x
+      if (reached && s.swing[i] == null) s.swing[i] = now
+      if (!reached) s.swing[i] = null
+      const tt = s.swing[i] == null ? -1 : now - s.swing[i], ang = tt < 0 ? 0 : 16 * Math.exp(-2.6 * tt) * Math.cos(7 * tt)
+      const tw = t.offsetWidth, cx = x * W + o * tw * .56
+      t.style.transform = `translate(${cx - tw / 2}px, ${tt < 0 ? -12 : 0}px) rotate(${ang}deg)`
+      t.style.opacity = tt < 0 ? 0 : clamp(tt * 4)
+      t.style.left = '0px'
+    })
+    const fo = phone ? clamp((y - s.yR - H * 1.6) / 600) : clamp((y - H * 1.6) / 600)
+    q('.foot').style.transform = `translateY(${(1 - out3(fo)) * 104}%)`
+    LANav.paint(s, { W, phone, dock: out3(clamp((now - .1) / 1)), dark: fo > .55 ? 1 : 0, chap: fo > .5 ? 2 : sec > H * .5 ? 1 : 0, y, dt, now, x0: null })
+  }
+  const pc = document.getElementById('pg-col'), [cd, cp] = pc.querySelectorAll('.stage')
+  const CS = [colBuild(cd, false), colBuild(cp, true)]; CS.forEach((s) => { s.paint = colPaint })
+  engine(pc, CS)
+
+  // ======================= ABOUT =======================
+  // From her CV (Nov 2026), in her own voice: she speaks on the site.
+  const ABOUT = 'I’m a fashion designer from Panadura, Sri Lanka, studying Fashion and Textile Design with Northumbria University. I work by hand, in Dumbara weaving, crochet, macramé, embroidery and reconstructed denim, and I give every collection an emotional subject: healing, motherhood, slowing down, renewal.'
+  const FACTS = [['Studying', 'BA (Hons) Fashion and Textile Design', 'Northumbria University · 2024–2027'], ['Experience', 'Design Intern, MAS India', '2025'], ['Recognition', 'Represented Sri Lanka at four World Chess Championships', '2015–2021']]
+  const SKILLS = [['Craft', ['Dumbara weaving', 'Crochet & macramé', 'Hand embroidery', 'Denim reconstruction']], ['Design', ['Fashion design', 'Draping', 'Garment construction', 'Sustainable design']], ['Tools', ['Adobe Photoshop', 'Adobe Illustrator', 'Technical drawing', 'Fashion illustration']], ['People', ['Leadership', 'Team building', 'Public speaking', 'Time management']]]
+  // her skills as pattern pieces: bodice front (cut on fold), skirt panel, sleeve, patch pocket
+  const PIECES = [
+    { d: 'M3 17 Q15 19 21 3 L58 9 Q60 30 79 35 L86 98 L3 98 Z', fold: 'M6 22 L6 95', at: [2, 6, 32, 56], ph: 290, cap: [12, 26], txt: [20, 0, 20], cut: 'Cut 1 on fold', cutAt: 'left:12%;bottom:6%' },
+    { d: 'M27 2 Q50 7 73 2 L98 95 Q50 100 2 95 Z', at: [36, 4, 30, 60], ph: 300, cap: [28, 13], txt: [26, 0, 22], cut: 'Cut 2', cutAt: 'left:44%;bottom:6%' },
+    { d: 'M2 45 Q18 41 28 19 Q50 1 72 19 Q82 41 98 45 L86 98 L14 98 Z', at: [69, 8, 29, 50], ph: 270, cap: [30, 24], txt: [22, 0, 16], cut: 'Cut 2 · mirror', cutAt: 'left:36%;bottom:4%' },
+    { d: 'M4 4 L96 4 L96 72 Q96 96 72 96 L28 96 Q4 96 4 72 Z', fold: 'M4 20 L96 20', at: [16, 61, 37, 36], ph: 230, cap: [10, 24], txt: [11, 0, 9], cut: 'Cut 1 · fold at top', cutAt: 'right:8%;top:8%' },
+  ]
+  // depth layers in the hero: [img, desktop rect (left%, top%, width%), phone rect, rotation, depth]
+  const POLA = [['pE-mirror', [83, 9, 12.5], [62, 30, 31], 5, 1], ['pE-chair', [84, 50, 13], [6, 33, 30], -4, .75], ['pE-beach', [35, 56, 13.5], [7, 57, 36], -6, .9]]
+  const INSP = [['inspE-2', [36, 16, 9], .35], ['inspE-7', [94, 76, 9], .3]]
+  const MOOD = ['inspE-1', 'inspE-3', 'inspE-4', 'inspE-5', 'inspE-6', 'inspE-7', 'inspE-2']
+
+  function aboutBuild(el, phone) {
+    const s = { el, phone, mxS: 0, myS: 0 }, nf = phone ? 2 : 5
+    el.innerHTML = `<div class="a-scroll">
+      <section class="a-hero">
+        ${phone ? '' : INSP.map(([m, r, z]) => `<div class="a-d a-insp" data-z="${z}" style="left:${r[0]}%;top:${r[1]}%;width:${r[2]}%"><img src="${F}${m}.jpg" alt=""></div>`).join('')}
+        <div class="txt2"><div class="label">About</div><h1 class="a-name">Linali Andrea</h1><div class="label a-role">Fashion designer · Panadura, Sri Lanka</div><p class="a-quote">“I strongly believe that fashion is the best form of self expression.”</p><span class="a-go">Get in touch →</span></div>
+        <img class="a-d a-fig" data-z=".15" src="${F}herF.png" alt="Linali laughing with her hands in her hair, in a leopard-print corset top and a brown satin ruched skirt">
+        ${POLA.map(([m, d, p, rot, z]) => { const r = phone ? p : d; return `<div class="a-d pola" data-z="${z}" data-r="${rot}" style="left:${r[0]}%;top:${r[1]}%;width:${r[2]}%;z-index:6"><span class="tape"></span><img src="${F}${m}.jpg" alt=""></div>` }).join('')}
+      </section>
+      <section class="a-about"><div class="a-grid">
+          <div class="a-c1"><div class="label">About me</div></div>
+          <div class="a-c2"><p>${ABOUT}</p><span class="a-link">LinkedIn →</span></div>
+          <dl class="a-c3">${FACTS.map(([k, a, b]) => `<div><dt class="label">${k}</dt><dd><b>${a}</b><span>${b}</span></dd></div>`).join('')}</dl>
+        </div>
+        <div class="a-mood"><div class="label">My inspiration</div><div class="a-mf">${[...Array(nf).keys()].map(() => `<div class="a-fr">${MOOD.map((m) => `<img src="${F}${m}.jpg" alt="" style="display:none">`).join('')}</div>`).join('')}</div></div></section>
+      <section class="a-skills"><div class="a-sg">
+        <div class="a-s1"><div class="label">Skills</div><h2>What I work with</h2><p class="a-hint">Laid out like pattern pieces on my cutting mat.</p></div>
+        <div class="a-mat"><div class="a-mrul"></div>
+          ${PIECES.map((p, i) => `<figure class="pc" data-i="${i}" style="--ph:${p.ph}px">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path class="f" d="${p.d}"/><path class="sa" pathLength="1" d="${p.d}" transform="translate(5 5) scale(.9)"/>${p.fold ? `<path class="fold" d="${p.fold}"/>` : ''}</svg>
+            <figcaption class="label" style="left:${p.cap[0]}%;top:${p.cap[1]}%"><span>${pad2(i + 1)}</span><span class="g"></span></figcaption>
+            <h3 style="left:${p.cap[0]}%;top:calc(${p.cap[1]}% + 22px)">${SKILLS[i][0]}</h3>
+            <ul style="left:${Math.max(p.txt[0], p.txt[2])}%;right:${Math.max(p.txt[0], p.txt[2])}%">${SKILLS[i][1].map((t) => `<li>${t}</li>`).join('')}</ul>
+            <span class="label cut" style="${p.cutAt}">${p.cut}</span>
+          </figure>`).join('')}
+          <svg class="a-tape" viewBox="0 0 200 110" preserveAspectRatio="none"><path d="M6 96 C60 106 120 96 150 70 C175 48 160 18 130 22 C108 25 112 52 138 52" fill="none" stroke="#F2E2B8" stroke-width="16" stroke-linecap="round"/><path class="tk" d="M6 96 C60 106 120 96 150 70 C175 48 160 18 130 22 C108 25 112 52 138 52" fill="none" stroke="#3B2418" stroke-width="5" stroke-dasharray="1 6" opacity=".55"/><text x="20" y="88" font-family="DM Mono, monospace" font-size="9" fill="#3B2418" letter-spacing="1">${SKILLS.reduce((n, [, it]) => n + it.length, 0)} SKILLS</text></svg>
+        </div></div></section>
+    </div>${foot}${LANav.html(phone, [['', 'About'], ['01', 'About me'], ['02', 'Skills'], ['—', 'Get in touch']], 'About')}`
+    if (!phone) mouse(s)
+    const q = (c) => el.querySelector(c), qa = (c) => [...el.querySelectorAll(c)]
+    Object.assign(s, { q, qa })
+    qa('.pc').forEach((p, i) => { p.addEventListener('mouseenter', () => { s.hp = i }); p.addEventListener('mouseleave', () => { s.hp = null }) })
+    s.layout = () => {
+      const W = s.W = el.clientWidth, H = s.H = el.clientHeight
+      q('.a-hero').style.height = H + 'px'
+      // the contact card follows the end of the page like the next block, so it never covers the last section
+      s.footH = q('.foot').offsetHeight; s.cH = q('.a-scroll').offsetHeight; s.total = s.cH - H + s.footH
+      s.secAbout = q('.a-about').offsetTop; s.secSkills = q('.a-skills').offsetTop
+      s.matTop = q('.a-mat').offsetTop
+      // each piece's content sits on that piece's own centre line (the bodice's is left of its box: fold left, armhole right)
+      const BOX = [[6, 26], [20, 20], [16, 16], [10, 10]]
+      qa('.pc').forEach((pc, i) => {
+        const h3 = pc.querySelector('h3'), ul = pc.querySelector('ul'), cut = pc.querySelector('.cut')
+        ;[pc.querySelector('figcaption'), h3, ul, cut].forEach((n) => { n.style.left = BOX[i][0] + '%'; n.style.right = BOX[i][1] + '%' })
+        ul.style.top = h3.offsetTop + h3.offsetHeight + 10 + 'px'
+        const lim = cut.offsetTop > ul.offsetTop ? cut.offsetTop - 6 : pc.clientHeight * .9
+        let fs = 15; ul.style.fontSize = fs + 'px'
+        while (ul.offsetTop + ul.offsetHeight > lim && fs > 12) { fs -= .5; ul.style.fontSize = fs + 'px' }
+      })
+    }
+    s.layout()
+    return s
+  }
+
+  function aboutPaint(s, y, dt, now) {
+    const { q, qa, phone, W, H } = s
+    q('.a-scroll').style.transform = `translateY(${-y}px)`
+    // ---- hero: polaroids drop in with a bounce; layers float at their depth (on phones they drift on their own)
+    if (phone) { s.mx = W * (.5 + .5 * Math.sin(now * .45)); s.my = H * (.5 + .5 * Math.cos(now * .37)) }
+    s.mxS = lerp(s.mxS, (s.mIn || phone ? s.mx / W : .5) - .5, .06); s.myS = lerp(s.myS, (s.mIn || phone ? s.my / H : .5) - .5, .06)
+    if (y < H * 1.2) qa('.a-hero .a-d').forEach((d, i) => {
+      const z = +d.dataset.z, r = +(d.dataset.r || 0), k = clamp((now - .45 - i * .14) / 1.1), sp = spring(k), pola = d.classList.contains('pola')
+      const px = -s.mxS * W * .03 * z, py = -s.myS * H * .03 * z - y * .45 * z
+      d.style.transform = `translate(${px}px, ${py + (pola ? (1 - sp) * -H * .35 : (1 - out3(k)) * H * .04)}px) rotate(${pola ? r + (1 - sp) * 14 : 0}deg)`
+    })
+    // ---- moodboard: each frame changes photograph in turn, wiping up from the bottom
+    if (y > s.secAbout - H && y < s.secSkills + H) qa('.a-fr').forEach((fr, f) => {
+      const P = 3.2, t = now - f * .6, k = Math.floor(t / P), n = MOOD.length, cur = ((f * 2 + k * 3) % n + n) % n, prev = ((f * 2 + (k - 1) * 3) % n + n) % n, kk = out3(clamp((t - k * P) / .9))
+      ;[...fr.children].forEach((im, m) => {
+        im.style.display = m === cur || m === prev ? '' : 'none'; im.style.zIndex = m === cur ? 2 : 1
+        im.style.clipPath = m === cur ? `inset(${(1 - kk) * 100}% 0 0 0)` : 'none'
+        im.style.transform = m === cur ? `scale(${lerp(1.12, 1.02, kk)})` : 'scale(1.02)'
+      })
+    })
+    // ---- skills: the pieces settle on the mat one after another, then their seam allowances sew in
+    if (s.matT == null && y > s.matTop - H * .8) s.matT = now
+    qa('.pc').forEach((p, i) => {
+      const k = s.matT == null ? 0 : clamp((now - s.matT - i * .16) / 1), sp = spring(k), rot = [-2.2, 1.6, -1.2, 2][i] * (phone ? .5 : 1), hov = !phone && s.hp === i
+      s.pl = s.pl || []; s.pl[i] = lerp(s.pl[i] || 0, hov ? 1 : 0, .15)
+      p.style.transform = `translateY(${(1 - sp) * -40 - s.pl[i] * 6 + (phone ? 0 : [0, 22, 8, 30][i])}px) rotate(${lerp(rot + (1 - sp) * 6, 0, s.pl[i])}deg)`
+      p.style.opacity = clamp(k * 3)
+      const sa = p.querySelector('.sa'), kd = s.matT == null ? 0 : out3(clamp((now - s.matT - .5 - i * .16) / 1.2))
+      sa.style.strokeDasharray = kd < 1 ? `${kd} 1` : '.007 .005'
+    })
+    // ---- footer + header
+    const ftop = Math.max(H - s.footH, s.cH - y), fo = clamp((H - ftop) / s.footH); q('.foot').style.transform = `translateY(${ftop - (H - s.footH)}px)`
+    const chap = fo > .5 ? 3 : y >= s.secSkills - H * .5 ? 2 : y >= s.secAbout - H * .5 ? 1 : 0
+    LANav.paint(s, { W, phone, dock: out3(clamp((now - .1) / 1)), dark: fo > .55 ? 1 : 0, chap, y, dt, now, x0: null, keep: H * .5 })
+  }
+  const pa = document.getElementById('pg-about'), [ad, ap] = pa.querySelectorAll('.stage')
+  const AS = [aboutBuild(ad, false), aboutBuild(ap, true)]; AS.forEach((s) => { s.paint = aboutPaint })
+  engine(pa, AS)
+})()
+</script>
+
+<style>
+  /* ================= INSIDE A COLLECTION ================= */
+  .hm .chips { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 10px }
+  .hm .chips button { font:13px system-ui,sans-serif; padding:5px 13px; border-radius:999px; border:1px solid #666; background:#2a2a2a; color:#ddd; cursor:pointer }
+  .hm .chips button[aria-pressed="true"] { background:#ddd; color:#222 }
+  .hm .x-scroll { position:absolute; left:0; right:0; top:0; will-change:transform }
+  .hm .x-sec { position:relative }
+  .hm .x-wrap { padding:0 4.5% } .hm .phone .x-wrap { padding:0 24px }
+  /* hero: a filmstrip of her first photographs at full height, nothing cropped */
+  .hm .x-hero { position:relative; overflow:hidden; background:#21150F }
+  .hm .x-strip { position:absolute; left:0; top:0; bottom:0; display:flex; gap:10px; will-change:transform }
+  .hm .x-strip img { height:100%; width:auto; display:block }
+  .hm .phone .x-strip { bottom:auto; height:66% }
+  .hm .phone .x-strip img { width:100cqw; height:100%; object-fit:cover }
+  .hm .x-shade { position:absolute; inset:0; background:radial-gradient(105% 95% at 0% 100%, rgb(20 14 10 / .8), rgb(20 14 10 / .35) 45%, rgb(20 14 10 / 0) 75%), linear-gradient(180deg, rgb(20 14 10 / 0) 55%, rgb(20 14 10 / .35)) }
+  .hm .phone .x-shade { display:none }
+  .hm .x-ht { position:absolute; left:4.5%; bottom:9%; color:var(--cream); max-width:44%; text-shadow:0 1px 2px rgb(0 0 0 / .5), 0 4px 14px rgb(0 0 0 / .45), 0 10px 40px rgb(0 0 0 / .35) }
+  .hm .phone .x-ht { left:24px; right:24px; bottom:auto; top:calc(66% + 22px); max-width:none; color:var(--cream); text-shadow:none }
+  .hm .x-ht .title { font-size:3.6cqw; margin-top:.8cqw }
+  .hm .phone .x-ht .title { font-size:clamp(34px,8.4cqw,56px); margin-top:8px }
+  .hm .x-ht .title .si { display:block; font:400 1.4cqw 'Noto Serif Sinhala',serif; margin-top:.5cqw; letter-spacing:0 }
+  .hm .phone .x-ht .title .si { font-size:16px; margin-top:6px }
+  .hm .x-ht p { margin:1.4cqw 0 0; font-size:clamp(15px,1.25cqw,19px); line-height:1.5; max-width:40ch }
+  .hm .phone .x-ht p { margin-top:12px; font-size:16px }
+  .hm .x-jump { display:flex; gap:1.2cqw; margin-top:2cqw }
+  .hm .phone .x-jump { gap:10px; margin-top:20px }
+  .hm .x-jump span { font:500 14px 'Hanken Grotesk',sans-serif; padding:12px 20px; border-radius:999px; background:var(--cream); color:var(--brown); text-shadow:none; cursor:pointer }
+  .hm .x-jump span + span { background:transparent; color:var(--cream); box-shadow:inset 0 0 0 1px rgb(242 232 218 / .6) }
+  /* in her words: short and still; only the photographs beside it move */
+  .hm .x-words { background:var(--cream); padding:7.5% 0 }
+  .hm .phone .x-words { padding:72px 0 64px }
+  .hm .x-wg { padding:0 4.5%; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); column-gap:1.6cqw; align-items:start }
+  .hm .phone .x-wg { padding:0 24px; display:block }
+  .hm .x-wl { grid-column:1 / span 3 } .hm .x-ws { margin-top:8px; color:var(--muted) }
+  .hm .x-wtx { grid-column:4 / span 5 }
+  .hm .phone .x-wtx { margin-top:18px }
+  .hm .x-wtx p { margin:0 0 1em; font-size:clamp(15px,1.15cqw,17px); line-height:1.75; max-width:58ch }
+  .hm .x-wtx p:first-child { font-size:clamp(17px,1.35cqw,20px); line-height:1.6 }
+  .hm .phone .x-wtx p { font-size:clamp(15px,2.4cqw,18px) } .hm .phone .x-wtx p:first-child { font-size:clamp(17px,2.8cqw,21px) }
+  .hm .x-film { grid-column:9 / span 4; height:var(--fh); display:flex; gap:1cqw; overflow:hidden; -webkit-mask-image:linear-gradient(transparent, #000 14%, #000 86%, transparent); mask-image:linear-gradient(transparent, #000 14%, #000 86%, transparent) }
+  .hm .x-fcol { flex:1; min-width:0; display:flex; flex-direction:column; gap:1cqw; will-change:transform }
+  .hm .x-fcol img { display:block; width:100%; height:auto }
+  .hm .phone .x-film { margin:30px -24px 0; height:auto; flex-direction:column; gap:8px; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent) }
+  .hm .phone .x-fcol { flex:none; height:clamp(110px,20cqw,170px); flex-direction:row; gap:8px }
+  .hm .phone .x-fcol img { width:auto; height:100% }
+  /* section header (shoot, portfolio) */
+  .hm .x-sh { display:flex; align-items:flex-end; justify-content:space-between; gap:20px }
+  .hm .phone .x-sh { display:block }
+  .hm .x-sh h2 { margin:.8cqw 0 0; font:400 1.9cqw/1.15 'Gloock',serif; letter-spacing:-.01em }
+  .hm .phone .x-sh h2 { margin-top:8px; font-size:clamp(24px,5.4cqw,34px) }
+  .hm .x-sh .hint { color:var(--muted); font-size:14px; margin-top:.6cqw }
+  .hm .phone .x-sh .hint { margin-top:6px }
+  .hm .x-tools { display:flex; gap:10px; align-items:center }
+  .hm .phone .x-tools { margin-top:16px }
+  .hm .x-seg2 { display:inline-flex; padding:3px; border-radius:999px; box-shadow:inset 0 0 0 1px rgb(59 36 24 / .3); position:relative }
+  .hm .x-seg2 span { position:relative; z-index:1; padding:8px 16px; font-size:14px; cursor:pointer; border-radius:999px; transition:color .3s }
+  .hm .x-seg2 span[aria-pressed="true"] { color:var(--cream) }
+  .hm .x-seg2 i { position:absolute; top:3px; bottom:3px; border-radius:999px; background:var(--brown); transition:left .45s cubic-bezier(.2,.8,.2,1), width .45s cubic-bezier(.2,.8,.2,1) }
+  .hm .x-btn { font-size:14px; padding:8px 14px; border-radius:999px; box-shadow:inset 0 0 0 1px rgb(59 36 24 / .3); cursor:pointer; white-space:nowrap }
+  /* the shoot */
+  .hm .x-shoot { background:var(--paper) }
+  .hm .x-pin { position:relative; will-change:transform; padding-top:11% }
+  .hm .phone .x-pin { padding-top:84px }
+  .hm .x-ring { position:relative; height:var(--rh); margin-top:2.2cqw; perspective:var(--persp); cursor:grab; touch-action:none }
+  .hm .x-cyl { position:absolute; left:50%; top:50%; width:0; height:0; transform-style:preserve-3d; will-change:transform }
+  .hm .x-card { position:absolute; left:0; top:0; backface-visibility:hidden; box-shadow:0 14px 30px rgb(59 36 24 / .2); cursor:pointer }
+  .hm .x-card img { display:block; width:100%; height:100%; object-fit:cover; pointer-events:none }
+  .hm .x-rcap { margin:1.2cqw 0 0; min-height:3em; font-size:14px; line-height:1.5; color:var(--muted); max-width:52ch }
+  .hm .x-rcap .label { margin-right:12px; color:var(--brown) }
+  .hm .desk .x-rcap { position:absolute; left:28%; width:38%; top:calc(11cqw + .6cqw); margin:0; text-align:center }
+  .hm .phone .x-rcap { position:absolute; left:24px; right:24px; margin:0 }
+  .hm .x-grid { columns:3; column-gap:1.4cqw; margin-top:2.6cqw; padding-bottom:9% }
+  .hm .phone .x-grid { columns:2; column-gap:10px; margin-top:22px; padding-bottom:70px }
+  .hm .x-grid figure { margin:0 0 1.4cqw; break-inside:avoid; cursor:pointer; overflow:hidden }
+  .hm .phone .x-grid figure { margin-bottom:10px }
+  .hm .x-grid img { display:block; width:100%; height:auto; will-change:transform }
+  /* viewer */
+  .hm .x-view { position:absolute; inset:0; z-index:60; background:rgb(26 17 12 / .96); color:var(--cream); display:none }
+  .hm .x-vimg { position:absolute; will-change:transform,opacity; box-shadow:0 30px 70px rgb(0 0 0 / .45) }
+  .hm .x-vtop { position:absolute; left:4.5%; right:4.5%; top:4.5%; display:flex; justify-content:space-between; align-items:center; z-index:2 }
+  .hm .phone .x-vtop { left:20px; right:20px; top:22px }
+  .hm .x-x { width:44px; height:44px; border-radius:50%; box-shadow:inset 0 0 0 1px rgb(242 232 218 / .5); display:grid; place-items:center; font-size:20px; cursor:pointer }
+  .hm .x-cap { position:absolute; left:4.5%; bottom:5%; max-width:40ch; font-size:15px; line-height:1.5; color:rgb(242 232 218 / .85); z-index:2 }
+  .hm .phone .x-cap { left:20px; right:20px; bottom:96px; max-width:none; font-size:14px }
+  .hm .x-arr { position:absolute; top:50%; width:52px; height:52px; margin-top:-26px; border-radius:50%; box-shadow:inset 0 0 0 1px rgb(242 232 218 / .5); display:grid; place-items:center; font-size:20px; cursor:pointer; z-index:2 }
+  .hm .x-arr.p { left:2.5% } .hm .x-arr.n { right:2.5% }
+  .hm .phone .x-arr { top:auto; bottom:22px; margin:0 } .hm .phone .x-arr.p { left:20px } .hm .phone .x-arr.n { right:20px }
+  .hm .x-thumbs { position:absolute; right:4.5%; bottom:5%; display:flex; gap:6px; z-index:2 }
+  .hm .phone .x-thumbs { display:none }
+  .hm .x-thumbs img { height:40px; width:auto; opacity:.4; cursor:pointer; transition:opacity .3s }
+  .hm .x-thumbs img.on { opacity:1; outline:1.5px solid #E8C4C0; outline-offset:2px }
+  /* the portfolio */
+  .hm .x-port { background:#EDE2D2; padding:11% 0 8% }
+  .hm .phone .x-port { padding:84px 0 60px }
+  .hm .x-read { position:relative; margin-top:2.6cqw; height:var(--rh2); perspective:1600px }
+  .hm .phone .x-read { margin-top:24px }
+  .hm .x-pg { position:absolute; left:50%; top:0; transform-origin:50% 100%; will-change:transform,opacity; box-shadow:0 18px 40px rgb(59 36 24 / .22); background:#fff; overflow:hidden; cursor:zoom-in }
+  .hm .x-pg img { position:absolute; top:0; left:0; height:100%; display:block; pointer-events:none }
+  .hm .x-loupe { position:absolute; z-index:5; width:220px; height:220px; margin:-110px 0 0 -110px; border-radius:50%; pointer-events:none; box-shadow:0 0 0 3px #FBF8F3, 0 0 0 4.5px rgb(59 36 24 / .35), 0 18px 40px rgb(0 0 0 / .3); background-repeat:no-repeat; display:none }
+  .hm .x-ctl { display:flex; align-items:center; justify-content:space-between; margin-top:1.8cqw; gap:12px }
+  .hm .phone .x-ctl { margin-top:16px }
+  .hm .x-ctl .mid { display:flex; align-items:center; gap:1.6cqw }
+  .hm .x-btn.dis { opacity:.35; pointer-events:none }
+  .hm .desk .x-ctl { position:absolute; left:4.5%; right:4.5%; margin:0; pointer-events:none; z-index:3 }
+  .hm .desk .x-ctl .x-btn { pointer-events:auto; width:48px; height:48px; padding:0; display:grid; place-items:center; font-size:18px; background:var(--paper) }
+  .hm .x-rail { display:flex; gap:8px; margin-top:1.2cqw; overflow:hidden; padding:4px 2px 10px }
+  .hm .phone .x-rail { margin-top:14px; gap:6px }
+  .hm .x-rail span { position:relative; flex:none; height:3cqw; cursor:pointer; opacity:.5 }
+  .hm .phone .x-rail span { height:30px }
+  .hm .x-rail span img { height:100%; width:auto; display:block; box-shadow:0 3px 8px rgb(59 36 24 / .15) }
+  .hm .x-rail span.on { opacity:1 }
+  .hm .x-rail span.on::after { content:""; position:absolute; left:0; right:0; bottom:-7px; height:2px; background:repeating-linear-gradient(90deg,#008794 0 5px,transparent 5px 8px) }
+  /* zoom */
+  .hm .x-zoom { position:absolute; inset:0; z-index:60; background:#2A1C14; display:none; overflow:hidden; cursor:move; touch-action:none }
+  .hm .x-zimg { position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform; max-width:none; box-shadow:0 30px 70px rgb(0 0 0 / .45) }
+  .hm .x-zbar { position:absolute; left:50%; bottom:4.5%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; padding:6px; border-radius:999px; background:rgb(251 248 243 / .95); color:var(--brown); z-index:2; box-shadow:0 10px 30px rgb(0 0 0 / .3) }
+  .hm .x-zbar span { min-width:40px; height:40px; padding:0 12px; box-sizing:border-box; border-radius:999px; display:grid; place-items:center; cursor:pointer; font-size:15px }
+  .hm .x-zbar span.v { font:500 11px 'DM Mono',monospace; letter-spacing:.1em; cursor:default; min-width:56px }
+  .hm .x-zbar span.k { background:var(--brown); color:var(--cream) }
+  .hm .x-zhint { position:absolute; left:4.5%; top:4.5%; color:var(--cream); z-index:2; background:rgb(33 21 15 / .78); padding:8px 12px; border-radius:999px }
+  .hm .phone .x-zhint { left:20px; top:24px; right:20px }
+  /* read the text */
+  .hm .x-text { position:absolute; left:0; right:0; bottom:0; height:62%; z-index:61; background:var(--paper); border-radius:20px 20px 0 0; padding:3cqw 4.5%; box-sizing:border-box; overflow:auto; transform:translateY(105%); transition:transform .5s cubic-bezier(.2,.8,.2,1); box-shadow:0 -20px 50px rgb(0 0 0 / .25); pointer-events:none }
+  .hm .phone .x-text { height:72%; padding:28px 24px }
+  .hm .x-text.on { transform:none; pointer-events:auto }
+  .hm .x-text p { white-space:pre-line; max-width:62ch; font-size:16px; line-height:1.6; margin:1.2cqw 0 0 }
+  /* next */
+  .hm .x-next { background:var(--cream); padding:9% 0 8% }
+  .hm .phone .x-next { padding:72px 0 64px }
+  .hm .x-nx { display:flex; align-items:center; justify-content:space-between; gap:2cqw; margin-top:1cqw; padding:1.6cqw 0; border-top:1px solid rgb(59 36 24 / .16); border-bottom:1px solid rgb(59 36 24 / .16); cursor:pointer }
+  .hm .x-nx .c-t { font-size:2.8cqw }
+  .hm .phone .x-nx .c-t { font-size:clamp(28px,6.4cqw,42px) }
+  .hm .x-nx img { height:7cqw; width:auto; box-shadow:0 10px 24px rgb(59 36 24 / .2) }
+  .hm .phone .x-nx img { height:84px }
+  /* floating section switch */
+  .hm .x-fl { position:absolute; left:50%; bottom:3.5%; z-index:45; transform:translateX(-50%); padding:4px; border-radius:999px; background:rgb(251 248 243 / .94); box-shadow:0 10px 26px rgb(59 36 24 / .22); display:flex; will-change:transform,opacity }
+  .hm .phone .x-fl { bottom:20px }
+  .hm .x-fl span { position:relative; z-index:1; padding:10px 18px; font-size:14px; cursor:pointer; border-radius:999px; white-space:nowrap; transition:color .3s }
+  .hm .x-fl span[aria-pressed="true"] { color:var(--cream) }
+  .hm .x-fl i { position:absolute; top:4px; bottom:4px; border-radius:999px; background:var(--brown); will-change:left,width }
+</style>
+
+<!-- ================= INSIDE A COLLECTION ================= -->
+<div class="hm pg" id="pg-det" style="display:none">
+<h2>Inside a collection, v3</h2>
+<p class="subtitle">Pick a collection. Wheel over either screen to scroll; click photos, pages and buttons. (Clicking a row on the Collections tab opens it here too.)</p>
+<div class="chips" role="group" aria-label="Collection"></div>
+<div class="ctl"><button type="button" class="replay">↺ back to the top</button></div>
+<div class="row">
+  <div style="flex:1 1 560px"><p class="lbl">Desktop</p><div class="stage desk"></div></div>
+  <div><p class="lbl">Phone (390 × 844)</p><div class="stage phone"></div></div>
+</div>
+<div class="ctl"><input type="range" min="0" max="1000" value="0" class="sl"></div>
+<p class="note"><b>One page per collection, two ways in.</b> The opening is her first photographs at full height, in proportion, drifting slowly, with two buttons: <i>The shoot</i> and <i>The portfolio</i>. Once you're past it, a small switch floats at the bottom of the screen, so you can jump between the two at any time.<br><b>The shoot.</b> Every photograph. It opens as the ring from your brief, turning slowly as you scroll, with a pause button. Drag to spin it. Switch to <i>Grid</i> to see them all at once, uncropped. Click any photo for the full-screen viewer, with arrows, the keyboard, swipe on phones, and a caption for each.<br><b>The portfolio.</b> A page-by-page reader. Pages stand in a stack, and turning one tips the front page forward so it lands flat, revealing the next. On desktop a magnifier follows the cursor for small writing. Click (or tap on the phone) to zoom to 2.5× and explore by moving the mouse or dragging. Scroll or use + and − to zoom further, and Esc to close. On the phone the double spreads are split into single pages so the text is bigger. Where her page text exists, <i>Read the text</i> opens it as real text.<br><b>The end</b> leads to the next collection in the journey.</p>
+</div>
+<script>
+(() => {
+  const F = '/files/'
+  const DATA = [{"slug":"mano-padana","title":"Mano Padana","native":"මනෝ පාදන","season":"SS25","concept":"Growing up in a society where mental health was an avoided subject, I realized the importance of communicating emotions. මනෝ පාදන, “The Mind’s Steps”, portrays a mental healing journey through cultural aspects. Initially inspired by the traditional art of Kandyan dance, I reflect my culture through design details. Hand-crafted Dumbara fabrics have been utilized to add textural and cultural value to my collection.","shoot":[{"f":"mps-01","ar":0.666,"alt":"Walking toward the camera under a colonial arcade in a brown Dumbara-woven waistcoat over a white mini dress with appliquéd heart motifs"},{"f":"mps-02","ar":0.666,"alt":"Leaning against a red-brick pillar in the Dumbara-woven waistcoat and white mini dress"},{"f":"mps-03","ar":0.666,"alt":"Back view, walking down a pink colonnade with one arm raised, in the woven waistcoat and white mini dress"},{"f":"mps-04","ar":0.666,"alt":"Standing by the arcade with a woven tote bag and a headscarf, in the waistcoat and white dress"},{"f":"mps-05","ar":0.666,"alt":"Crossing a zebra crossing in Colombo with the woven tote, passers-by behind"},{"f":"mps-06","ar":0.666,"alt":"A distant view of the model crossing a wide street lined with trees"}],"pages":[{"f":"pg-mano-padana-01","ar":1.414,"text":""},{"f":"pg-mano-padana-02","ar":1.414,"text":""},{"f":"pg-mano-padana-03","ar":1.414,"text":""},{"f":"pg-mano-padana-04","ar":1.414,"text":""},{"f":"pg-mano-padana-05","ar":1.414,"text":""},{"f":"pg-mano-padana-06","ar":1.414,"text":""},{"f":"pg-mano-padana-07","ar":1.414,"text":""},{"f":"pg-mano-padana-08","ar":1.414,"text":""},{"f":"pg-mano-padana-09","ar":1.414,"text":""},{"f":"pg-mano-padana-10","ar":1.414,"text":""}]},{"slug":"revive","title":"Revive","native":"","season":"SS27","concept":"Denim is one of the most wasted materials in fashion; worn, torn, and thrown away before its potential runs out. This project asks what happens if we treat it the way SPAB treats old buildings: not restored to look new, but repaired and given new life. Revive takes that same idea into denim reconstruction, working in the spirit of E.L.V. Denim’s zero-waste, hand-crafted approach to prove that discarded denim jeans have more life left in them.","shoot":[],"pages":[{"f":"pg-revive-30","ar":2.828,"text":""},{"f":"pg-revive-32","ar":2.828,"text":""},{"f":"pg-revive-34","ar":2.828,"text":""},{"f":"pg-revive-36","ar":2.828,"text":""}]},{"slug":"lunelle","title":"Lunelle","native":"","season":"AW26","concept":"Lunelle is a maternity collection based on functionality and empowerment, designed for the contemporary woman balancing work, life and motherhood. My collection was inspired by the timeless beauty of the moon, the protection of Artemis: the Greek goddess of childbirth, mother and child sculptures of Henry Moore and the curves of the pregnant body. The stretch marks of her body are compared to the craters of the moon, which are considered symbols of imperfect beauty. Lunelle is a tribute to all the unstoppable mothers!","shoot":[{"f":"l01","ar":0.663,"alt":"Beside a large moon artwork on a dark wall, in a white draped crop top tied above the bump and wide brown trousers"},{"f":"l02","ar":1.5,"alt":"Holding an ultrasound print beside the moon artwork, in the white draped top, a blush wrap and brown trousers"},{"f":"l03","ar":0.667,"alt":"Close crop of the white draped top tied in a bow over the bump, with a blush sash and brown trousers"},{"f":"l04","ar":0.667,"alt":"Side view of the bump in the white draped top with a ruched shoulder and a blush wrap"},{"f":"l05","ar":0.647,"alt":"Back view of the white top with a long asymmetric blush chiffon overskirt over wide brown trousers"},{"f":"l06","ar":0.667,"alt":"Detail of the hem of the wide brown trousers on wooden stairs"},{"f":"l07","ar":0.667,"alt":"Wide brown trousers with a blush chiffon wrap, stepping down wooden stairs"},{"f":"l08","ar":0.704,"alt":"Seated in front of a painted tropical-leaf mural in a blush chiffon cape, white top and brown trousers"},{"f":"l09","ar":0.667,"alt":"Standing in a dim studio in a blush chiffon cape, an ultrasound print on a stool beside her"},{"f":"l10","ar":0.667,"alt":"Still life of a white candle and three ultrasound prints on a dark stone stool"}],"pages":[{"f":"pg-lunelle-01","ar":1.415,"text":""},{"f":"pg-lunelle-02","ar":1.415,"text":""},{"f":"pg-lunelle-03","ar":1.415,"text":""},{"f":"pg-lunelle-04","ar":1.415,"text":""},{"f":"pg-lunelle-05","ar":1.415,"text":""},{"f":"pg-lunelle-06","ar":1.415,"text":""},{"f":"pg-lunelle-07","ar":1.415,"text":""},{"f":"pg-lunelle-08","ar":1.415,"text":""},{"f":"pg-lunelle-09","ar":1.415,"text":""},{"f":"pg-lunelle-10","ar":1.414,"text":""},{"f":"pg-lunelle-11","ar":1.414,"text":""},{"f":"pg-lunelle-12","ar":1.414,"text":""},{"f":"pg-lunelle-13","ar":1.414,"text":""},{"f":"pg-lunelle-14","ar":1.414,"text":""},{"f":"pg-lunelle-15","ar":1.414,"text":""},{"f":"pg-lunelle-16","ar":1.414,"text":""},{"f":"pg-lunelle-17","ar":1.414,"text":""},{"f":"pg-lunelle-18","ar":1.414,"text":""},{"f":"pg-lunelle-19","ar":1.414,"text":""},{"f":"pg-lunelle-20","ar":1.414,"text":""},{"f":"pg-lunelle-21","ar":1.414,"text":""},{"f":"pg-lunelle-22","ar":1.414,"text":""}]},{"slug":"drift","title":"Drift","native":"","season":"SS27","concept":"Drift is a womenswear collection exploring the act of stepping away from social acceleration, the cultural condition of relentless pace that overwhelms people. The concept was born from a personal experience, watching fabric move naturally in coastal wind, and seeing in that movement the breath the body takes when it finally stops rushing. My collection offers the feeling of a calming breath taken to escape the fast paced world.","shoot":[{"f":"d01","ar":0.645,"alt":"Barefoot on dark coastal rocks in an oversized cream shirt with tie sleeves over an indigo crochet skirt and crochet leg warmers"},{"f":"d02","ar":0.654,"alt":"Back view of the cream shirt, open at the back, over the indigo crochet skirt against the rocks"},{"f":"d03","ar":0.676,"alt":"Standing on a rock above the sea in a cobalt wrap jacket with brown suede fringe over a short white skirt"},{"f":"d04","ar":0.667,"alt":"Back view of the cobalt jacket with an openwork crochet back panel and brown fringe, by the sea"},{"f":"d05","ar":1.5,"alt":"Reclining on a boulder at the water’s edge in a pale blue macramé dress with long fringe"},{"f":"d06","ar":0.667,"alt":"Reclining on a boulder in the pale blue fringed macramé dress, sea and palms behind"},{"f":"d07","ar":0.667,"alt":"Against a rock wall, arm raised, in a white cropped halter top with a cobalt tie and an indigo crochet skirt"},{"f":"d08","ar":0.667,"alt":"Seated on rocks under palm trees in a white halter top and full indigo crochet trousers"},{"f":"d09","ar":0.666,"alt":"On a rock by the sea in a sheer white draped top over a cobalt midi skirt, holding a cream fringed bag"},{"f":"d10","ar":0.667,"alt":"Detail of the sheer white draped top, cobalt skirt and cream fringed macramé bag"},{"f":"d11","ar":0.667,"alt":"In a rock cave in a pale blue sleeveless tunic with a cobalt scarf and white flared trousers with blue crochet panels"},{"f":"d12","ar":0.667,"alt":"Seated on a rock in the pale blue tunic and white trousers with crochet panels at the knee"},{"f":"d13","ar":1.501,"alt":"Six models on coastal rocks wearing the full Drift line-up, the sea behind them"},{"f":"d14","ar":0.667,"alt":"Two models by the sea, one in the pale blue fringed macramé dress, one walking past in a cobalt fringed jacket"},{"f":"d15","ar":0.667,"alt":"Two models side by side by the sea in white draped tops with crocheted shoulders and cobalt panels"},{"f":"d16","ar":0.667,"alt":"Two models among boulders, one in a cobalt-and-white layered look with crochet-panelled trousers, one in a white top and indigo crochet skirt"},{"f":"d17","ar":0.667,"alt":"The six looks together among boulders and palms at a tidal pool"}],"pages":[{"f":"pg-drift-04","ar":2.828,"text":"Drift SS27 · Catwalk collection · Concept\n\nDrift is a womenswear collection exploring the act of stepping away from social acceleration, the cultural condition of relentless pace that overwhelms people. The concept was born from a personal experience, watching fabric move naturally in coastal wind, and seeing in that movement the breath the body takes when it finally stops rushing. My collection offers the feeling of a calming breath taken to escape the fast paced world.\n\nThe collection is constructed through lightweight fabrics and the hand crafted techniques of crochet, macramé and hand embroidery. These slow made techniques were chosen as they cannot be rushed, making the process of creating itself an act of resistance against speed. Fringing details which moves gently with the movement of the body and crochet footwear grounding the body to the earth embrace natural movement. The muse, Dr Asha de Vos, embodies the collection’s philosophy, a Sri Lankan marine biologist who chose depth over speed, staying rooted in her coastline when every convention told her to move on."},{"f":"pg-drift-06","ar":2.828,"text":""},{"f":"pg-drift-08","ar":2.828,"text":""},{"f":"pg-drift-10","ar":2.828,"text":""},{"f":"pg-drift-12","ar":2.828,"text":""},{"f":"pg-drift-14","ar":2.828,"text":""},{"f":"pg-drift-16","ar":2.828,"text":""},{"f":"pg-drift-18","ar":2.828,"text":""}]}]
+  const clamp = (v) => Math.min(1, Math.max(0, v)), sg = (v, a, b) => clamp((v - a) / (b - a)), lerp = (a, b, t) => a + (b - a) * t
+  const out3 = (t) => 1 - Math.pow(1 - t, 3), out4 = (t) => 1 - Math.pow(1 - t, 4), inOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  const outExpo = (t) => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)
+  const words = (s) => s.split(' ').map((w) => `<span class="w"><i>${w}</i></span>`).join(' ')
+  const wsCache = new WeakMap(), rise = (c, k, st = .03) => { if (!c) return; let ws = wsCache.get(c); if (!ws) { ws = [...c.querySelectorAll('.w > i')]; wsCache.set(c, ws) } ws.forEach((w, j) => { const v = out4(clamp(k * (1 + ws.length * st) - j * st)); w.style.transform = `translateY(${(1 - v) * 110}%)` }) }
+  const pad2 = (n) => String(n).padStart(2, '0')
+  const sentence1 = (t) => (t.match(/^.*?[.!?](\s|$)/) || [t])[0].trim()
+  const ORDER = ['mano-padana', 'revive', 'lunelle', 'drift']
+  const LEAD = { 'mano-padana': ['mps-01', 'mps-02', 'mps-03', 'mps-04'], revive: ['pg-revive-30'], lunelle: ['l01', 'l02', 'l09', 'l04'], drift: ['d13', 'd14', 'd07', 'd03'] }
+  const LEADP = { 'mano-padana': 'mps-01', revive: 'rev-34s', lunelle: 'l01', drift: 'd17' }
+  const foot = `<div class="foot"><h4>Let’s make something together.</h4><div class="fields label"><span>Name</span><span>Email</span><span style="grid-column:1/-1">Message</span></div><div class="send">Send message</div></div>`
+
+  // her concept, sentence by sentence (a sentence ends at . ! ? before a capital or an opening quote)
+  const sentences = (t) => t.split(/(?<=[.!?”])\s+(?=[A-Z“\u0D80-\u0DFF])/)
+  // two columns of her photographs (for Revive, her boards), doubled so they can loop
+  const film = (c, k) => { const src = c.shoot.length ? c.shoot.map((p) => p.f) : c.pages.map((p) => p.f); const col = src.filter((_, i) => i % 2 === k); return [...col, ...col].map((m) => `<img src="${F}${m}.jpg" alt="">`).join('') }
+  function build(s, slug) {
+    const { el, phone } = s, c = DATA.find((d) => d.slug === slug), ci = ORDER.indexOf(slug), nx = DATA.find((d) => d.slug === ORDER[(ci + 1) % 4])
+    // the phone reads one page at a time: a double spread becomes its left and right pages
+    const pages = phone ? c.pages.flatMap((p) => p.ar > 2 ? [{ ...p, ar: p.ar / 2, half: 0 }, { ...p, ar: p.ar / 2, half: 1 }] : [{ ...p, half: -1 }]) : c.pages.map((p) => ({ ...p, half: -1 }))
+    s.nav = null
+    Object.assign(s, { c, slug, pages, pi: 0, turn: null, view: null, zoom: null, mode: 'ring', rot: 0, drag: 0, play: true, textOn: false, gridK: {} })
+    const hasShoot = c.shoot.length > 0, unit = c.pages[0].ar > 2 ? 'spreads' : 'pages'
+    const lead = phone ? [LEADP[slug]] : LEAD[slug]
+    el.innerHTML = `<div class="x-scroll">
+      <section class="x-sec x-hero"><div class="x-strip">${lead.map((m) => `<img src="${F}${m}.jpg" alt="">`).join('')}</div><div class="x-shade"></div>
+        <div class="x-ht"><div class="label">Collection ${pad2(ci + 1)} / 04 · ${c.season}</div><h1 class="title">${words(c.title)}${c.native ? `<span class="si">${c.native}</span>` : ''}</h1><p>${sentence1(c.concept)}</p>
+          <div class="x-jump">${hasShoot ? `<span data-go="shoot">The shoot · ${c.shoot.length}</span>` : ''}<span data-go="port">The portfolio · ${c.pages.length}</span></div></div></section>
+      <section class="x-sec x-words"><div class="x-wg">
+        <div class="x-wl"><div class="label">In my words</div><div class="label x-ws">${c.title} · ${c.season}</div></div>
+        <div class="x-wtx">${sentences(c.concept).reduce((a, t, i, all) => { const k = Math.floor(i / Math.ceil(all.length / 2)); (a[k] = a[k] || []).push(t); return a }, []).map((p) => `<p>${p.join(' ')}</p>`).join('')}</div>
+        <div class="x-film">${[0, 1].map((k) => `<div class="x-fcol">${film(c, k)}</div>`).join('')}</div>
+      </div></section>
+      ${hasShoot ? `<section class="x-sec x-shoot" data-sec="shoot"><div class="x-pin"><div class="x-wrap"><div class="x-sh"><div><div class="label">The shoot</div><h2>${c.shoot.length} photographs</h2></div>
+          <div class="x-tools"><span class="x-seg2"><i></i><span data-mode="ring" aria-pressed="true">Ring</span><span data-mode="grid" aria-pressed="false">Grid</span></span><span class="x-btn x-play">Pause</span></div></div>
+          <p class="x-rcap"><span class="label"></span><span class="t"></span></p><div class="x-ring"><div class="x-cyl">${c.shoot.map((p, i) => `<div class="x-card" data-i="${i}"><img src="${F}${p.f}.jpg" alt="${p.alt}"></div>`).join('')}</div></div>
+          <div class="x-grid" style="display:none">${c.shoot.map((p, i) => `<figure data-i="${i}"><img src="${F}${p.f}.jpg" alt="${p.alt}"></figure>`).join('')}</div></div></div></section>` : ''}
+      <section class="x-sec x-port" data-sec="port"><div class="x-wrap"><div class="x-sh"><div><div class="label">The portfolio</div><h2>${c.pages.length} ${unit}${phone && unit === 'spreads' ? ` · ${pages.length} pages` : ''}</h2><div class="hint">${phone ? 'Tap a page to zoom. Swipe to turn.' : 'Hover to magnify. Click to zoom.'}${phone ? '' : ' <span class="label x-cnt" style="margin-left:14px;color:var(--brown)"></span>'}</div></div>
+          <div class="x-tools"><span class="x-btn x-zb">Zoom</span>${c.pages.some((p) => p.text) ? '<span class="x-btn x-tb">Read the text</span>' : ''}</div></div>
+        <div class="x-read">${pages.map((p, i) => `<div class="x-pg" data-i="${i}"><img src="${F}${p.f}.jpg" alt="Portfolio ${unit === 'spreads' && !phone ? 'spread' : 'page'} ${i + 1} of ${pages.length}"></div>`).join('')}<div class="x-loupe"></div></div>
+        <div class="x-ctl"><span class="x-btn x-prev">${phone ? '← Previous' : '←'}</span>${phone ? '<div class="mid label x-cnt"></div>' : ''}<span class="x-btn x-next2">${phone ? 'Next →' : '→'}</span></div>
+        <div class="x-rail">${pages.map((p, i) => `<span data-i="${i}"><img src="${F}${p.f}.jpg" alt="" style="${p.half >= 0 ? `width:${(phone ? 30 : 36) * p.ar}px;object-fit:cover;object-position:${p.half ? 'right' : 'left'}` : ''}"></span>`).join('')}</div></div></section>
+      <section class="x-sec x-next"><div class="x-wrap"><div class="label">${ci === 3 ? 'Back to the start of the journey' : 'Next collection'}</div>
+        <div class="x-nx" data-slug="${nx.slug}"><div><h2 class="c-t">${nx.title}</h2><div class="label c-meta" style="margin-top:10px">${nx.season} · ${pad2(ORDER.indexOf(nx.slug) + 1)} / 04</div></div><img src="${F}${LEADP[nx.slug]}.jpg" alt=""></div></div></section>
+    </div>
+    ${hasShoot ? `<div class="x-fl"><i></i><span data-go="shoot">The shoot</span><span data-go="port">The portfolio</span></div>` : ''}
+    <div class="x-view"><div class="x-vtop"><span class="label x-vc"></span><span class="x-x" data-close="view">✕</span></div><img class="x-vimg" alt=""><span class="x-arr p">←</span><span class="x-arr n">→</span><p class="x-cap"></p><div class="x-thumbs">${c.shoot.map((p, i) => `<img data-i="${i}" src="${F}${p.f}.jpg" alt="">`).join('')}</div></div>
+    <div class="x-zoom"><div class="label x-zhint">${phone ? 'Drag to explore · + and − to zoom' : 'Move to explore · scroll or + − to zoom · Esc to close'}</div><img class="x-zimg" alt=""><div class="x-zbar"><span data-z="-">−</span><span class="v"></span><span data-z="+">+</span><span data-z="p">←</span><span data-z="n">→</span><span class="k" data-z="x">Close</span></div></div>
+    <div class="x-text"><div class="label">The text on this page</div><p></p><div style="margin-top:20px"><span class="x-btn" data-close="text">Close</span></div></div>
+    ${foot}${LANav.html(phone, [['', c.title], ['', 'The shoot'], ['', 'The portfolio'], ['', 'Next'], ['—', 'Get in touch']], 'Collections')}`
+    s.q = (k) => el.querySelector(k); s.qa = (k) => [...el.querySelectorAll(k)]; s.wds = null
+    wire(s)
+    s.layout()
+  }
+
+  function wire(s) {
+    const { el, q, qa, phone } = s
+    const goTo = (sec) => s.jump(sec)
+    qa('[data-go]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); goTo(b.dataset.go) }))
+    // ring / grid
+    qa('.x-seg2 [data-mode]').forEach((b) => b.addEventListener('click', () => {
+      s.mode = b.dataset.mode; qa('.x-seg2 [data-mode]').forEach((x) => x.setAttribute('aria-pressed', x === b))
+      q('.x-ring').style.display = q('.x-rcap').style.display = s.mode === 'ring' ? '' : 'none'; q('.x-grid').style.display = s.mode === 'grid' ? '' : 'none'; q('.x-play').style.display = s.mode === 'ring' ? '' : 'none'
+      s.modeT = s.now; s.gridK = {}; s.layout(); s.jump('shoot', true, true)
+    }))
+    const pb = q('.x-play'); if (pb) pb.addEventListener('click', () => { s.play = !s.play; pb.textContent = s.play ? 'Pause' : 'Play' })
+    // ring drag (a click without a drag opens the viewer)
+    const ring = q('.x-ring')
+    if (ring) {
+      let dn = null
+      ring.addEventListener('pointerdown', (e) => { dn = { x: e.clientX, r: s.drag, moved: false }; ring.setPointerCapture(e.pointerId) })
+      ring.addEventListener('pointermove', (e) => { if (!dn) return; const dx = e.clientX - dn.x; if (Math.abs(dx) > 4) dn.moved = true; s.drag = dn.r + dx * .25 })
+      ring.addEventListener('pointerup', (e) => { const was = dn; dn = null; if (was && !was.moved) { const c = document.elementsFromPoint(e.clientX, e.clientY).find((n) => n.classList && n.classList.contains('x-card')); if (c) openView(s, +c.dataset.i, c) } })
+      qa('.x-grid figure').forEach((f) => f.addEventListener('click', () => openView(s, +f.dataset.i, f)))
+    }
+    // viewer
+    q('.x-arr.p').addEventListener('click', () => stepView(s, -1)); q('.x-arr.n').addEventListener('click', () => stepView(s, 1))
+    qa('.x-thumbs img').forEach((t) => t.addEventListener('click', () => stepView(s, +t.dataset.i - s.view.i)))
+    q('[data-close="view"]').addEventListener('click', () => closeView(s))
+    let sw = null; const vw = q('.x-view')
+    vw.addEventListener('pointerdown', (e) => { sw = e.clientX }); vw.addEventListener('pointerup', (e) => { if (sw != null && Math.abs(e.clientX - sw) > 50) stepView(s, e.clientX < sw ? 1 : -1); sw = null })
+    // reader
+    q('.x-prev').addEventListener('click', () => turn(s, -1)); q('.x-next2').addEventListener('click', () => turn(s, 1))
+    qa('.x-rail span').forEach((r) => r.addEventListener('click', () => turn(s, +r.dataset.i - s.pi)))
+    const read = q('.x-read')
+    read.addEventListener('mousemove', (e) => { const b = read.getBoundingClientRect(); s.lx = e.clientX - b.left; s.ly = e.clientY - b.top; s.lIn = true })
+    read.addEventListener('mouseleave', () => { s.lIn = false })
+    let rs = null
+    read.addEventListener('pointerdown', (e) => { rs = { x: e.clientX, y: e.clientY } })
+    read.addEventListener('pointerup', (e) => {
+      if (!rs) return; const dx = e.clientX - rs.x; rs = null
+      if (Math.abs(dx) > 40) return turn(s, dx < 0 ? 1 : -1)
+      const pg = qa('.x-pg')[s.pi], b = pg.getBoundingClientRect()
+      if (e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom) openZoom(s, (e.clientX - b.left) / b.width, (e.clientY - b.top) / b.height)
+    })
+    q('.x-zb').addEventListener('click', () => openZoom(s, .5, .5))
+    const tb = q('.x-tb'); if (tb) tb.addEventListener('click', () => { const t = s.pages[s.pi].text; q('.x-text p').textContent = t || 'This page has no transcribed text yet. Use Zoom to read it.'; q('.x-text').classList.add('on') })
+    q('[data-close="text"]').addEventListener('click', () => q('.x-text').classList.remove('on'))
+    // zoom
+    const zm = q('.x-zoom')
+    zm.addEventListener('mousemove', (e) => { if (!s.zoom || phone) return; const b = zm.getBoundingClientRect(); s.zoom.mx = (e.clientX - b.left) / b.width; s.zoom.my = (e.clientY - b.top) / b.height })
+    let zd = null
+    zm.addEventListener('pointerdown', (e) => { if (e.target.closest('.x-zbar')) return; zd = { x: e.clientX, y: e.clientY, mx: s.zoom.mx, my: s.zoom.my }; zm.setPointerCapture(e.pointerId) })
+    zm.addEventListener('pointermove', (e) => { if (!zd || !phone) return; const b = zm.getBoundingClientRect(); s.zoom.mx = zd.mx - (e.clientX - zd.x) / b.width * 1.2; s.zoom.my = zd.my - (e.clientY - zd.y) / b.height * 1.2 })
+    zm.addEventListener('pointerup', () => { zd = null })
+    qa('.x-zbar [data-z]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const z = b.dataset.z; if (z === 'x') closeZoom(s); else if (z === '+') s.zoom.tz = Math.min(5, s.zoom.tz * 1.4); else if (z === '-') s.zoom.tz = Math.max(1, s.zoom.tz / 1.4); else { turn(s, z === 'n' ? 1 : -1); s.zoom.img = null } }))
+    s.onWheel = (e) => { if (s.zoom) { s.zoom.tz = Math.max(1, Math.min(5, s.zoom.tz * (e.deltaY < 0 ? 1.12 : 1 / 1.12))); return true } return !!s.view }
+    q('.x-nx').addEventListener('click', () => window.openCollection(q('.x-nx').dataset.slug))
+  }
+
+  // ---------- viewer: the photo opens from where it sits, contained, never cropped
+  function fitRect(s, ar) {
+    const W = s.W, H = s.H, mw = W * (s.phone ? 1 : .78), mh = H * (s.phone ? .62 : .78)
+    let w = mw, h = w / ar; if (h > mh) { h = mh; w = h * ar }
+    return [(W - w) / 2, s.phone ? 96 + (mh - h) / 2 : (H - h) / 2, w, h]
+  }
+  const relRect = (s, n) => { const b = n.getBoundingClientRect(), r = s.el.getBoundingClientRect(); return [b.left - r.left, b.top - r.top, b.width, b.height] }
+  function openView(s, i, from) { const p = s.c.shoot[i]; s.view = { i, t: s.now, from: relRect(s, from), dir: 0 }; const im = s.q('.x-vimg'); im.src = F + p.f + '.jpg'; im.alt = p.alt; s.q('.x-view').style.display = 'block' }
+  function stepView(s, d) { if (!s.view || !d) return; const n = s.c.shoot.length, i = (s.view.i + d + n) % n, p = s.c.shoot[i]; s.view = { i, t: s.now, from: null, dir: Math.sign(d) }; const im = s.q('.x-vimg'); im.src = F + p.f + '.jpg'; im.alt = p.alt }
+  function closeView(s) { s.view = null; s.q('.x-view').style.display = 'none' }
+  // ---------- reader
+  function turn(s, d) { const n = s.pages.length, to = Math.max(0, Math.min(n - 1, s.pi + d)); if (to === s.pi || (s.turn && s.now - s.turn.t < .3)) return; s.turn = { from: s.pi, to, t: s.now, dir: Math.sign(to - s.pi) }; s.pi = to; s.q('.x-text').classList.remove('on') }
+  function openZoom(s, fx, fy) { s.zoom = { z: 1, tz: 2.5, mx: fx, my: fy, img: null }; s.q('.x-zoom').style.display = 'block' }
+  function closeZoom(s) { s.zoom = null; s.q('.x-zoom').style.display = 'none' }
+
+  function make(el, phone) {
+    const s = { el, phone }
+    s.layout = () => {
+      const W = s.W = el.clientWidth, H = s.H = el.clientHeight, { q, qa } = s
+      q('.x-hero').style.height = H + 'px'
+      // her words: the film beside the text is as tall as the text
+      const ws = q('.x-words'); if (!phone) q('.x-film').style.setProperty('--fh', Math.max(H * .5, q('.x-wtx').offsetHeight) + 'px')
+      // ring geometry: cards on a cylinder, the front one at natural size
+      const ring = q('.x-ring')
+      if (ring) {
+        const n = s.c.shoot.length, cw = phone ? Math.min(W * .52, 300) : Math.min(W * .2, H * .56 * .6), R = Math.max(cw * 1.3, n * cw * 1.12 / (2 * Math.PI)), rh = phone ? cw * 2 : H * .56
+        Object.assign(s, { R, cw, rh })
+        ring.style.setProperty('--rh', rh + 'px'); ring.style.setProperty('--persp', R * 2.4 + 'px')
+        if (phone) q('.x-rcap').style.top = ring.offsetTop + rh + 22 + 'px'
+        qa('.x-card').forEach((c, i) => { const ch = Math.min(rh * .92, cw / s.c.shoot[i].ar), w = ch * s.c.shoot[i].ar; Object.assign(c.style, { width: w + 'px', height: ch + 'px', marginLeft: -w / 2 + 'px', marginTop: -ch / 2 + 'px' }) })
+      }
+      // reader geometry
+      const rd = q('.x-read'), rw = rd.clientWidth, rh2 = phone ? Math.min(W * .78, rw / s.pages[0].ar + 24) : H * .43
+      rd.style.setProperty('--rh2', rh2 + 'px')
+      qa('.x-pg').forEach((pg, i) => {
+        const p = s.pages[i], mw = phone ? rw : rw - 140; let h = rh2 - (phone ? 24 : H * .05), w = h * p.ar; if (w > mw) { w = mw; h = w / p.ar }
+        Object.assign(pg.style, { width: w + 'px', height: h + 'px', marginLeft: -w / 2 + 'px', top: (rh2 - h) + 'px' })
+        const im = pg.querySelector('img'); im.style.width = (p.half >= 0 ? w * 2 : w) + 'px'; im.style.left = (p.half === 1 ? -w : 0) + 'px'
+      })
+      if (!phone) q('.x-ctl').style.top = rd.offsetTop + rh2 / 2 + 'px'
+      // section positions in the scroll
+      const sc = q('.x-scroll'), pin = q('.x-pin'), sh = q('.x-shoot')
+      if (sh) { s.pinLen = s.mode === 'ring' ? H * 1.1 : 0; pin.style.transform = ''; sh.style.height = s.mode === 'ring' ? pin.offsetHeight + s.pinLen + 'px' : ''; s.secShoot = sh.offsetTop }
+      s.secPort = q('.x-port').offsetTop; s.secNext = q('.x-next').offsetTop; s.secWords = ws.offsetTop
+      // a jump lands with the section's heading just under the header
+      const navH = phone ? 76 : H * .15; s.padP = parseFloat(getComputedStyle(q('.x-port')).paddingTop) - navH; s.padS = pin ? parseFloat(getComputedStyle(pin).paddingTop) - navH : 0
+      s.footH = q('.foot').offsetHeight; s.cH = sc.offsetHeight; s.total = s.cH - H + s.footH
+      const seg = q('.x-seg2'); if (seg) { const on = seg.querySelector('[aria-pressed="true"]'); Object.assign(seg.querySelector('i').style, { left: on.offsetLeft + 'px', width: on.offsetWidth + 'px' }) }
+    }
+    s.paint = paint
+    return s
+  }
+
+  function paint(s, y, dt, now) {
+    const { q, qa, phone, W, H } = s; s.now = now
+    const sc = q('.x-scroll'); sc.style.transform = `translateY(${-y}px)`
+    // hero
+    q('.x-strip').style.transform = `translateX(${-y * (phone ? 0 : .35) - now * (phone ? 0 : 6)}px)`
+    rise(q('.x-ht .title'), clamp((now - .1) / 1), .08)
+    if (phone) q('.x-strip img').style.transform = `translateY(${y * .3}px) scale(1.05)`
+    // in her words: the words rise as the section comes up
+    // her words: the text stays still; her photographs roll past beside it
+    const wTop = s.secWords
+    if (y > wTop - H && y < wTop + H * 1.5) qa('.x-fcol').forEach((col, k) => {
+      const half = (phone ? col.scrollWidth : col.scrollHeight) / 2, d = ((y - wTop) * .3 + now * 14) % half, o = k ? -(half - d) : -d
+      col.style.transform = phone ? `translateX(${o}px)` : `translateY(${o}px)`
+    })
+    // shoot
+    const sh = q('.x-shoot')
+    if (sh) {
+      const pin = q('.x-pin')
+      if (s.mode === 'ring') {
+        const into = Math.max(0, Math.min(s.pinLen, y - s.secShoot)); pin.style.transform = `translateY(${into}px)`
+        if (s.play && !s.view) s.rot += dt * 7
+        const n = s.c.shoot.length, ang = s.rot + (y - s.secShoot) * .09 + s.drag
+        q('.x-cyl').style.transform = `translateZ(${-s.R}px) rotateY(${-ang}deg)`
+        let best = 0, bf = -2
+        qa('.x-card').forEach((c, i) => { const a = i * 360 / n, face = Math.cos((a - ang) * Math.PI / 180); if (face > bf) { bf = face; best = i } c.style.transform = `rotateY(${a}deg) translateZ(${s.R}px)`; c.style.opacity = .25 + .75 * Math.max(0, face) })
+        if (best !== s.front) { s.front = best; q('.x-rcap .label').textContent = `${pad2(best + 1)} / ${pad2(n)}`; q('.x-rcap .t').textContent = s.c.shoot[best].alt }
+      } else {
+        const sr = s.el.getBoundingClientRect()
+        qa('.x-grid figure').forEach((f, i) => { const b = f.getBoundingClientRect(), top = b.top - sr.top; if (top < H * .92 && s.gridK[i] == null) s.gridK[i] = now; const k = s.gridK[i] == null ? 0 : out3(clamp((now - s.gridK[i]) / .8)); f.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`; f.querySelector('img').style.transform = `scale(${lerp(1.15, 1, k)}) translateY(${(top - H / 2) * -.03}px)` })
+      }
+    }
+    // reader: a stack of pages; the front one tips forward and lands flat
+    const tr = s.turn, tk = tr ? clamp((now - tr.t) / .75) : 1; if (tr && tk >= 1) s.turn = null
+    qa('.x-pg').forEach((pg, i) => {
+      const d = i - s.pi
+      let t = '', o = 1, z = 100 - Math.abs(d), show = d >= 0 && d <= 2
+      if (d >= 0) t = `translateY(${-d * 3.2}%) scale(${1 - d * .035})`, o = d === 0 ? 1 : .85 - d * .2
+      if (tr) {
+        const e = inOut(tk)
+        if (tr.dir > 0 && i === tr.from) { show = true; z = 200; t = `translateY(${e * 12}%) rotateX(${-e * 88}deg)`; o = 1 - sg(tk, .55, 1) }
+        if (tr.dir > 0 && d >= 0 && d <= 2) t = `translateY(${-(d + 1 - e) * 3.2}%) scale(${1 - (d + 1 - e) * .035})`
+        if (tr.dir < 0 && i === tr.to) { z = 200; t = `translateY(${(1 - e) * 12}%) rotateX(${-(1 - e) * 88}deg)`; o = sg(tk, 0, .45) }
+        if (tr.dir < 0 && d > 0 && d <= 3) { show = d <= 3; t = `translateY(${-(d - 1 + e) * 3.2}%) scale(${1 - (d - 1 + e) * .035})`; o = d === 3 ? .45 * (1 - e) : .85 - (d - 1 + e) * .2 }
+      }
+      pg.style.display = show ? '' : 'none'; pg.style.transform = t; pg.style.opacity = o; pg.style.zIndex = z
+    })
+    q('.x-cnt').textContent = `${phone || s.pages[0].ar < 2 ? 'Page' : 'Spread'} ${pad2(s.pi + 1)} / ${pad2(s.pages.length)}`
+    const tbb = q('.x-tb'); if (tbb) tbb.classList.toggle('dis', !s.pages[s.pi].text)
+    q('.x-prev').classList.toggle('dis', s.pi === 0); q('.x-next2').classList.toggle('dis', s.pi === s.pages.length - 1)
+    const rail = q('.x-rail'); qa('.x-rail span').forEach((r, i) => r.classList.toggle('on', i === s.pi))
+    const on = rail.children[s.pi]; if (on) { s.railX = lerp(s.railX || 0, Math.max(0, on.offsetLeft - rail.clientWidth / 2 + on.offsetWidth / 2), .12); ;[...rail.children].forEach((r) => { r.style.transform = `translateX(${-s.railX}px)` }) }
+    // loupe (desktop): the small writing, magnified under the cursor
+    const lp = q('.x-loupe'), front = qa('.x-pg')[s.pi]
+    if (!phone && s.lIn && !s.turn && !s.zoom && front) {
+      const b = { l: front.offsetLeft + parseFloat(front.style.marginLeft || 0) * 0, w: front.offsetWidth, h: front.offsetHeight }
+      const fl = front.offsetLeft, ft = front.offsetTop, inside = s.lx > fl && s.lx < fl + b.w && s.ly > ft && s.ly < ft + b.h
+      lp.style.display = inside ? 'block' : 'none'
+      if (inside) { s.lpx = lerp(s.lpx ?? s.lx, s.lx, .3); s.lpy = lerp(s.lpy ?? s.ly, s.ly, .3); const Z = 3, rx = (s.lpx - fl) / b.w, ry = (s.lpy - ft) / b.h
+        Object.assign(lp.style, { left: s.lpx + 'px', top: s.lpy + 'px', backgroundImage: `url(${F}${s.pages[s.pi].f}.jpg)`, backgroundSize: `${b.w * Z}px ${b.h * Z}px`, backgroundPosition: `${110 - rx * b.w * Z}px ${110 - ry * b.h * Z}px` }) }
+    } else lp.style.display = 'none'
+    // zoom
+    if (s.zoom) {
+      const z = s.zoom, p = s.pages[s.pi], im = q('.x-zimg')
+      if (z.img !== p.f + p.half) { z.img = p.f + p.half; im.src = F + p.f + '.jpg' }
+      z.z = lerp(z.z, z.tz, .14)
+      let fw = W * .92, fh = fw / p.ar; if (fh > H * .8) { fh = H * .8; fw = fh * p.ar }
+      const w = fw * z.z, h = fh * z.z, iw = p.half >= 0 ? w * 2 : w
+      z.mx = Math.min(1, Math.max(0, z.mx)); z.my = Math.min(1, Math.max(0, z.my))
+      const x = w > W ? (W - w) * z.mx : (W - w) / 2, yy = h > H ? (H - h) * z.my : (H - h) / 2
+      z.sx = lerp(z.sx ?? x, x, .16); z.sy = lerp(z.sy ?? yy, yy, .16)
+      Object.assign(im.style, { width: iw + 'px', height: h + 'px', clipPath: p.half >= 0 ? `inset(0 ${p.half ? 0 : 50}% 0 ${p.half ? 50 : 0}%)` : 'none', transform: `translate(${z.sx - (p.half === 1 ? w : 0)}px, ${z.sy}px)` })
+      q('.x-zbar .v').textContent = Math.round(z.z * 100) + '%'
+    }
+    // viewer
+    if (s.view) {
+      const v = s.view, p = s.c.shoot[v.i], to = fitRect(s, p.ar), k = outExpo(clamp((now - v.t) / .6)), im = q('.x-vimg')
+      if (v.from) { const r = v.from.map((f, j) => lerp(f, to[j], k)); Object.assign(im.style, { left: r[0] + 'px', top: r[1] + 'px', width: r[2] + 'px', height: r[3] + 'px', transform: '', opacity: 1, objectFit: 'cover' }); q('.x-view').style.background = `rgb(26 17 12 / ${.96 * k})` }
+      else { Object.assign(im.style, { left: to[0] + 'px', top: to[1] + 'px', width: to[2] + 'px', height: to[3] + 'px', transform: `translateX(${(1 - k) * v.dir * 6}%)`, opacity: k, objectFit: 'cover' }) }
+      q('.x-vc').textContent = `${pad2(v.i + 1)} / ${pad2(s.c.shoot.length)}`; q('.x-cap').textContent = p.alt
+      ;['.x-vtop', '.x-cap', '.x-arr.p', '.x-arr.n', '.x-thumbs'].forEach((k2) => { q(k2).style.opacity = sg(now - v.t, .2, .5) })
+      qa('.x-thumbs img').forEach((t, i) => t.classList.toggle('on', i === v.i))
+    }
+    // floating switch: after the hero, until the next-collection section
+    const fl = q('.x-fl')
+    if (fl) {
+      const vis = y > s.secShoot - H * .4 && y < s.secNext - H * .4 && !s.view && !s.zoom, cur = y >= s.secPort - H * .5 ? 'port' : 'shoot'
+      s.flv = lerp(s.flv || 0, vis ? 1 : 0, .12); fl.style.opacity = s.flv; fl.style.transform = `translateX(-50%) translateY(${(1 - s.flv) * 30}px)`; fl.style.pointerEvents = s.flv > .5 ? '' : 'none'
+      const spans = [...fl.querySelectorAll('span')], a = spans.find((x) => x.dataset.go === cur); spans.forEach((x) => x.setAttribute('aria-pressed', x === a))
+      s.flx = lerp(s.flx ?? a.offsetLeft, a.offsetLeft, .16); s.flw = lerp(s.flw ?? a.offsetWidth, a.offsetWidth, .16); Object.assign(fl.querySelector('i').style, { left: s.flx + 'px', width: s.flw + 'px' })
+    }
+    // footer + header
+    const ftop = Math.max(H - s.footH, s.cH - y), fo = clamp((H - ftop) / s.footH); q('.foot').style.transform = `translateY(${ftop - (H - s.footH)}px)`
+    const chap = fo > .5 ? 4 : y >= s.secNext - H * .5 ? 3 : y >= s.secPort - H * .5 ? 2 : s.secShoot != null && y >= s.secShoot - H * .5 ? 1 : 0
+    LANav.paint(s, { W, phone, dock: out3(clamp((now - .1) / 1)), dark: (y < H * .7 && !phone) || s.view || s.zoom || fo > .55 ? 1 : 0, chap, y, dt, now, x0: null, keep: H * .5 })
+    s.el.querySelector('.nav').style.display = s.view || s.zoom ? 'none' : ''
+  }
+
+  // ---------- the page: two stages, a collection switcher, the shared scroll loop
+  const pg = document.getElementById('pg-det'), [dd, dp] = pg.querySelectorAll('.stage'), chips = pg.querySelector('.chips')
+  const S = window.__det = [make(dd, false), make(dp, true)]
+  const st = S.map((s) => ({ s, target: 0, y: 0 }))
+  // jump both screens to the same section (or only this one, after a layout change)
+  S.forEach((s) => { s.jump = (sec, now, self) => st.forEach((o) => { if (self && o.s !== s) return; const t = sec === 'shoot' ? (o.s.secShoot == null ? null : o.s.secShoot + o.s.padS) : o.s.secPort + o.s.padP; if (t == null) return; o.target = t + 2; if (now) o.y = o.target }) })
+  const Sl = pg.querySelector('.sl')
+  const setCol = (slug) => { S.forEach((s) => build(s, slug)); st.forEach((o) => { o.target = o.y = 0 }); Sl.value = 0; chips.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.slug === slug)); t0 = performance.now() }
+  chips.innerHTML = ORDER.map((sl) => `<button type="button" data-slug="${sl}" aria-pressed="false">${DATA.find((d) => d.slug === sl).title}</button>`).join('')
+  chips.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => setCol(b.dataset.slug)))
+  st.forEach((o) => o.s.el.addEventListener('wheel', (e) => { if (e.target.closest('.x-text')) return; e.preventDefault(); if (o.s.onWheel && o.s.onWheel(e)) return; o.target = Math.max(0, Math.min(o.s.total, o.target + e.deltaY)); const f = o.target / o.s.total; Sl.value = f * 1000; st.forEach((p) => { if (p !== o) p.target = f * p.s.total }) }, { passive: false }))
+  Sl.addEventListener('input', () => st.forEach((o) => { o.target = Sl.value / 1000 * o.s.total }))
+  pg.querySelector('.replay').addEventListener('click', () => st.forEach((o) => { o.target = 0 }))
+  document.addEventListener('keydown', (e) => {
+    if (!pg.offsetParent) return
+    S.forEach((s) => { if (s.view) { if (e.key === 'ArrowRight') stepView(s, 1); if (e.key === 'ArrowLeft') stepView(s, -1); if (e.key === 'Escape') closeView(s) } else if (s.zoom) { if (e.key === 'Escape') closeZoom(s); if (e.key === 'ArrowRight') { turn(s, 1); s.zoom.img = null } if (e.key === 'ArrowLeft') { turn(s, -1); s.zoom.img = null } } })
+  })
+  window.openCollection = (slug) => { document.querySelector('[data-tab="pg-det"]').click(); setCol(slug) }
+  pg.addEventListener('show', () => S.forEach((s) => s.layout()))
+  document.fonts.ready.then(() => S.forEach((s) => s.c && s.layout()))
+  setInterval(() => { if (pg.offsetParent) S.forEach((s) => s.layout()) }, 1500)
+  let last = performance.now(), t0 = last
+  setCol('drift')
+  function tick(t) {
+    const dt = Math.min(.05, (t - last) / 1000); last = t
+    if (pg.offsetParent) st.forEach((o) => { o.y = lerp(o.y, o.target, .1); o.s.paint(o.s, o.y, dt, (t - t0) / 1000) })
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+})()
+</script>
