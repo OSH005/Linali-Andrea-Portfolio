@@ -1,0 +1,163 @@
+/* One strip of fabric. The ticker sets --dock (0 bare → 1 sewn pill) and --dk (0 day → 1 night). */
+.nav {
+  position: fixed;
+  z-index: 40;
+  top: 14px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.bar {
+  --dock: 1;
+  --dk: 0;
+  --stitch: color-mix(in srgb, var(--teal), var(--blush) calc(var(--dk) * 100%));
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px 5px 6px;
+  font-size: 15px;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--brown), var(--cream) calc(var(--dk) * 100%));
+  white-space: nowrap;
+  will-change: transform;
+  pointer-events: auto;
+  /* Without JS: a plain sewn pill. */
+  background: rgb(251 248 243 / 0.95);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgb(59 36 24 / 0.16);
+}
+.bar::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed var(--stitch);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.bar.live { background: none; box-shadow: none; }
+.bar.live::before { content: none; }
+.bar :focus-visible { outline-color: var(--stitch); }
+
+.nb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 16px rgb(59 36 24 / calc(0.16 * var(--dock))));
+}
+.fill {
+  fill: color-mix(in srgb, var(--paper), rgb(38 25 18) calc(var(--dk) * 100%));
+  fill-opacity: calc((0.95 - 0.09 * var(--dk)) * min(1, var(--dock) * 1.5));
+}
+.stitch { stroke: var(--stitch); stroke-width: 1; stroke-linecap: round; stroke-opacity: 0.8; }
+
+.mono {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mark { display: block; height: calc(36px - 10px * var(--dock)); background: currentColor; mask-position: center; mask-size: contain; mask-repeat: no-repeat; }
+@media (forced-colors: active) { .mark { forced-color-adjust: none; background: CanvasText; } }
+
+.chap {
+  overflow: hidden;
+  height: 18px;
+  margin-left: calc(6px * var(--dock));
+  margin-right: calc(10px * var(--dock));
+  padding-right: calc(14px * var(--dock));
+  box-sizing: content-box;
+  border-right: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  opacity: var(--dock);
+  font: 500 11px/18px var(--font-dm-mono), monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.roll { width: max-content; will-change: transform; }
+.roll span { display: block; width: max-content; height: 18px; }
+.roll b { font-weight: 500; opacity: 0.55; margin-right: 0.7em; }
+
+.links { display: none; align-items: center; }
+.lk, .menu {
+  position: relative;
+  display: inline-block;
+  margin: 0 11px;
+  padding: 12px 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lk::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 1.5px;
+  background: repeating-linear-gradient(90deg, var(--stitch) 0 4px, transparent 4px 7px);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lk[aria-current]::after, .lk:focus-visible::after { transform: scaleX(1); }
+@media (hover: hover) and (pointer: fine) { .lk:hover::after { transform: scaleX(1); } }
+.mo {
+  margin-left: 6px;
+  padding: 6px 0 6px 16px;
+  font: 500 11px var(--font-dm-mono), monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  cursor: pointer;
+}
+.menu { margin-right: 0; }
+
+@media (min-width: 1024px) {
+  .nav { top: 2vw; }
+  .bar { padding: 6px 18px 6px 8px; font-size: 14px; }
+  .mono { width: 44px; height: 44px; }
+  .mark { height: calc(44px - 14px * var(--dock)); }
+  .chap { margin-right: calc(4px * var(--dock)); }
+  .links { display: flex; }
+  .menu { display: none; }
+}
+
+/* Phone menu: a paper sheet that slides down from the pill and fills the screen. */
+.sheet {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 96px var(--gutter) 40px;
+  border: 0;
+  background: var(--paper);
+  color: var(--brown);
+}
+.sheet[open] { display: flex; flex-direction: column; justify-content: space-between; }
+.sheet::backdrop { background: transparent; }
+.slide[open] { animation: sheet-down var(--dur-open) var(--ease-out); }
+@keyframes sheet-down { from { transform: translateY(-100%); } }
+.sheet ul { display: grid; gap: var(--s-3); margin: 0; padding: 0; list-style: none; }
+.sheet a { color: inherit; text-decoration: none; }
+.sheet ul a { display: block; padding-block: var(--s-2); }
+.sheet ul a[aria-current] { text-decoration: underline; text-decoration-color: var(--teal); text-decoration-style: dashed; text-decoration-thickness: 1.5px; }
+.sheet button { padding: 0; color: inherit; background: none; border: 0; cursor: pointer; }
+.sheet :global(.label) { color: var(--brown); min-height: 44px; display: inline-flex; align-items: center; }
+.close { position: absolute; top: 20px; right: var(--gutter); }
+.sheetFoot { display: flex; gap: var(--s-6); align-items: center; }

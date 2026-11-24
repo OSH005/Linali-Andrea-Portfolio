@@ -3,6 +3,10 @@ import { Gloock, Hanken_Grotesk, DM_Mono, Special_Elite, Noto_Serif_Sinhala } fr
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import SmoothScroll from "@/lib/motion/SmoothScroll";
+import { HeaderProvider } from "@/components/header/HeaderContext";
+import SiteHeader from "@/components/header/SiteHeader";
+import { getBrand } from "@/lib/media";
+import { getSite } from "@/lib/site";
 
 const gloock = Gloock({ variable: "--font-gloock", subsets: ["latin"], weight: "400" });
 const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"], weight: ["400", "500"] });
@@ -17,10 +21,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   const fonts = [gloock, hanken, dmMono, specialElite, sinhala].map((f) => f.variable).join(" ");
+  const { monogramCream: m } = getBrand();
+  const mark = { src: m.srcset.webp.split(" ")[0], width: m.width, height: m.height };
   return (
     <html lang="en" className={fonts}>
       <body>
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          <HeaderProvider>
+            <SiteHeader mark={mark} linkedin={getSite().links.linkedin} />
+            {children}
+          </HeaderProvider>
+        </SmoothScroll>
       </body>
     </html>
   );

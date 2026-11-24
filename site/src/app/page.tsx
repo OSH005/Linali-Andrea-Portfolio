@@ -1,7 +1,7 @@
 import Hero from '@/components/sections/Hero'
 import Manifesto from '@/components/sections/Manifesto'
 import Person from '@/components/sections/Person'
-import Footer from '@/components/sections/Footer'
+import Footer from '@/components/Footer'
 import Chapter from '@/components/Chapter'
 import { getFeatured } from '@/lib/collections'
 import { getMedia } from '@/lib/media'
@@ -17,7 +17,7 @@ export default function Home() {
         ))}
         <Person />
       </main>
-      <Footer />
+      <Footer variant="rise" />
     </>
   )
 }

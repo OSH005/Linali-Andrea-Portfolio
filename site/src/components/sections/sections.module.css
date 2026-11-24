@@ -89,18 +89,3 @@
   .figure { left: auto; right: 14%; translate: none; height: 82svh; }
 }
 
-/* Footer: a brown card rising over the cream */
-.footer {
-  position: relative;
-  z-index: 4;
-  margin-top: -40px;
-  border-radius: 40px 40px 0 0;
-  background: var(--brown);
-  color: var(--cream);
-  padding-block: var(--s-10) var(--s-7);
-}
-.footer ::selection { background: rgb(242 232 218 / 0.3); }
-.footer :focus-visible { outline-color: var(--cream); }
-.footerInner { display: grid; gap: var(--s-8); }
-.footerInner h2 { margin: 0; max-width: 12ch; }
-.fine { margin: 0; font-size: 14px; color: color-mix(in oklab, var(--cream) 70%, var(--brown)); }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Chapter from '@/components/Chapter'
-import Footer from '@/components/sections/Footer'
+import Footer from '@/components/Footer'
 import { getCollection, getCollections } from '@/lib/collections'
 import { getMedia } from '@/lib/media'
 import styles from '../collections.module.css'
@@ -26,7 +26,7 @@ export default async function CollectionPage(props: PageProps<'/collections/[slu
         </nav>
         <Chapter collection={c} media={getMedia(c.slug)} defaultOpen />
       </main>
-      <Footer />
+      <Footer variant="flow" />
     </>
   )
 }

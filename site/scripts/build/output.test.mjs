@@ -35,3 +35,11 @@ test('index.html and its CSS carry the Phase 2 fonts and no Bodoni', () => {
   for (const v of ['gloock', 'hanken', 'dm-mono', 'special-elite', 'noto-sinhala']) expect((html + css).includes(`--font-${v}`)).toBe(true)
   expect(/Bodoni/i.test(html + css)).toBe(false)
 })
+
+test.each(pages)('%s has the header pill and the contact card, nothing hidden inline', (p) => {
+  const html = fs.readFileSync(path.join(out, p), 'utf8')
+  expect(html).toMatch(/<nav[^>]*aria-label="Main"/)
+  expect(html).toContain('href="#contact"')
+  expect(html.match(/<footer[^>]*id="contact"/g)).toHaveLength(1)
+  expect(html).not.toMatch(/style="[^"]*(opacity:\s*0[;"]|visibility:\s*hidden)/)
+})

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Footer from '@/components/sections/Footer'
+import Footer from '@/components/Footer'
 import { getCollections } from '@/lib/collections'
 import { getMedia } from '@/lib/media'
 import styles from './collections.module.css'
@@ -32,7 +32,7 @@ export default function CollectionsIndex() {
           })}
         </ul>
       </main>
-      <Footer />
+      <Footer variant="flow" />
     </>
   )
 }
