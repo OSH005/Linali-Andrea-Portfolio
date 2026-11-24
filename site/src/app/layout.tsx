@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Gloock, Hanken_Grotesk, DM_Mono, Special_Elite, Noto_Serif_Sinhala } from "next/font/google";
 import "./globals.css";
+import SmoothScroll from "@/lib/motion/SmoothScroll";
 
 const gloock = Gloock({ variable: "--font-gloock", subsets: ["latin"], weight: "400" });
 const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"], weight: ["400", "500"] });
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   const fonts = [gloock, hanken, dmMono, specialElite, sinhala].map((f) => f.variable).join(" ");
   return (
     <html lang="en" className={fonts}>
-      <body>{children}</body>
+      <body>
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }
