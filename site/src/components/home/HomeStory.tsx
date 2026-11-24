@@ -16,10 +16,12 @@ import Drift, * as dr from './scenes/Drift'
 import s from './HomeStory.module.css'
 
 gsap.registerPlugin(ScrollTrigger)
-/** Lenis's wheel step lives on its private VirtualScroll too, so both are set. */
+/** Lenis's wheel step lives on its private VirtualScroll too, so both are set (guarded: a Lenis update must not stop the home paint). */
 const wheel = (l: Lenis, slow: boolean) => {
   l.options.lerp = slow ? 0.07 : 0.1
-  l.options.wheelMultiplier = (l as unknown as { virtualScroll: { options: { wheelMultiplier: number } } }).virtualScroll.options.wheelMultiplier = slow ? 0.65 : 1
+  l.options.wheelMultiplier = slow ? 0.65 : 1
+  const vs = (l as unknown as { virtualScroll?: { options?: { wheelMultiplier?: number } } }).virtualScroll?.options
+  if (vs) vs.wheelMultiplier = l.options.wheelMultiplier
 }
 /** Each scene paints only while the timeline is inside its range; outside it, its layer is hidden (visibility: nothing off screen can take focus). */
 const SCENES: { paint: Paint; dom: { root: HTMLElement | null }; live: (r: Ranges) => [number, number] }[] = [

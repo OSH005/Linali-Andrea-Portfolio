@@ -28,7 +28,7 @@
 :global([data-stage]) .sheet svg { display: block; width: min(50px, 12.8vw); height: auto; aspect-ratio: 1; overflow: visible; }
 
 /* tablets (spec 5.7): the main photo keeps its 2:3 beside the text (--th mirrors geometry tabletPhoto), the second overlapping its left edge, the sheet under the text */
-@media (min-width: 600px) and (max-width: 1023.98px) {
+@media (min-width: 600px) and (min-height: 600px) and (max-width: 1023.98px) {
   :global([data-stage]) .ln { --th: min(72vw, 86svh); --tt: calc((100% - var(--th)) / 2); }
   :global([data-stage]) .main { left: auto; right: 4.5%; top: var(--tt); width: calc(var(--th) / 1.5); height: var(--th); }
   :global([data-stage]) .second { left: calc(95.5% - var(--th) * 0.727); top: calc(var(--tt) + var(--th) * 0.5); height: calc(var(--th) * 0.4); }

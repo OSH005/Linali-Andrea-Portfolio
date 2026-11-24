@@ -157,7 +157,7 @@ export default function Drift({ data, stage }: { data: HomeData; stage: boolean 
   )
 }
 
-type Item = { start: number; size: number; id?: string; c: HTMLElement; img: HTMLElement | null; ov: HTMLElement | null; texts: HTMLElement[]; bn: HTMLElement | null }
+type Item = { start: number; size: number; id?: string; out?: boolean; c: HTMLElement; img: HTMLElement | null; ov: HTMLElement | null; texts: HTMLElement[]; bn: HTMLElement | null }
 let laid = '', items: Item[] = [], len = 0, ch = 0, vel = 0, px = 0, capKey: string | null = null, capT = 0, idxK = 0
 const vis = (el: Element, on: boolean) => void ((el as HTMLElement).style.visibility = on ? '' : 'hidden')
 
@@ -211,6 +211,9 @@ export const paint: Paint = (y, r, { phone, W, H, dt, now }) => {
     const size = i ? it.size : lead.size + shift, start = i ? it.start + shift : 0
     const rel = (start + size / 2 - x - W / 2) / W
     if (Math.abs(rel) < Math.abs(bestD)) [bestD, best] = [rel, it]
+    // off screen: not focusable (tabbing to a link there would scroll the hidden-overflow layer out of step with the strip)
+    const out = start + size - x <= 0 || start - x >= W
+    if (out !== it.out) vis(it.c, !(it.out = out))
     if (Math.abs(rel) > 1.6) return
     if (it.c.dataset.ar) {
       if (i) it.img!.style.transform = `translateX(${rel * (phone ? -3.5 : -4.5)}%) scale(1.08)`

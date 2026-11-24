@@ -93,4 +93,8 @@ test('tablets: a portrait photo stands beside the text, keeping its 2:3', () => 
   expect(windowRects(768, 1024, true).B).toEqual(tabletPhoto(768, 1024))
   expect(lunelleMain(820, 1180, true)).toEqual(tabletPhoto(820, 1180))
   expect(windowRects(599, 900, true).B[2]).toBe(100) // phones keep the full-width photo
+  // a phone turned sideways keeps the phone layout (spec 5.7): the tablet layout needs 600px both ways
+  expect(windowRects(844, 390, true).B[2]).toBe(100)
+  expect(lunelleMain(932, 430, true)[2]).toBe(100)
+  expect(windowRects(1023, 600, true).B).toEqual(tabletPhoto(1023, 600))
 })

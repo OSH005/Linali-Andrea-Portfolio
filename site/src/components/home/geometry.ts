@@ -7,7 +7,7 @@ export type Rect = [x: number, y: number, w: number, h: number]
 /** Mano Padana's window: A (small print beside her), B (centred), C (right of the text). Width keeps the photo's 2:3 on any aspect. */
 export function windowRects(W: number, H: number, phone: boolean): { A: Rect; B: Rect; C: Rect } {
   // phone: 69.3% tall (390×844), less on short screens so the text column (≈255px) fits under it
-  if (phone && W >= 600) {
+  if (phone && Math.min(W, H) >= 600) {
     const T = tabletPhoto(W, H)
     return { A: [60, 62, 20, (20 * W * 1.5) / H], B: T, C: T }
   }
@@ -48,7 +48,7 @@ export const litPath = (phase: number) =>
 
 /** Lunelle's main photo. Desktop: on the right edge, as tall as the screen, keeping 2:3. Phone: full width on top, 64% tall (less on short screens, so 300px stay for the text and the contact sheet). */
 export function lunelleMain(W: number, H: number, phone: boolean): Rect {
-  if (phone && W >= 600) return tabletPhoto(W, H)
+  if (phone && Math.min(W, H) >= 600) return tabletPhoto(W, H)
   if (phone) return [0, 0, 100, Math.min(64, 100 - 30000 / H)]
   const w = ((100 * H) / W) * 0.667
   return [100 - w, 0, w, 100]
@@ -57,7 +57,7 @@ export function lunelleMain(W: number, H: number, phone: boolean): Rect {
 /** The moon over the rise (0…1): its centre `y` (% of the photo frame) climbs 150 → 50, then its radius `r` (%) grows 17 → 120 to fill the frame. */
 export const moonRise = (p: number) => ({ y: lerp(150, 50, out3(seg(p, 0.1, 0.65))), r: lerp(17, 120, inOut(seg(p, 0.6, 1))) })
 
-/** Tablets (600–1023 wide, spec 5.7): a portrait photo keeps its 2:3 beside the text (right margin 4.5%, centred), instead of a cropped wide box. Mirrored in the scenes' tablet CSS. */
+/** Tablets (600–1023 wide and at least 600 tall; a phone turned sideways keeps the phone layout, spec 5.7): a portrait photo keeps its 2:3 beside the text (right margin 4.5%, centred), instead of a cropped wide box. Mirrored in the scenes' tablet CSS. */
 export function tabletPhoto(W: number, H: number): Rect {
   const h = Math.min(0.72 * W, 0.86 * H), w = h / 1.5
   return [95.5 - (w / W) * 100, ((H - h) / 2 / H) * 100, (w / W) * 100, (h / H) * 100]

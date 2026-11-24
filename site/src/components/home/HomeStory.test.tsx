@@ -139,3 +139,14 @@ test('desktop: the phone-only lunar contact sheet and Drift captions are not ren
   expect(container.querySelector('#lunelle image')).toBeNull()
   expect(container.querySelectorAll('#drift a[href="/collections/drift/"]')).toHaveLength(1)
 })
+
+test('drift: strip items off screen cannot take focus (the hidden-overflow layer would scroll to them)', () => {
+  const { container } = render(<HomeStory data={data} />)
+  const r = sceneRanges(900), lis = container.querySelectorAll<HTMLElement>('#drift ol > li'), end = lis[lis.length - 1]
+  act(() => tick(r.at.strip[0] + 10))
+  expect(end.style.visibility).toBe('hidden')
+  expect(lis[0].style.visibility).toBe('')
+  act(() => tick(r.at.strip[1] - 1))
+  expect(end.style.visibility).toBe('')
+  expect(lis[0].style.visibility).toBe('hidden')
+})
