@@ -1,4 +1,4 @@
-import { inkFor, jagSplit, tearPolygon, windowRects } from './geometry'
+import { inkFor, jagSplit, litPath, lunelleMain, moonRise, tearPolygon, windowRects } from './geometry'
 
 test('window rects: centred at 16:9, the photo keeps its 2:3 on a 4:3 screen', () => {
   const { A, B, C } = windowRects(1600, 900, false)
@@ -32,4 +32,24 @@ test('ink by luminance: cream on dark grounds, brown on light', () => {
   expect(inkFor([31, 30, 28])).toBe('#F2E8DA')
   expect(inkFor([242, 232, 218])).toBe('#3B2418')
   expect(inkFor([59, 36, 24])).toBe('#F2E8DA')
+})
+
+test('moon phases: the lit path waxes from a sliver to the full disc', () => {
+  expect(litPath(0.5)).toContain('A0.00 9')
+  expect(litPath(0.18)).toMatch(/ 0 0 0 10 1$/) // waxing crescent: inner arc bulges right
+  expect(litPath(0.999)).toMatch(/ 0 0 1 10 1$/)
+})
+
+test('lunelle main photo: right edge, keeps the photo 2:3 on any aspect; phone: top 64%, less on short screens', () => {
+  const d = lunelleMain(1600, 900, false)
+  ;[62.5, 0, 37.5, 100].forEach((v, i) => expect(d[i]).toBeCloseTo(v, 1))
+  expect(lunelleMain(390, 844, true)).toEqual([0, 0, 100, 64])
+  const p = lunelleMain(320, 640, true)
+  expect(640 - (p[3] * 640) / 100).toBeCloseTo(300) // room for the text and the contact sheet
+})
+
+test('moonrise: rises from below to the middle, then grows to fill the frame', () => {
+  expect(moonRise(0)).toEqual({ y: 150, r: 17 })
+  expect(moonRise(0.65).y).toBe(50)
+  expect(moonRise(1).r).toBe(120)
 })

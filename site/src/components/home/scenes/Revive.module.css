@@ -1,8 +1,10 @@
 /* Revive on the stage (mockup "Revive" + .tearshadow): her torn board in two halves with a teal cross-stitched seam, the pile under it. */
-.shadow, .half, .seam { display: none; }
+.shadow, .half, .seam, .night { display: none; }
 
 :global([data-stage]) .rv { z-index: 1; background: var(--cream); }
 :global([data-stage]) .shadow { display: block; position: absolute; left: 0; right: 0; top: 0; height: 6%; z-index: 9; pointer-events: none; filter: blur(6px); background: rgb(33 21 15 / 0.45); }
+/* night falls over Revive as the moon rises (opacity from paint) */
+:global([data-stage]) .night { display: block; position: absolute; inset: 0; z-index: 8; pointer-events: none; background: var(--night); opacity: 0; }
 /* her logo sits on opaque white: multiply drops the white into the cream (blend on the stacking-context element itself) */
 :global([data-stage]) .rv .text { mix-blend-mode: multiply; }
 /* shortcut: crops the square logo to its art (measured trim of revive/logo: 458×183 at 75,259 of 640); re-measure if the logo source changes */

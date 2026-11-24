@@ -43,10 +43,9 @@
 /* ---- Stage (motion on; HomeStory sets data-stage on the client): one pinned screen of layers (mockup "Home"). Phone below 1024, desktop at and above. ---- */
 .story[data-stage] { height: 100svh; overflow: hidden; background: var(--cream); }
 .story[data-stage] > section { position: absolute; inset: 0; overflow: hidden; }
-/* Interim until Tasks 9–10 paint Lunelle and Drift: each shows only on its chapter (opacity, so it stays in the accessibility tree). */
-.story[data-stage] > section:nth-of-type(n + 4) { z-index: 5; background: var(--cream); opacity: 0; pointer-events: none; }
-.story[data-chapter='3'] > section:nth-of-type(4),
-.story[data-chapter='4'] > section:nth-of-type(5) { opacity: 1; pointer-events: auto; }
+/* Interim until Task 10 paints Drift: it shows only on its chapter (visibility, so its links cannot take focus while off screen). */
+.story[data-stage] > section:nth-of-type(5) { z-index: 6; background: var(--cream); visibility: hidden; }
+.story[data-chapter='4'] > section:nth-of-type(5) { visibility: visible; }
 
 /* word masks for sentences that rise (client only, see words.tsx) */
 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }

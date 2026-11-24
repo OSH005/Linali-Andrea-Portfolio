@@ -69,7 +69,7 @@ test('resize or rotate: new scene lengths, same place in the same scene', () => 
   expect(scrollTo).toHaveBeenLastCalledWith({ top: remap(y, sceneRanges(900), sceneRanges(1366)), behavior: 'instant' })
 })
 
-test('one ticker paints the stage; far scenes are skipped and hidden', () => {
+test('one ticker paints the stage; far scenes are skipped and hidden from focus', () => {
   const { container } = render(<HomeStory data={data} />)
   expect(ticks.size).toBe(1)
   act(() => setMotion(false))
@@ -78,10 +78,35 @@ test('one ticker paints the stage; far scenes are skipped and hidden', () => {
   act(() => tick(10))
   expect(top.style.opacity).toBe('')
   expect(top.querySelector<HTMLElement>('p:last-of-type > span')!.getAttribute('style')).toContain('0.18') // manifesto at 18% ink
-  expect(rv.style.opacity).toBe('0')
+  expect(rv.style.visibility).toBe('hidden') // its text and links are not tabbable while off screen
   act(() => tick(sceneRanges(900).steps.rv![1][0]))
-  expect(top.style.opacity).toBe('0')
-  expect(rv.style.opacity).toBe('')
+  expect(top.style.visibility).toBe('hidden')
+  expect(rv.style.visibility).toBe('')
+})
+
+test('lunelle: the moon rises over Revive, then one sentence per step', () => {
+  const { container } = render(<HomeStory data={data} />)
+  const ln = container.querySelector<HTMLElement>('#lunelle')!, rv = container.querySelector<HTMLElement>('#revive')!
+  const r = sceneRanges(900)
+  act(() => tick(r.at.rise[0] + 300))
+  expect(ln.style.visibility).toBe('')
+  expect(rv.style.transform).toContain('scale(0.9') // Revive recedes into the night
+  expect(ln.querySelector<HTMLElement>('picture')!.style.clipPath).toMatch(/^circle\(/) // the first photo seen through the moon
+  act(() => tick(r.steps.ln![2][1] - 10))
+  const ps = [...ln.querySelectorAll<HTMLElement>('.body > p')]
+  expect(ps.map((p) => p.style.opacity)).toEqual(['0', '0', '', '0', '0'])
+})
+
+test('motion off keeps inline styles React set; only what paint wrote goes', () => {
+  const { container } = render(<HomeStory data={data} />)
+  act(() => setMotion(false))
+  const h = container.querySelector<HTMLElement>('#home-ln')!
+  h.setAttribute('style', 'color: red') // stands in for a style prop
+  act(() => setMotion(true))
+  act(() => tick(sceneRanges(900).steps.ln![1][0] + 10))
+  act(() => setMotion(false))
+  expect(h.getAttribute('style')).toBe('color: red')
+  expect(container.querySelector('#lunelle [style]:not(#home-ln)')).toBeNull()
 })
 
 test('word spans only on the stage; motion off leaves the plain, unstyled page', () => {

@@ -11,13 +11,13 @@ import m from './Revive.module.css'
 const JAG = jagSplit()
 
 /** Ref registry (see Opening.tsx). */
-export const dom = {} as { root: HTMLElement | null; shadow: HTMLElement; steps: HTMLElement[]; count: HTMLElement; board: HTMLElement; halves: HTMLElement[]; stitches: SVGElement[]; pile: HTMLElement }
+export const dom = {} as { root: HTMLElement | null; shadow: HTMLElement; night: HTMLElement; steps: HTMLElement[]; count: HTMLElement; board: HTMLElement; halves: HTMLElement[]; stitches: SVGElement[]; pile: HTMLElement }
 const grab = (n: HTMLElement | null) => {
   dom.root = n
   if (!n) return
   const q = (c: string) => n.querySelector<HTMLElement>(`.${c}`)!
   Object.assign(dom, {
-    shadow: q(m.shadow), steps: [...q(s.steps).children], count: q(s.count), board: q(m.board), pile: q(m.pile),
+    shadow: q(m.shadow), night: q(m.night), steps: [...q(s.steps).children], count: q(s.count), board: q(m.board), pile: q(m.pile),
     halves: [...n.querySelectorAll(`.${m.half}`)], stitches: [...q(m.seam).children],
   })
 }
@@ -51,15 +51,18 @@ export default function Revive({ data, stage }: { data: HomeData; stage: boolean
           <Photo p={data.rv.pile} sizes="(min-width: 1024px) 40vw, 80vw" className={`${s.pile} ${m.pile}`} />
         </div>
       </div>
+      <div className={m.night} aria-hidden="true" />
     </section>
   )
 }
 
-/** Revive settles in under the tear (1.08 → 1); the two halves of her board drift together as cross-stitches close the seam (mockup "TEAR"). */
+/** Revive settles in under the tear (1.08 → 1); the two halves of her board drift together as cross-stitches close the seam (mockup "TEAR"); then night falls and it recedes as the moon rises (mockup "MOONRISE"). */
 export const paint: Paint = (y, r, { phone, W, H }) => {
-  const { root, shadow, steps, count, board, halves, stitches, pile } = dom
+  const { root, shadow, night, steps, count, board, halves, stitches, pile } = dom
   const u = r.unit, rv = r.steps.rv!, tear = inOut(seg(y, ...r.at.tear)), sc = lerp(1.08, 1, out3(tear))
-  root!.style.transform = `scale(${sc})`
+  const rise = seg(y, ...r.at.rise)
+  root!.style.transform = rise > 0 ? `scale(${lerp(1, 0.9, inOut(rise))}) translateY(${-rise * 4}%)` : `scale(${sc})`
+  night.style.opacity = String(inOut(seg(rise, 0, 0.45)))
   // the tear's shadow sits just under the torn edge (screen %), drawn inside this layer, which is scaled about its centre
   const edge = lerp(103, -12, tear) - 2 - tear * 8
   shadow.style.opacity = tear > 0 && tear < 1 ? '' : '0'

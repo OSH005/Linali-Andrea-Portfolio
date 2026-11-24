@@ -15,7 +15,7 @@ import Drift, * as dr from './scenes/Drift'
 import s from './HomeStory.module.css'
 
 gsap.registerPlugin(ScrollTrigger)
-/** Each scene paints only while the timeline is inside its range; outside it, its layer is hidden (opacity: it stays readable to assistive tech). */
+/** Each scene paints only while the timeline is inside its range; outside it, its layer is hidden (visibility: nothing off screen can take focus). */
 const SCENES: { paint: Paint; dom: { root: HTMLElement | null }; live: (r: Ranges) => [number, number] }[] = [
   { ...op, live: (r) => [0, r.at.open[1]] },
   { ...mp, live: (r) => [0, r.at.tear[1]] },
@@ -65,6 +65,8 @@ export default function HomeStory({ data }: { data: HomeData }) {
     }
 
     el.setAttribute('data-stage', '')
+    // inline styles React set before the first paint: motion off restores these and drops everything paint wrote
+    const own = new Map([...el.querySelectorAll('[style]')].map((n) => [n, n.getAttribute('style')!]))
     let r = sceneRanges(innerHeight), from = r, y0 = 0, W = 0, H = 0
     const t0 = gsap.ticker.time, shown: boolean[] = []
     let last = 0
@@ -79,8 +81,7 @@ export default function HomeStory({ data }: { data: HomeData }) {
         if (on) paint(y, r, ctx)
         if (on !== shown[i] && dom.root) {
           shown[i] = on
-          dom.root.style.opacity = on ? '' : '0'
-          dom.root.style.pointerEvents = on ? '' : 'none'
+          dom.root.style.visibility = on ? '' : 'hidden'
         }
       })
       const h = homeHeader(y, r)
@@ -117,8 +118,8 @@ export default function HomeStory({ data }: { data: HomeData }) {
       frameRef.current = null
       st.kill()
       el.removeAttribute('data-stage')
-      // the stacked page carries none of the stage's inline styles (scenes set styles only from paint, never as React props)
-      el.querySelectorAll('[style]').forEach((n) => n.removeAttribute('style'))
+      // the stacked page carries none of the stage's inline styles
+      el.querySelectorAll('[style]').forEach((n) => (own.has(n) ? n.setAttribute('style', own.get(n)!) : n.removeAttribute('style')))
       delete el.dataset.chapter
       if (el.isConnected) window.scrollTo({ top: i === 0 ? 0 : (marks[i]?.getBoundingClientRect().top ?? 0) + scrollY, behavior: 'instant' })
     }
@@ -129,7 +130,7 @@ export default function HomeStory({ data }: { data: HomeData }) {
       <Opening data={data} stage={on} />
       <ManoPadana data={data} stage={on} />
       <Revive data={data} stage={on} />
-      <Lunelle data={data} />
+      <Lunelle data={data} stage={on} />
       <Drift data={data} />
     </div>
   )

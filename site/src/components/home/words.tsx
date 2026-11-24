@@ -22,10 +22,10 @@ export function rise(el: Element, k: number, st = 0.03) {
 }
 
 const pad2 = (n: number) => String(n).padStart(2, '0')
-/** Sentence steps: only the current sentence shows (the others stay in the accessibility tree), rising for `k`; counter `NN / NN`. */
-export function showStep(ps: HTMLElement[], count: HTMLElement, i: number, k: number) {
+/** Sentence steps: only the current sentence shows (the others stay in the accessibility tree), rising for `k`; counter `NN / NN` (if the scene has one). */
+export function showStep(ps: HTMLElement[], count: HTMLElement | null, i: number, k: number) {
   ps.forEach((p, j) => void (p.style.opacity = j === i ? '' : '0'))
   rise(ps[i], k, 0.018)
   const t = `${pad2(i + 1)} / ${pad2(ps.length)}`
-  if (count.textContent !== t) count.textContent = t
+  if (count && count.textContent !== t) count.textContent = t
 }
