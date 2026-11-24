@@ -23,9 +23,18 @@ export const isSpread = (w, h) => w / h > 2.5
 const MAX = WIDTHS[WIDTHS.length - 1]
 export const widthsFor = (w) => (w < WIDTHS[0] ? [w] : [...WIDTHS.filter((x) => x < Math.min(w, MAX)), Math.min(w, MAX)])
 
+// Gentle, garment-safe lift for photographs (spec 9): no upscaling, no recolouring. Never for cut-outs, pages or logos.
+export const enhance = (s) =>
+  s
+    .rotate()
+    .resize({ fit: 'inside', kernel: 'lanczos3' })
+    .linear(1.05, -5)
+    .modulate({ brightness: 1.02, saturation: 1.05 })
+    .sharpen({ sigma: 0.6, m1: 0.5, m2: 1.2 })
+
 // Decoded once, upright, metadata dropped (sharp never copies EXIF unless asked).
-async function load(file) {
-  return sharp(file).rotate().raw().toBuffer({ resolveWithObject: true })
+async function load(file, { enhanced = false } = {}) {
+  return (enhanced ? enhance(sharp(file)) : sharp(file).rotate()).raw().toBuffer({ resolveWithObject: true })
 }
 const fromRaw = ({ data, info }) => sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } })
 
@@ -71,8 +80,43 @@ async function emit(img, { folder, id, order, outRoot, urlPrefix, zoomWidth }) {
   }
 }
 
-export async function buildImage(file, opts) {
-  return emit(await load(file), opts)
+export async function buildImage(file, { enhanced, ...opts }) {
+  return emit(await load(file, { enhanced }), opts)
+}
+
+const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+
+// `input` is a path or a PNG buffer. Returns a PNG: the colour `hex` everywhere, with `alpha` (1 channel raw) as its alpha.
+async function solid(width, height, hex, alpha) {
+  const [r, g, b] = hexRgb(hex)
+  const rgba = Buffer.alloc(width * height * 4)
+  for (let i = 0; i < width * height; i++) rgba.set([r, g, b, alpha[i]], i * 4)
+  return sharp(rgba, { raw: { width, height, channels: 4 } }).png().toBuffer()
+}
+
+// Keeps the alpha of a transparent mark (path or buffer), fills its colour.
+export async function recolor(input, hex) {
+  const { data, info } = await sharp(input).ensureAlpha().extractChannel(3).raw().toBuffer({ resolveWithObject: true })
+  return solid(info.width, info.height, hex, data)
+}
+
+// Dark ink on paper (opaque) becomes a transparent mark: alpha from darkness, filled `hex`, trimmed.
+export async function silhouette(file, hex) {
+  const { data, info } = await sharp(file).flatten({ background: '#ffffff' }).greyscale().raw().toBuffer({ resolveWithObject: true })
+  const { width: w, height: h } = info
+  const alpha = Buffer.alloc(w * h)
+  let x0 = w, y0 = h, x1 = -1, y1 = -1
+  for (let i = 0; i < w * h; i++) {
+    const a = 255 - data[i]
+    const v = a < 12 ? 0 : a > 243 ? 255 : Math.round(((a - 12) * 255) / 231) // paper noise drops out
+    alpha[i] = v
+    if (v) {
+      const x = i % w, y = (i / w) | 0
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y
+    }
+  }
+  if (x1 < 0) throw new Error(`silhouette: no ink in ${file}`)
+  return sharp(await solid(w, h, hex, alpha)).extract({ left: x0, top: y0, width: x1 - x0 + 1, height: y1 - y0 + 1 }).png().toBuffer()
 }
 
 export async function buildCollection(slug, { srcRoot, outRoot, urlPrefix = '', alt = {} }) {
@@ -102,7 +146,7 @@ export async function buildCollection(slug, { srcRoot, outRoot, urlPrefix = '', 
 
   const shoot = []
   for (const f of shootFiles) {
-    shoot.push(await buildImage(path.join(dir, 'shoot', f), { ...ctx, folder: `${slug}/shoot`, id: stem(f), order: parseOrder(f) }))
+    shoot.push(await buildImage(path.join(dir, 'shoot', f), { ...ctx, enhanced: true, folder: `${slug}/shoot`, id: stem(f), order: parseOrder(f) }))
   }
 
   const pages = []
@@ -129,7 +173,21 @@ export async function buildPersonal({ srcRoot, outRoot, urlPrefix = '' }) {
   const dir = path.join(srcRoot, 'personal')
   const out = {}
   for (const f of fs.readdirSync(dir).filter(isImage).sort()) {
-    out[stem(f)] = await buildImage(path.join(dir, f), { outRoot, urlPrefix, folder: 'personal', id: stem(f), order: 0 })
+    // Photographs are enhanced; PNG cut-outs keep their alpha untouched.
+    const enhanced = /.(jpe?g|webp)$/i.test(f)
+    out[stem(f)] = await buildImage(path.join(dir, f), { outRoot, urlPrefix, folder: 'personal', id: stem(f), order: 0, enhanced })
+  }
+  return out
+}
+
+// srcRoot is the Inspiration folder itself. Filename order becomes ids 1…n, 640/1280 wide.
+export async function buildInspiration({ srcRoot, outRoot, urlPrefix = '' }) {
+  fs.rmSync(path.join(outRoot, 'media', 'inspiration'), { recursive: true, force: true })
+  const out = []
+  for (const [i, f] of fs.readdirSync(srcRoot).filter(isImage).sort().entries()) {
+    // Downscale first so the sharpening lands at the delivered size.
+    const small = await sharp(path.join(srcRoot, f)).rotate().resize({ width: 1280, withoutEnlargement: true }).toBuffer()
+    out.push(await buildImage(small, { outRoot, urlPrefix, folder: 'inspiration', id: String(i + 1), order: i + 1, enhanced: true }))
   }
   return out
 }

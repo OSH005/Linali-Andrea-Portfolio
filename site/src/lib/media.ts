@@ -18,10 +18,18 @@ export interface CollectionMedia {
   logo?: MediaImage
 }
 
+export interface Brand {
+  monogram: MediaImage
+  monogramCream: MediaImage
+  driftLogoBrown: MediaImage
+  driftLogoCream: MediaImage
+}
+
 interface Manifest {
   collections: Record<string, CollectionMedia>
   personal: Record<string, MediaImage>
-  brand: { monogram: MediaImage }
+  brand: Brand
+  inspiration: MediaImage[]
 }
 
 const m = manifest as Manifest
@@ -38,4 +46,5 @@ export function getPersonal(name: string): MediaImage {
   return p
 }
 
-export const getBrand = () => m.brand
+export const getBrand = (): Brand => m.brand
+export const getInspiration = (): MediaImage[] => m.inspiration

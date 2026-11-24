@@ -3,7 +3,7 @@
 // MEDIA_BASE_URL (e.g. https://media.example.com) prefixes every URL; default is same-origin.
 import fs from 'node:fs'
 import path from 'node:path'
-import { buildCollection, buildPersonal, buildImage } from './lib.mjs'
+import { buildCollection, buildPersonal, buildImage, buildInspiration, recolor, silhouette } from './lib.mjs'
 
 const site = path.resolve(import.meta.dirname, '../..')
 const mediaSrc = path.resolve(site, '../media-src')
@@ -19,7 +19,7 @@ if (!arg) {
 
 const manifest = fs.existsSync(manifestPath)
   ? JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
-  : { collections: {}, personal: {}, brand: {} }
+  : { collections: {}, personal: {}, brand: {}, inspiration: [] }
 
 const slugs = arg === '--all' ? fs.readdirSync(path.join(mediaSrc, 'collections')) : [arg]
 for (const slug of slugs) {
@@ -34,10 +34,18 @@ for (const slug of slugs) {
 if (arg === '--all') {
   for (const dir of ['personal', 'brand']) fs.rmSync(path.join(outRoot, 'media', dir), { recursive: true, force: true })
   manifest.personal = await buildPersonal({ srcRoot: mediaSrc, outRoot, urlPrefix })
+  const brand = (input, id) => buildImage(input, { outRoot, urlPrefix, folder: 'brand', id, order: 0 })
+  const monogram = path.join(mediaSrc, 'brand/monogram.png')
+  // Both logo sources are dark ink on opaque white, so the light variants come from a silhouette, not a plain recolour.
+  const driftBrown = await silhouette(path.join(mediaSrc, 'collections/drift/logo.png'), '#3B2418')
   manifest.brand = {
-    monogram: await buildImage(path.join(mediaSrc, 'brand/monogram.png'), { outRoot, urlPrefix, folder: 'brand', id: 'monogram', order: 0 }),
+    monogram: await brand(monogram, 'monogram'),
+    monogramCream: await brand(await silhouette(monogram, '#F2E8DA'), 'monogram-cream'),
+    driftLogoBrown: await brand(driftBrown, 'drift-logo-brown'),
+    driftLogoCream: await brand(await recolor(driftBrown, '#F7F0E6'), 'drift-logo-cream'),
   }
-  console.log(`personal: ${Object.keys(manifest.personal).length} images, brand: monogram`)
+  manifest.inspiration = await buildInspiration({ srcRoot: path.join(mediaSrc, 'Inspiration'), outRoot, urlPrefix })
+  console.log(`personal: ${Object.keys(manifest.personal).length} images, brand: ${Object.keys(manifest.brand).length}, inspiration: ${manifest.inspiration.length}`)
 }
 
 fs.mkdirSync(path.dirname(manifestPath), { recursive: true })

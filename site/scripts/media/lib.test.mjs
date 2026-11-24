@@ -2,9 +2,9 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import sharp from 'sharp'
-import { parseOrder, isSpread, widthsFor, buildCollection } from './lib.mjs'
+import { parseOrder, isSpread, widthsFor, buildCollection, enhance, recolor, silhouette, buildInspiration } from './lib.mjs'
 
-let fx, fxPortrait, fxWide, fxMixed, tmpRoot
+let fx, fxPortrait, fxWide, fxMixed, fxInspiration, logoFixture, strokeFixture, tmpRoot
 
 async function img(file, width, height, withGps = false) {
   fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -25,6 +25,16 @@ beforeAll(async () => {
   await img(path.join(tmp, 'src4/t/pages/06.png'), 1414, 1000)
   fxMixed = { srcRoot: path.join(tmp, 'src4'), outRoot: path.join(tmp, 'out4'), urlPrefix: '', alt: {} }
   tmpRoot = tmp
+  logoFixture = path.join(tmp, 'logo.png')
+  await sharp({ create: { width: 8, height: 8, channels: 4, background: { r: 10, g: 20, b: 30, alpha: 1 } } }).png().toFile(logoFixture)
+  // Black stroke (4x8 block) on white paper, with a white margin to be trimmed.
+  strokeFixture = path.join(tmp, 'stroke.png')
+  await sharp({ create: { width: 20, height: 20, channels: 3, background: '#ffffff' } })
+    .composite([{ input: await sharp({ create: { width: 4, height: 8, channels: 3, background: '#000000' } }).png().toBuffer(), left: 8, top: 6 }])
+    .png().toFile(strokeFixture)
+  await img(path.join(tmp, 'insp/PXL_b.jpg.jpeg'), 1500, 1000)
+  await img(path.join(tmp, 'insp/PXL_a.jpg.jpeg'), 900, 600)
+  fxInspiration = { srcRoot: path.join(tmp, 'insp'), outRoot: path.join(tmp, 'out7'), urlPrefix: '' }
   fxWide = { srcRoot: path.join(tmp, 'src3'), outRoot: path.join(tmp, 'out3'), urlPrefix: '', alt: {} }
 })
 
@@ -102,4 +112,30 @@ test('a successful build replaces stale output', async () => {
   fs.writeFileSync(stale, 'x')
   await buildCollection('t', { ...fx, outRoot })
   expect(fs.existsSync(stale)).toBe(false)
+})
+
+test('enhance keeps size and strips metadata', async () => {
+  const out = await enhance(sharp(path.join(tmpRoot, 'src/t/shoot/01-a.jpg'))).jpeg().toBuffer()
+  const m = await sharp(out).metadata()
+  expect([m.width, m.height]).toEqual([1200, 1800])
+  expect(m.exif).toBeUndefined()
+})
+
+test('recolor fills every visible pixel with the colour and keeps alpha', async () => {
+  const px = await sharp(await recolor(logoFixture, '#F2E8DA')).ensureAlpha().raw().toBuffer()
+  expect([...px.subarray(0, 4)]).toEqual([0xf2, 0xe8, 0xda, 255])
+})
+
+test('silhouette makes dark strokes opaque brown and white paper transparent, trimmed', async () => {
+  const { data, info } = await sharp(await silhouette(strokeFixture, '#3B2418')).raw().toBuffer({ resolveWithObject: true })
+  expect([info.width, info.height]).toEqual([4, 8])
+  expect([...data.subarray(0, 4)]).toEqual([0x3b, 0x24, 0x18, 255])
+})
+
+test('inspiration is built in filename order as 1…n', async () => {
+  const list = await buildInspiration(fxInspiration)
+  expect(list.map((i) => i.id)).toEqual(['1', '2'])
+  expect(list[0].width).toBe(900) // PXL_a sorts first
+  expect(list[0].srcset.webp).toMatch('/media/inspiration/1-640.webp')
+  expect(list[0].srcset.webp).toMatch('/media/inspiration/1-900.webp')
 })
