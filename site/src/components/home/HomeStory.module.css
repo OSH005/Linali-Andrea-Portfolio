@@ -1,0 +1,50 @@
+/* Stacked layout: the page without JS and with Motion off (spec 10). Each scene readable on its own. */
+.story { position: relative; }
+.scene { padding-block: 112px 72px; }
+.grid { display: grid; gap: 32px; }
+.grid > * { min-width: 0; }
+.text { display: grid; gap: 16px; align-content: start; }
+.text h1, .text h2, .text p { margin: 0; }
+.manif { max-width: 22ch; }
+.steps { display: grid; gap: 1em; }
+.steps p { margin: 0; }
+.sinh { display: block; font-family: var(--font-noto-sinhala), serif; font-size: 0.5em; margin-top: 0.3em; }
+.logoTitle { margin: 0 0 12px; }
+
+.scene picture { display: block; }
+.scene img { display: block; max-width: 100%; height: auto; }
+.scene .logoTitle img { width: auto; height: clamp(56px, 8vw, 96px); }
+
+.her img { max-height: 80svh; width: auto; margin-inline: auto; filter: drop-shadow(0 18px 30px rgb(59 36 24 / 0.25)); }
+.mood { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.col { display: grid; gap: 8px; align-content: start; }
+.col img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+
+.photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.photos img { width: 100%; }
+.boards { display: grid; gap: 16px; }
+.pile { width: 70%; justify-self: end; rotate: 2deg; }
+
+.strip { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.strip > li { min-width: 0; }
+.card { display: grid; gap: 12px; align-content: start; }
+.card img { width: 100%; }
+.card p, .panel p, .panel h3 { margin: 0; }
+.panel { position: relative; display: grid; gap: 12px; align-content: center; padding: 24px; background: var(--paper); }
+.bignum { position: absolute; right: 12px; top: 0; font: 400 96px/1 var(--font-gloock), serif; color: transparent; -webkit-text-stroke: 1px rgb(59 36 24 / 0.25); }
+.cta { color: inherit; font-weight: 500; min-height: 44px; display: inline-flex; align-items: center; }
+
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: 5fr 7fr; gap: 64px; align-items: start; }
+  .opening .grid { grid-template-columns: 4fr 4fr 4fr; align-items: end; }
+  .photos { gap: 16px; }
+}
+
+/* Stage (motion on, set by HomeStory). Interim until Tasks 8–10 paint the scenes: one scene per chapter, full screen. */
+.story[data-stage] { height: 100vh; overflow: hidden; background: var(--cream); }
+.story[data-stage] > section { position: absolute; inset: 0; overflow: hidden; display: none; }
+.story[data-chapter='0'] > section:nth-of-type(1),
+.story[data-chapter='1'] > section:nth-of-type(2),
+.story[data-chapter='2'] > section:nth-of-type(3),
+.story[data-chapter='3'] > section:nth-of-type(4),
+.story[data-chapter='4'] > section:nth-of-type(5) { display: block; }
