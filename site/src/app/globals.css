@@ -110,7 +110,14 @@ html { scrollbar-color: var(--brown-muted) var(--cream); }
 .pressable { transition: scale var(--dur-press) var(--ease-out); }
 .pressable:active { scale: 0.97; }
 
+/* Page changes cross-fade; a collection's photo carries over from /collections to its page. Ignored where unsupported. */
+@view-transition { navigation: auto; }
+.vt-photo img { view-transition-name: collection-photo; } /* global: a CSS module would rename it */
+::view-transition-group(collection-photo) { animation-duration: 0.7s; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.4s; }
+
 @media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

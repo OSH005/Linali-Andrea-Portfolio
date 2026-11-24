@@ -1,0 +1,88 @@
+/* /collections (mockup "COLLECTIONS", v12). Phones first: open rows; ≥1024 a 12-column list; [data-live] the phone focus rail. */
+.index { background: var(--cream); transition: background-color 0.9s var(--ease-out); overflow-x: clip; }
+.top { position: relative; }
+.pin { padding: 96px 24px 64px; }
+.h1 { margin: 8px 0 0; font: 400 clamp(22px, 4.8vw, 32px) / 1.18 var(--font-gloock), serif; letter-spacing: -0.01em; text-wrap: balance; }
+.list { margin: 30px 0 0; padding: 0; list-style: none; }
+.row { border-top: 1px solid rgb(59 36 24 / 0.16); }
+.link { position: relative; display: flex; flex-direction: column; padding: 14px 0 30px; color: inherit; text-decoration: none; }
+.pics { position: relative; display: block; overflow: hidden; border-radius: 2px; aspect-ratio: 8 / 9; max-height: 52svh; }
+.pic, .pic img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.pics .pic:not(:first-child) { display: none; }
+.n, .go, .sew { display: none; }
+.tw { display: flex; flex-direction: column; }
+.meta { order: -1; margin: 12px 0 0; }
+.si { font: 400 13px var(--font-noto-sinhala), serif; letter-spacing: 0; text-transform: none; }
+.t { margin: 6px 0 0; font: 400 28px / 1.05 var(--font-gloock), serif; letter-spacing: -0.015em; }
+.line { margin: 12px 0 0; font-size: 16px; line-height: 1.5; max-width: 34ch; }
+.cnt { margin: 10px 0 0; }
+.open { align-self: flex-end; margin-top: -1.2em; font-weight: 500; font-size: 15px; }
+.open::after { content: ""; display: block; height: 2px; margin-top: 4px; background: repeating-linear-gradient(90deg, var(--teal) 0 7px, transparent 7px 11px); }
+
+/* tablets (not a phone turned sideways): the photo beside its text */
+@media (min-width: 600px) and (min-height: 600px) and (max-width: 1023.98px) {
+  .link { display: grid; grid-template-columns: 46% minmax(0, 1fr); column-gap: 28px; align-content: end; }
+  .pics { grid-row: 1 / span 4; aspect-ratio: 10 / 13; max-height: 56svh; }
+  .tw, .lw, .open { grid-column: 2; }
+  .tw { align-self: end; }
+  .t { font-size: 35px; }
+}
+
+/* ---- the focus rail (motion on, below 1024): the section pins while the rows are painted (FocusRail) ---- */
+.top[data-live] { height: calc(100svh + var(--len)); }
+.top[data-live] .pin { position: sticky; top: 0; height: 100svh; box-sizing: border-box; overflow: clip; }
+.top[data-live] .head { position: relative; z-index: 2; }
+.top[data-live] .list { margin: 0; }
+.top[data-live] .row { position: absolute; left: 24px; right: 24px; top: 0; }
+/* the link is as tall as an open row; later rows lie on top, so every point belongs to the row drawn there */
+.top[data-live] .link { position: absolute; left: 0; right: 0; top: 0; display: block; height: var(--ex); padding: 0; }
+.top[data-live] .link:focus-visible { outline-offset: -2px; }
+.top[data-live] .pics { position: absolute; left: 0; top: 14px; width: var(--iw); height: var(--ih); max-height: none; aspect-ratio: auto; border-radius: 0; transform-origin: 0 0; }
+.top[data-live] .pics .pic { display: block; }
+.top[data-live] .tw, .top[data-live] .lw { display: contents; }
+.top[data-live] .meta { position: absolute; left: 72px; top: 18px; margin: 0; white-space: nowrap; }
+.top[data-live] .t { position: absolute; left: 72px; top: 38px; margin: 0; font-size: 22px; line-height: 1; white-space: nowrap; transform-origin: 0 0; }
+.top[data-live] .line { position: absolute; left: var(--tx); right: 0; top: var(--lt); margin: 0; max-width: none; }
+.top[data-live] .cnt { position: absolute; left: var(--tx); top: var(--ct); margin: 0; }
+.top[data-live] .open { position: absolute; right: 0; top: var(--ot); margin: 0; }
+/* the text lies over the photo while it opens */
+.top[data-live] :is(.meta, .t, .line, .cnt, .open) { z-index: 1; }
+
+/* ---- desktop: one row per collection on a 12-column grid; all four fit the first screen at 16:9 ---- */
+@media (min-width: 1024px) {
+  .pin { padding: 15svh 4.5% 9svh; }
+  .h1 { margin-top: 0.8vw; font-size: 1.9vw; line-height: 1.15; }
+  .list { margin-top: 4.3vw; border-bottom: 1px solid rgb(59 36 24 / 0.16); }
+  .row { position: relative; }
+  .link { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 1.6vw; align-items: center; padding: 1.25vw 0; }
+  .pics, .pn, .open { display: none; }
+  .n { display: block; grid-column: 1; align-self: start; padding-top: 0.45vw; font: 400 1.2vw / 1 var(--font-gloock), serif; color: var(--muted); }
+  .tw { grid-column: 2 / span 6; }
+  .t { margin: 0; font-size: 3.2vw; line-height: 1; letter-spacing: -0.02em; white-space: nowrap; }
+  .meta { order: 0; margin-top: 0.9vw; }
+  .lw { grid-column: 8 / span 4; }
+  .line { margin: 0; font-size: clamp(14px, 1.18vw, 18px); max-width: 28ch; }
+  .cnt { margin-top: 0.8vw; }
+  .go { grid-column: 12; justify-self: end; display: grid; place-items: center; width: 3.4vw; height: 3.4vw; border-radius: 50%; border: 1px solid rgb(59 36 24 / 0.35); font-size: 1.3vw; }
+  .sew { display: block; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: repeating-linear-gradient(90deg, var(--teal) 0 9px, transparent 9px 15px); transform: scaleX(0); transform-origin: 0 50%; }
+  .link:focus-visible .sew { transform: scaleX(1); }
+}
+/* hover: the others fade to 34%, the name shifts 1vw, the arrow fills, a stitch sews under the row (fine pointers only) */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .row { transition: opacity 0.35s var(--ease-out); }
+  .list:hover .row:not(:hover) { opacity: 0.34; }
+  .t, .go, .sew { transition: transform 0.5s var(--ease-out), background-color 0.3s, color 0.3s, border-color 0.3s; }
+  .link:hover .t { transform: translateX(1vw); }
+  .link:hover .go { background: var(--brown); border-color: var(--brown); color: var(--cream); transform: translateX(0.6vw); }
+  .link:hover .sew { transform: scaleX(1); }
+}
+
+/* the follow frame (desktop, fine pointers; FollowFrame paints it) */
+.frame { position: fixed; left: 0; top: 0; z-index: 25; width: 17vw; height: 21.25vw; overflow: hidden; pointer-events: none; border-radius: 3px; box-shadow: 0 30px 60px rgb(59 36 24 / 0.28); will-change: transform, clip-path; }
+.set { position: absolute; inset: 0; overflow: hidden; }
+
+/* the entrance (motion on, once): the heading rises word by word, the rows come up one after another */
+@keyframes rise { from { transform: translateY(110%); } }
+@keyframes up { from { opacity: 0; translate: 0 30px; } }
+.index[data-enter] .h1 > span > span { animation: rise 0.9s var(--ease-out) 0.15s both; }
+.index[data-enter] .row { animation: up 0.9s var(--ease-out) calc(0.3s + var(--i) * 0.11s) both; }

@@ -48,3 +48,11 @@ test.each(pages)('%s header links work without JS (outside the phone menu dialog
   const bar = fs.readFileSync(path.join(out, p), 'utf8').match(/<nav[^>]*aria-label="Main"[\s\S]*?<\/nav>/)[0].replace(/<dialog[\s\S]*?<\/dialog>/g, '')
   for (const href of ['/collections/', '/about/', '#contact']) expect(bar).toContain(`href="${href}"`)
 })
+
+test('cross-document View Transitions: on for navigations, and the collection photo is named in the CSS', () => {
+  const css = fs.readdirSync(path.join(out, '_next/static'), { recursive: true, withFileTypes: true })
+    .filter((f) => f.isFile() && f.name.endsWith('.css'))
+    .map((f) => fs.readFileSync(path.join(f.parentPath, f.name), 'utf8')).join('\n')
+  expect(css).toMatch(/@view-transition\s*\{\s*navigation:\s*auto/)
+  expect(css).toMatch(/view-transition-name:\s*collection-photo/)
+})
