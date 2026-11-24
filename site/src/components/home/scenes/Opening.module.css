@@ -1,0 +1,29 @@
+/* Opening on the stage (mockup "opening"): she stands flush on the bottom edge, moodboard behind, name and manifesto left.
+   Phone below 1024, desktop at and above. Everything here applies only with motion on ([data-stage], set on the client). */
+.dup { display: none; } /* the moodboard's second copy of each column (for the endless drift) */
+
+:global([data-stage]) .op { z-index: 4; }
+:global([data-stage]) .hero { position: absolute; z-index: 3; left: 24px; right: 24px; top: 92px; display: block; }
+:global([data-stage]) .name { margin: 0; font-size: clamp(58px, 12vw, 100px); line-height: 0.86; letter-spacing: -0.035em; }
+:global([data-stage]) .name > span { display: block; }
+:global([data-stage]) .label { margin: 14px 0 0; }
+:global([data-stage]) .manif { margin: 22px 0 0; max-width: 15ch; font: 400 clamp(23px, 4.6vw, 38px) / 1.14 var(--font-gloock), serif; letter-spacing: -0.01em; color: var(--brown); }
+
+/* short phones: she and the moodboard start below the manifesto (370px); 390×844 is unchanged */
+:global([data-stage]) .her { position: absolute; z-index: 4; right: -3%; bottom: -7%; height: min(60%, 107% - 370px); filter: drop-shadow(0 16px 30px rgb(59 36 24 / 0.22)); transform-origin: 50% 100%; }
+:global([data-stage]) .her img { height: 100%; width: auto; max-width: none; max-height: none; margin: 0; filter: none; }
+
+:global([data-stage]) .cols { position: absolute; z-index: 1; left: -4%; right: -4%; top: max(47%, 370px); bottom: -2%; display: flex; gap: 2%; overflow: hidden; }
+:global([data-stage]) .col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+:global([data-stage]) .dup { display: block; }
+:global([data-stage]) .col img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+:global([data-stage]) .col .wide img { aspect-ratio: 4 / 3; }
+
+@media (min-width: 1024px) {
+  :global([data-stage]) .hero { left: 4.5%; right: auto; top: 20%; width: 42%; }
+  :global([data-stage]) .name { font-size: 9.2vw; }
+  :global([data-stage]) .label { margin-top: 20px; }
+  :global([data-stage]) .manif { margin-top: 4.2vw; max-width: 17ch; font-size: 2.45vw; }
+  :global([data-stage]) .her { left: 50%; right: auto; height: 106%; bottom: -9%; }
+  :global([data-stage]) .cols { left: 45%; right: 2%; top: -4%; bottom: -4%; gap: 1.2%; }
+}

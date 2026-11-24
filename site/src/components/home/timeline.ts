@@ -61,16 +61,20 @@ export const lum = (rgb: number[]) => {
 /** Mano Padana's ground per step, after her colour board: charcoal → grey → cream → brown (step `k` blends from the previous). */
 export const mpGround = (step: number, k: number) => (step === 0 ? MPG[0] : mix(MPG[step - 1], MPG[step], inOut(k)))
 
+/** The ground behind her and Mano Padana at `y`: cream, flooding to the step colour as the window opens (spec 6.1–6.2). */
+export function mpGroundAt(y: number, r: Ranges) {
+  const { at, unit: s } = r
+  const st = stepState(Math.max(y, at.mp[0]), r.steps.mp!), k = y < at.mp[0] ? 0 : st.k
+  return mix(CREAM, mpGround(st.index, k), inOut(seg(y, at.open[0] + 70 * s, at.open[0] + 420 * s)))
+}
+
 /** Header state on the home timeline: chapter, dock (bare on the landing → pill), night over dark grounds (spec 5.3). */
 export function homeHeader(y: number, r: Ranges) {
   const { at, unit: s } = r
   const dock = inOut(seg(y, at.open[0] - 100 * s, at.open[0] + 300 * s))
   let dark: boolean
-  if (y < at.tear[0]) {
-    const st = stepState(Math.max(y, at.mp[0]), r.steps.mp!), k = y < at.mp[0] ? 0 : st.k
-    const ground = mix(CREAM, mpGround(st.index, k), inOut(seg(y, at.open[0] + 70 * s, at.open[0] + 420 * s)))
-    dark = lum(ground) < 0.3
-  } else dark = (y > at.rise[0] + 250 * s && y < at.foam[1]) || y > at.foot[0] + 360 * s
+  if (y < at.tear[0]) dark = lum(mpGroundAt(y, r)) < 0.3
+  else dark = (y > at.rise[0] + 250 * s && y < at.foam[1]) || y > at.foot[0] + 360 * s
   return { chapter: CHAPTER[sceneAt(y, r)], dock, dark }
 }
 

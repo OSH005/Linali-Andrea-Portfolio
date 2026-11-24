@@ -1,0 +1,29 @@
+/* Revive on the stage (mockup "Revive" + .tearshadow): her torn board in two halves with a teal cross-stitched seam, the pile under it. */
+.shadow, .half, .seam { display: none; }
+
+:global([data-stage]) .rv { z-index: 1; background: var(--cream); }
+:global([data-stage]) .shadow { display: block; position: absolute; left: 0; right: 0; top: 0; height: 6%; z-index: 9; pointer-events: none; filter: blur(6px); background: rgb(33 21 15 / 0.45); }
+/* her logo sits on opaque white: multiply drops the white into the cream (blend on the stacking-context element itself) */
+:global([data-stage]) .rv .text { mix-blend-mode: multiply; }
+/* shortcut: crops the square logo to its art (measured trim of revive/logo: 458×183 at 75,259 of 640); re-measure if the logo source changes */
+:global([data-stage]) .logo { position: relative; overflow: hidden; width: 150px; aspect-ratio: 458 / 183; margin: 0 0 12px; }
+:global([data-stage]) .rv .logo img { position: absolute; left: -16.38%; top: -141.53%; width: 139.74%; height: auto; max-width: none; }
+
+/* phone board 42.7% of the screen tall; short screens keep 460px below it for the pile and the text (mirrored in Revive paint) */
+:global([data-stage]) .board { --bh: max(120px, min(42.7svh, 100svh - 460px)); position: absolute; z-index: 3; top: 128px; left: 0; height: var(--bh); width: calc(var(--bh) * 2.83); }
+:global([data-stage]) .board img { display: block; width: auto; height: 100%; max-width: none; box-shadow: 0 14px 30px rgb(59 36 24 / 0.18); }
+:global([data-stage]) .board > picture:first-child { opacity: 0; } /* sizes the board; the halves draw it (kept for its alt text) */
+:global([data-stage]) .half { display: block; position: absolute; inset: 0; }
+:global([data-stage]) .half img { position: absolute; inset: 0; }
+:global([data-stage]) .seam { display: block; position: absolute; inset: -4% 0; width: 100%; height: 108%; overflow: visible; z-index: 2; fill: none; stroke: var(--teal); stroke-width: 2.4px; }
+:global([data-stage]) .seam path { opacity: 0; }
+:global([data-stage]) .pile { position: absolute; z-index: 2; left: 14%; width: 74%; top: calc(92px + max(120px, min(42.7svh, 100svh - 460px))); rotate: none; justify-self: auto; box-shadow: 0 14px 30px rgb(59 36 24 / 0.16); }
+:global([data-stage]) .pile img { width: 100%; }
+
+@media (min-width: 1024px) {
+  :global([data-stage]) .rv .text { width: 30%; }
+  :global([data-stage]) .logo { width: 15vw; margin-bottom: 22px; }
+  :global([data-stage]) .board { left: 40%; right: 3.5%; top: 14%; width: auto; height: auto; }
+  :global([data-stage]) .board img { width: 100%; height: auto; }
+  :global([data-stage]) .pile { left: 56%; width: 40%; top: 60%; }
+}

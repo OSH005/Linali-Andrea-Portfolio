@@ -3,10 +3,13 @@ import { useState } from 'react'
 import HomeStory from './HomeStory'
 import { homeData } from './data'
 import { remap, sceneRanges } from './timeline'
+import { MANIFEST } from './story'
 
 const st = { start: 0, y: 0, scroll: () => st.y, kill: vi.fn(), vars: {} as Record<string, any> }
 const on: Record<string, () => void> = {}
-vi.mock('gsap', () => ({ default: { registerPlugin() {}, ticker: { time: 0 } } }))
+const ticks = new Set<() => void>()
+vi.mock('gsap', () => ({ default: { registerPlugin() {}, ticker: { time: 0, add: (f: () => void) => ticks.add(f), remove: (f: () => void) => ticks.delete(f) } } }))
+const tick = (y: number) => { Object.defineProperty(window, 'scrollY', { value: y, configurable: true }); ticks.forEach((f) => f()) }
 vi.mock('gsap/ScrollTrigger', () => ({
   ScrollTrigger: {
     create: vi.fn((v) => ((st.vars = v), st)),
@@ -32,6 +35,7 @@ beforeEach(() => {
   scrollTo.mockClear()
   st.kill.mockClear()
   st.y = 0
+  tick(0)
 })
 
 test('motion on: pins the stage for the whole timeline', () => {
@@ -63,4 +67,31 @@ test('resize or rotate: new scene lengths, same place in the same scene', () => 
   expect(st.vars.end()).toBe(`+=${sceneRanges(1366).total}`)
   on.refresh()
   expect(scrollTo).toHaveBeenLastCalledWith({ top: remap(y, sceneRanges(900), sceneRanges(1366)), behavior: 'instant' })
+})
+
+test('one ticker paints the stage; far scenes are skipped and hidden', () => {
+  const { container } = render(<HomeStory data={data} />)
+  expect(ticks.size).toBe(1)
+  act(() => setMotion(false))
+  act(() => setMotion(true)) // the word spans are new elements after each switch
+  const top = container.querySelector<HTMLElement>('#top')!, rv = container.querySelector<HTMLElement>('#revive')!
+  act(() => tick(10))
+  expect(top.style.opacity).toBe('')
+  expect(top.querySelector<HTMLElement>('p:last-of-type > span')!.getAttribute('style')).toContain('0.18') // manifesto at 18% ink
+  expect(rv.style.opacity).toBe('0')
+  act(() => tick(sceneRanges(900).steps.rv![1][0]))
+  expect(top.style.opacity).toBe('0')
+  expect(rv.style.opacity).toBe('')
+})
+
+test('word spans only on the stage; motion off leaves the plain, unstyled page', () => {
+  const { container } = render(<HomeStory data={data} />)
+  const manif = container.querySelector('#top p:last-of-type')!
+  expect(manif.querySelectorAll('span').length).toBe(MANIFEST.split(' ').length)
+  act(() => tick(sceneRanges(900).at.mp[0] + 50))
+  act(() => setMotion(false))
+  expect(ticks.size).toBe(0)
+  expect(manif.querySelector('span')).toBeNull()
+  expect(container.querySelector('#top [style], #mano-padana [style], #revive [style]')).toBeNull()
+  expect([...container.querySelectorAll('section')].map((n) => n.getAttribute('style'))).toEqual([null, null, null, null, null])
 })

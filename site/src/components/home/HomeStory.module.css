@@ -40,11 +40,32 @@
   .photos { gap: 16px; }
 }
 
-/* Stage (motion on, set by HomeStory). Interim until Tasks 8–10 paint the scenes: one scene per chapter, full screen. */
-.story[data-stage] { height: 100vh; overflow: hidden; background: var(--cream); }
-.story[data-stage] > section { position: absolute; inset: 0; overflow: hidden; display: none; }
-.story[data-chapter='0'] > section:nth-of-type(1),
-.story[data-chapter='1'] > section:nth-of-type(2),
-.story[data-chapter='2'] > section:nth-of-type(3),
+/* ---- Stage (motion on; HomeStory sets data-stage on the client): one pinned screen of layers (mockup "Home"). Phone below 1024, desktop at and above. ---- */
+.story[data-stage] { height: 100svh; overflow: hidden; background: var(--cream); }
+.story[data-stage] > section { position: absolute; inset: 0; overflow: hidden; }
+/* Interim until Tasks 9–10 paint Lunelle and Drift: each shows only on its chapter (opacity, so it stays in the accessibility tree). */
+.story[data-stage] > section:nth-of-type(n + 4) { z-index: 5; background: var(--cream); opacity: 0; pointer-events: none; }
 .story[data-chapter='3'] > section:nth-of-type(4),
-.story[data-chapter='4'] > section:nth-of-type(5) { display: block; }
+.story[data-chapter='4'] > section:nth-of-type(5) { opacity: 1; pointer-events: auto; }
+
+/* word masks for sentences that rise (client only, see words.tsx) */
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.w > span { display: inline-block; }
+.count { display: none; }
+
+/* chapter text column (mockup "chapter text column"): one sentence at a time and a counter */
+[data-stage] .chap { position: absolute; z-index: 5; left: 24px; right: 24px; bottom: 28px; display: block; }
+[data-stage] .chap :global(.label) { color: inherit; }
+[data-stage] .first { margin-bottom: 14px; }
+[data-stage] .chapTitle { margin: 0; font-size: clamp(38px, 7.6vw, 60px); line-height: 0.94; letter-spacing: -0.02em; }
+[data-stage] .sinh { font-size: 0.36em; margin-top: 0.35em; letter-spacing: 0; }
+/* every sentence in one grid cell: the box is as tall as the longest one, so none runs into the counter */
+[data-stage] .chap .steps { position: relative; display: grid; margin-top: 14px; min-height: 5.2em; max-width: 46ch; font-size: clamp(16px, 2.4vw, 19px); line-height: 1.55; }
+[data-stage] .chap .steps p { grid-area: 1 / 1; }
+[data-stage] .count { display: block; margin: 12px 0 0; opacity: 0.7; }
+@media (min-width: 1024px) {
+  [data-stage] .chap { left: 4.5%; right: auto; bottom: auto; top: 50%; width: 36%; transform: translateY(-50%); }
+  [data-stage] .chapTitle { font-size: 5.2vw; }
+  [data-stage] .chap .steps { margin-top: 28px; min-height: 7.4em; max-width: 34ch; font-size: clamp(15px, 1.25vw, 19px); }
+  [data-stage] .count { margin-top: 20px; }
+}

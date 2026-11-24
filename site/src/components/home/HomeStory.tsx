@@ -6,20 +6,28 @@ import { useMotion } from '@/lib/motion/useMotion'
 import { useLenis } from '@/lib/motion/lenisContext'
 import { useHeader } from '@/components/header/HeaderContext'
 import type { HomeData } from './data'
-import { HOME_CHAPTERS, homeHeader, remap, sceneRanges, type Paint } from './timeline'
-import Opening, { paint as pOpening } from './scenes/Opening'
-import ManoPadana, { paint as pMano } from './scenes/ManoPadana'
-import Revive, { paint as pRevive } from './scenes/Revive'
-import Lunelle, { paint as pLunelle } from './scenes/Lunelle'
-import Drift, { paint as pDrift } from './scenes/Drift'
+import { HOME_CHAPTERS, homeHeader, remap, sceneRanges, type Paint, type Ranges } from './timeline'
+import Opening, * as op from './scenes/Opening'
+import ManoPadana, * as mp from './scenes/ManoPadana'
+import Revive, * as rv from './scenes/Revive'
+import Lunelle, * as ln from './scenes/Lunelle'
+import Drift, * as dr from './scenes/Drift'
 import s from './HomeStory.module.css'
 
 gsap.registerPlugin(ScrollTrigger)
-const PAINTS: Paint[] = [pOpening, pMano, pRevive, pLunelle, pDrift]
+/** Each scene paints only while the timeline is inside its range; outside it, its layer is hidden (opacity: it stays readable to assistive tech). */
+const SCENES: { paint: Paint; dom: { root: HTMLElement | null }; live: (r: Ranges) => [number, number] }[] = [
+  { ...op, live: (r) => [0, r.at.open[1]] },
+  { ...mp, live: (r) => [0, r.at.tear[1]] },
+  { ...rv, live: (r) => [r.at.tear[0], r.at.rise[1]] },
+  { ...ln, live: (r) => [r.at.rise[0], r.at.foam[1]] },
+  { ...dr, live: (r) => [r.at.foam[0], Infinity] },
+]
 
 /**
  * The home story. Server HTML and motion off: the scenes as stacked sections (the readable page).
- * Motion on: `data-stage` on the root, pinned for the whole timeline; one ScrollTrigger update paints every scene.
+ * Motion on: `data-stage` on the root, pinned for the whole timeline by ScrollTrigger; one gsap.ticker callback paints the scenes
+ * every frame (time-based motion runs while the visitor is still).
  */
 export default function HomeStory({ data }: { data: HomeData }) {
   const root = useRef<HTMLDivElement>(null)
@@ -28,6 +36,15 @@ export default function HomeStory({ data }: { data: HomeData }) {
   const lenis = useLenis()
   const lenisRef = useRef(lenis)
   useEffect(() => void (lenisRef.current = lenis), [lenis])
+  const frameRef = useRef<(() => void) | null>(null)
+
+  // added after SmoothScroll's Lenis tick (it re-runs once Lenis exists), so each frame paints the scroll Lenis just set
+  useEffect(() => {
+    if (!on) return
+    const f = () => frameRef.current?.()
+    gsap.ticker.add(f)
+    return () => gsap.ticker.remove(f)
+  }, [on, lenis])
 
   useEffect(() => {
     set({ chapters: HOME_CHAPTERS })
@@ -48,13 +65,24 @@ export default function HomeStory({ data }: { data: HomeData }) {
     }
 
     el.setAttribute('data-stage', '')
-    let r = sceneRanges(innerHeight), from = r, y0 = 0, last = gsap.ticker.time
+    let r = sceneRanges(innerHeight), from = r, y0 = 0, W = 0, H = 0
+    const t0 = gsap.ticker.time, shown: boolean[] = []
+    let last = 0
     const desk = matchMedia('(min-width: 1024px)')
-    const frame = (y: number) => {
-      const now = gsap.ticker.time, phone = !desk.matches, W = innerWidth
-      const ctx = { phone, W, H: innerHeight, dt: now - last, now }
+    const measure = () => void ((W = el.clientWidth || innerWidth), (H = el.clientHeight || innerHeight))
+    const frame = () => {
+      const y = scrollY - st.start, now = gsap.ticker.time - t0, phone = !desk.matches
+      const ctx = { phone, W, H, dt: Math.min(0.05, now - last), now }
       last = now
-      for (const p of PAINTS) p(y, r, ctx)
+      SCENES.forEach(({ paint, dom, live }, i) => {
+        const [a, b] = live(r), on = y >= a && y <= b
+        if (on) paint(y, r, ctx)
+        if (on !== shown[i] && dom.root) {
+          shown[i] = on
+          dom.root.style.opacity = on ? '' : '0'
+          dom.root.style.pointerEvents = on ? '' : 'none'
+        }
+      })
       const h = homeHeader(y, r)
       el.dataset.chapter = String(Math.min(4, h.chapter))
       set({ ...h, x0: phone ? 8 : W * 0.045 - 8 })
@@ -64,11 +92,13 @@ export default function HomeStory({ data }: { data: HomeData }) {
       pin: true,
       start: 'top top',
       end: () => `+=${r.total}`,
-      onUpdate: (self) => frame(self.scroll() - self.start),
     })
+    measure()
     // resize/rotate: ScrollTrigger refreshes; new scene lengths, then back to the same fraction of the same scene
     const init = () => void ((y0 = st.scroll() - st.start), (from = r), (r = sceneRanges(innerHeight)))
     const done = () => {
+      measure()
+      shown.length = 0
       if (r.total === from.total) return
       const top = st.start + remap(y0, from, r)
       if (lenisRef.current) lenisRef.current.scrollTo(top, { immediate: true, force: true })
@@ -76,15 +106,19 @@ export default function HomeStory({ data }: { data: HomeData }) {
     }
     ScrollTrigger.addEventListener('refreshInit', init)
     ScrollTrigger.addEventListener('refresh', done)
-    frame(st.scroll() - st.start)
+    frameRef.current = frame
+    frame()
 
     return () => {
       // motion off mid-visit (or leaving): unpin, back to the stacked page at the section being watched
       const i = homeHeader(st.scroll() - st.start, r).chapter
       ScrollTrigger.removeEventListener('refreshInit', init)
       ScrollTrigger.removeEventListener('refresh', done)
+      frameRef.current = null
       st.kill()
       el.removeAttribute('data-stage')
+      // the stacked page carries none of the stage's inline styles (scenes set styles only from paint, never as React props)
+      el.querySelectorAll('[style]').forEach((n) => n.removeAttribute('style'))
       delete el.dataset.chapter
       if (el.isConnected) window.scrollTo({ top: i === 0 ? 0 : (marks[i]?.getBoundingClientRect().top ?? 0) + scrollY, behavior: 'instant' })
     }
@@ -92,9 +126,9 @@ export default function HomeStory({ data }: { data: HomeData }) {
 
   return (
     <div ref={root} className={s.story}>
-      <Opening data={data} />
-      <ManoPadana data={data} />
-      <Revive data={data} />
+      <Opening data={data} stage={on} />
+      <ManoPadana data={data} stage={on} />
+      <Revive data={data} stage={on} />
       <Lunelle data={data} />
       <Drift data={data} />
     </div>
