@@ -7,7 +7,7 @@ export default function Manifesto() {
       <blockquote>
         <p className="display">{site.manifesto}</p>
       </blockquote>
-      <p className={styles.themes}>{site.themes.join(' · ')}</p>
+      <p className={styles.themes}>mind · body · nature · renewal</p>
     </section>
   )
 }

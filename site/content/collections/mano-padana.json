@@ -1,10 +1,10 @@
 {
   "credits": {},
   "rights": {
-    "models": false,
+    "models": true,
     "photographer": false,
     "sensitive": "none",
-    "confirmedBy": null
+    "confirmedBy": "user, 2026-11-24, chat"
   },
   "palette": {
     "ground": "#F2E8DA",
@@ -29,5 +29,17 @@
     "05-IMG-20250506-WA0033": "Crossing a zebra crossing in Colombo with the woven tote, passers-by behind",
     "06-IMG-20250506-WA0039": "A distant view of the model crossing a wide street lined with trees"
   },
-  "pageText": {}
+  "pageText": {},
+  "theme": "Mind",
+  "line": "A mental healing journey through cultural aspects.",
+  "lead": {
+    "from": "shoot",
+    "desktop": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "phone": 1
+  }
 }

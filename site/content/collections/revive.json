@@ -3,10 +3,10 @@
     "collaboration": "E.L.V. Denim"
   },
   "rights": {
-    "models": false,
+    "models": true,
     "photographer": false,
     "sensitive": "none",
-    "confirmedBy": null
+    "confirmedBy": "user, 2026-11-24, chat"
   },
   "palette": {
     "ground": "#F2E8DA",
@@ -18,7 +18,7 @@
   "title": "Revive",
   "season": "SS27",
   "year": 2026,
-  "order": 4,
+  "order": 2,
   "moment": "studio",
   "studio": [
     {
@@ -44,5 +44,14 @@
   "pageOrder": "confirmed",
   "concept": "Denim is one of the most wasted materials in fashion; worn, torn, and thrown away before its potential runs out. This project asks what happens if we treat it the way SPAB treats old buildings: not restored to look new, but repaired and given new life. Revive takes that same idea into denim reconstruction, working in the spirit of E.L.V. Denim’s zero-waste, hand-crafted approach to prove that discarded denim jeans have more life left in them.",
   "alt": {},
-  "pageText": {}
+  "pageText": {},
+  "theme": "Renewal",
+  "line": "Discarded denim jeans have more life left in them.",
+  "lead": {
+    "from": "pages",
+    "desktop": [
+      30
+    ],
+    "phone": 34
+  }
 }

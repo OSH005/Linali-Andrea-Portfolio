@@ -1,10 +1,10 @@
 {
   "credits": {},
   "rights": {
-    "models": false,
+    "models": true,
     "photographer": false,
     "sensitive": "pregnancy; ultrasound images",
-    "confirmedBy": null
+    "confirmedBy": "user, 2026-11-24, chat"
   },
   "palette": {
     "ground": "#21150F",
@@ -16,7 +16,7 @@
   "title": "Lunelle",
   "season": "AW26",
   "year": 2026,
-  "order": 2,
+  "order": 3,
   "moment": "orbit",
   "carousel": {
     "preset": "orbit",
@@ -37,5 +37,17 @@
     "09-MMS_5639-15": "Standing in a dim studio in a blush chiffon cape, an ultrasound print on a stool beside her",
     "10-MMS_5700-18": "Still life of a white candle and three ultrasound prints on a dark stone stool"
   },
-  "pageText": {}
+  "pageText": {},
+  "theme": "Body",
+  "line": "A tribute to all the unstoppable mothers.",
+  "lead": {
+    "from": "shoot",
+    "desktop": [
+      1,
+      2,
+      9,
+      4
+    ],
+    "phone": 1
+  }
 }

@@ -15,7 +15,7 @@ vi.mock('./glass-folder/GlassFolder', () => ({
 const img = (id: string): MediaImage => ({ id, order: 1, width: 2400, height: 1697, placeholder: '', srcset: { avif: '', webp: '' }, src: `/${id}.webp`, zoom: `/${id}.webp` })
 const media: CollectionMedia = { shoot: [img('01-a'), img('02-b')], pages: ['30', '32', '34', '36'].map(img) }
 const base: Collection = {
-  slug: 'x', title: 'X', season: 'SS27', year: 2026, order: 1, featured: true, concept: 'Concept.',
+  slug: 'x', title: 'X', season: 'SS27', year: 2026, order: 1, featured: true, concept: 'Concept.', line: 'A line.', theme: 'Nature', lead: { from: 'shoot', desktop: [1], phone: 1 },
   palette: { ground: '#F2E8DA', ink: '#3B2418', accent: '#008794' }, moment: 'ring',
   carousel: { preset: 'cylinder', autoplay: 'drift' },
   studio: [{ label: 'Research', pages: ['30', '32'] }, { label: 'Fabric & detail', pages: ['34'] }, { label: 'Line-up', pages: ['36'] }],

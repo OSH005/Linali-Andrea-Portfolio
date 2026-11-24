@@ -1,10 +1,10 @@
 {
   "credits": {},
   "rights": {
-    "models": false,
+    "models": true,
     "photographer": false,
     "sensitive": "none",
-    "confirmedBy": null
+    "confirmedBy": "user, 2026-11-24, chat"
   },
   "palette": {
     "ground": "#F2E8DA",
@@ -16,7 +16,7 @@
   "title": "Drift",
   "season": "SS27",
   "year": 2026,
-  "order": 3,
+  "order": 4,
   "moment": "ring",
   "carousel": {
     "preset": "cylinder",
@@ -46,5 +46,67 @@
   },
   "pageText": {
     "04": "Drift SS27 · Catwalk collection · Concept\n\nDrift is a womenswear collection exploring the act of stepping away from social acceleration, the cultural condition of relentless pace that overwhelms people. The concept was born from a personal experience, watching fabric move naturally in coastal wind, and seeing in that movement the breath the body takes when it finally stops rushing. My collection offers the feeling of a calming breath taken to escape the fast paced world.\n\nThe collection is constructed through lightweight fabrics and the hand crafted techniques of crochet, macramé and hand embroidery. These slow made techniques were chosen as they cannot be rushed, making the process of creating itself an act of resistance against speed. Fringing details which moves gently with the movement of the body and crochet footwear grounding the body to the earth embrace natural movement. The muse, Dr Asha de Vos, embodies the collection’s philosophy, a Sri Lankan marine biologist who chose depth over speed, staying rooted in her coastline when every convention told her to move on."
-  }
+  },
+  "theme": "Nature",
+  "line": "A calming breath taken to escape the fast paced world.",
+  "lead": {
+    "from": "shoot",
+    "desktop": [
+      13,
+      14,
+      7,
+      3
+    ],
+    "phone": 17
+  },
+  "looks": [
+    {
+      "n": 1,
+      "shots": [
+        7,
+        8
+      ],
+      "text": "White cropped halter top with a cobalt tie, and indigo crochet."
+    },
+    {
+      "n": 2,
+      "shots": [
+        3,
+        4
+      ],
+      "text": "Cobalt wrap jacket with brown suede fringe and an openwork crochet back, over a short white skirt."
+    },
+    {
+      "n": 3,
+      "shots": [
+        11,
+        12
+      ],
+      "text": "Pale blue sleeveless tunic with a cobalt scarf, and white flared trousers with blue crochet panels."
+    },
+    {
+      "n": 4,
+      "shots": [
+        1,
+        2
+      ],
+      "text": "Oversized cream shirt with tie sleeves, over an indigo crochet skirt and crochet leg warmers."
+    },
+    {
+      "n": 5,
+      "shots": [
+        6,
+        5
+      ],
+      "text": "Pale blue macramé dress with long fringe."
+    },
+    {
+      "n": 6,
+      "shots": [
+        9,
+        10
+      ],
+      "text": "Sheer white draped top over a cobalt midi skirt, with a cream fringed macramé bag."
+    }
+  ]
 }

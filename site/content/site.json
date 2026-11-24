@@ -1,29 +1,93 @@
 {
   "name": "Linali Andrea",
-  "tagline": "Womenswear designer · Sri Lanka · Slow craft",
+  "role": "Fashion designer",
+  "location": "Panadura, Sri Lanka",
+  "tagline": "Fashion designer · Sri Lanka",
   "manifesto": "I strongly believe that fashion is the best form of self expression.",
-  "themes": ["mind", "body", "nature", "renewal"],
-  "hero": {
-    "sketch": { "collection": "drift", "page": "18" },
-    "photo": { "collection": "drift", "shoot": "13-MMS_8698" }
+  "bio": "I’m a fashion designer from Panadura, Sri Lanka, studying Fashion and Textile Design with Northumbria University. I work by hand, in Dumbara weaving, crochet, macramé, embroidery and reconstructed denim, and I give every collection an emotional subject: healing, motherhood, slowing down, renewal.",
+  "facts": [
+    {
+      "label": "Studying",
+      "title": "BA (Hons) Fashion and Textile Design",
+      "detail": "Northumbria University · 2024–2027"
+    },
+    {
+      "label": "Experience",
+      "title": "Design Intern, MAS India",
+      "detail": "2025"
+    },
+    {
+      "label": "Recognition",
+      "title": "Represented Sri Lanka at four World Chess Championships",
+      "detail": "2015–2021"
+    }
+  ],
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/linali-andrea-831216363"
   },
-  "bio": {
-    "draft": true,
-    "text": "Linali Andrea is a Sri Lankan womenswear designer and recent graduate. Her collections are built by hand, with Dumbara weaving, crochet, macramé, hand embroidery and reconstructed denim, and each one carries an emotional subject: healing, motherhood, slowing down, renewal."
-  },
-  "skills": ["Dumbara weaving", "Crochet", "Macramé", "Hand embroidery", "Draping", "Denim reconstruction", "Technical drawing", "Fashion illustration"],
-  "person": {
-    "figure": "balcony-sticker",
-    "polaroids": ["beach-graded", "mirror-graded"]
+  "skills": [
+    {
+      "name": "Craft",
+      "piece": "bodice",
+      "cut": "Cut 1 on fold",
+      "skills": [
+        "Dumbara weaving",
+        "Crochet & macramé",
+        "Hand embroidery",
+        "Denim reconstruction"
+      ]
+    },
+    {
+      "name": "Design",
+      "piece": "skirt",
+      "cut": "Cut 2",
+      "skills": [
+        "Fashion design",
+        "Draping",
+        "Garment construction",
+        "Sustainable design"
+      ]
+    },
+    {
+      "name": "Tools",
+      "piece": "sleeve",
+      "cut": "Cut 2 · mirror",
+      "skills": [
+        "Adobe Photoshop",
+        "Adobe Illustrator",
+        "Technical drawing",
+        "Fashion illustration"
+      ]
+    },
+    {
+      "name": "People",
+      "piece": "pocket",
+      "cut": "Cut 1 · fold at top",
+      "skills": [
+        "Leadership",
+        "Team building",
+        "Public speaking",
+        "Time management"
+      ]
+    }
+  ],
+  "portrait": {
+    "figure": "her-flush",
+    "polaroids": [
+      "mirror-graded",
+      "chair-graded",
+      "beach-graded"
+    ]
   },
   "personalAlt": {
     "balcony-sticker": "Linali laughing with her hands in her hair, in a leopard-print corset top and a brown satin ruched skirt",
     "beach-graded": "Linali sitting on the sand at sunset, knees drawn up, a flower in her hair",
     "mirror-graded": "Linali taking a mirror photo in a grey tailored waistcoat and wide-leg jeans",
-    "chair-graded": "Linali sitting in a white hanging wicker chair in warm evening light"
+    "chair-graded": "Linali sitting in a white hanging wicker chair in warm evening light",
+    "her-flush": "Linali laughing with her hands in her hair, in a leopard-print corset top and a brown satin ruched skirt"
   },
   "contact": {
     "endpointEnv": "NEXT_PUBLIC_CONTACT_ENDPOINT",
-    "closing": "Let’s make something slow."
+    "closing": "Let’s make something together."
   }
 }

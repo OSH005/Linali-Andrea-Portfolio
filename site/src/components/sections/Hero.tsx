@@ -4,7 +4,8 @@ import { getCollection } from '@/lib/collections'
 import styles from './sections.module.css'
 
 export default function Hero() {
-  const { sketch, photo } = site.hero
+  const sketch = { collection: 'drift', page: '18' }
+  const photo = { collection: 'drift', shoot: '13-MMS_8698' }
   const page = getMedia(sketch.collection).pages.find((p) => p.id === sketch.page)!
   const shot = getMedia(photo.collection).shoot.find((s) => s.id === photo.shoot)!
   const alt = getCollection(photo.collection)!.alt[photo.shoot]

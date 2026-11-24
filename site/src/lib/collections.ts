@@ -2,9 +2,19 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { contrastRatio } from './contrast'
+import { getMedia } from './media'
 
 export type Moment = 'ring' | 'orbit' | 'walk' | 'studio' | 'gallery'
 const MOMENTS: Moment[] = ['ring', 'orbit', 'walk', 'studio', 'gallery']
+
+export type Theme = 'Mind' | 'Renewal' | 'Body' | 'Nature'
+const THEMES: Theme[] = ['Mind', 'Renewal', 'Body', 'Nature']
+
+/** Media `order` numbers available per kind; used to check `lead` and `looks`. */
+export interface MediaOrders {
+  shoot: number[]
+  pages: number[]
+}
 
 export interface Collection {
   slug: string
@@ -15,6 +25,10 @@ export interface Collection {
   order: number
   featured: boolean
   concept: string
+  line: string
+  theme: Theme
+  lead: { from: 'shoot' | 'pages'; desktop: number[]; phone: number }
+  looks?: { n: number; shots: [number, number]; text: string }[]
   palette: { ground: string; ink: string; accent: string }
   moment: Moment
   carousel?: { preset: 'cylinder' | 'orbit' | 'wheel' | 'panorama'; autoplay: 'drift' | 'step' | 'off'; speed?: number }
@@ -28,7 +42,7 @@ export interface Collection {
 
 const HEX = /^#[0-9a-f]{6}$/i
 
-export function parseCollection(raw: unknown, file: string): Collection {
+export function parseCollection(raw: unknown, file: string, mediaOrders?: MediaOrders): Collection {
   const c = raw as Record<string, unknown>
   const fail = (msg: string): never => {
     throw new Error(`${file}: ${msg}`)
@@ -36,10 +50,20 @@ export function parseCollection(raw: unknown, file: string): Collection {
   const need = (key: string, type: string) => {
     if (typeof c?.[key] !== type) fail(`${key} must be a ${type}`)
   }
-  for (const k of ['slug', 'title', 'season', 'concept']) need(k, 'string')
+  for (const k of ['slug', 'title', 'season', 'concept', 'line']) need(k, 'string')
   for (const k of ['year', 'order']) need(k, 'number')
   need('featured', 'boolean')
   for (const k of ['palette', 'credits', 'rights', 'alt', 'pageText']) need(k, 'object')
+
+  if (!THEMES.includes(c.theme as Theme)) fail(`theme must be one of ${THEMES.join(', ')}`)
+  const lead = c.lead as Collection['lead'] | undefined
+  if (!lead || (lead.from !== 'shoot' && lead.from !== 'pages') || !Array.isArray(lead.desktop) || typeof lead.phone !== 'number')
+    fail('lead must be { from: shoot|pages, desktop: number[], phone: number }')
+  else if (mediaOrders) {
+    for (const n of [...lead.desktop, lead.phone])
+      if (!mediaOrders[lead.from].includes(n)) fail(`lead ${n} is not in ${lead.from}`)
+  }
+  if (c.looks !== undefined && !Array.isArray(c.looks)) fail('looks must be an array')
 
   const p = c.palette as Collection['palette']
   for (const k of ['ground', 'ink', 'accent'] as const) if (!HEX.test(p?.[k] ?? '')) fail(`palette.${k} must be #RRGGBB`)
@@ -60,7 +84,11 @@ export function getCollections(): Collection[] {
   cache ??= fs
     .readdirSync(DIR)
     .filter((f) => f.endsWith('.json'))
-    .map((f) => parseCollection(JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')), f))
+    .map((f) => {
+      const raw = JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8'))
+      const m = getMedia(raw.slug)
+      return parseCollection(raw, f, { shoot: m.shoot.map((i) => i.order), pages: m.pages.map((i) => i.order) })
+    })
     .sort((a, b) => a.order - b.order)
   return cache
 }

@@ -9,7 +9,7 @@ vi.mock('@/components/StudioTable', () => ({ default: () => <div data-testid="st
 test('story order: hero, manifesto, 4 chapters, person, footer', () => {
   const { container } = render(<Home />)
   const ids = [...container.querySelectorAll('main > section, footer')].map((el) => el.id)
-  expect(ids).toEqual(['top', 'manifesto', 'mano-padana', 'lunelle', 'drift', 'revive', 'about', 'contact'])
+  expect(ids).toEqual(['top', 'manifesto', 'mano-padana', 'revive', 'lunelle', 'drift', 'about', 'contact'])
 })
 
 test('no element starts hidden by default (JS-off safety)', () => {
