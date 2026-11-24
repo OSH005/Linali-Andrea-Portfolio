@@ -43,3 +43,8 @@ test.each(pages)('%s has the header pill and the contact card, nothing hidden in
   expect(html.match(/<footer[^>]*id="contact"/g)).toHaveLength(1)
   expect(html).not.toMatch(/style="[^"]*(opacity:\s*0[;"]|visibility:\s*hidden)/)
 })
+
+test.each(pages)('%s header links work without JS (outside the phone menu dialog)', (p) => {
+  const bar = fs.readFileSync(path.join(out, p), 'utf8').match(/<nav[^>]*aria-label="Main"[\s\S]*?<\/nav>/)[0].replace(/<dialog[\s\S]*?<\/dialog>/g, '')
+  for (const href of ['/collections/', '/about/', '#contact']) expect(bar).toContain(`href="${href}"`)
+})

@@ -89,3 +89,30 @@ test('motion off: fully sewn and static; over the contact card the pill turns ni
   expect(bar.querySelector('path[pathLength]')).toHaveAttribute('stroke-dasharray', '.5 .3333')
   expect(bar.style.transform).toBe('translate(0px)') // centred, never hidden
 })
+
+test('headroom never hides the header while focus is inside it (WCAG 2.4.11)', async () => {
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  const scroll = (y: number) => Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
+  const down = async (from: number) => {
+    for (let i = 1; i <= 8; i++) {
+      await sleep(16)
+      scroll(from + i * 40)
+      act(() => gsap.ticker.tick())
+    }
+  }
+  try {
+    render(<SiteHeader {...props} />)
+    const bar = screen.getByRole('navigation', { name: 'Main' })
+    scroll(1000)
+    await sleep(1150) // the pill sews on over the first second (gsap's clock can't be faked)
+    await down(1000)
+    expect(bar.style.transform).toMatch(/-\d/) // sliding away
+    act(() => within(bar).getByRole('link', { name: 'Collections' }).focus())
+    act(() => gsap.ticker.tick())
+    expect(bar.style.transform).toBe('translate(0px)')
+    await down(1320)
+    expect(bar.style.transform).toBe('translate(0px)')
+  } finally {
+    scroll(0)
+  }
+})

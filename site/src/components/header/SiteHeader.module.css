@@ -124,6 +124,10 @@
   cursor: pointer;
 }
 .menu { margin-right: 0; }
+/* Without JS the Menu can't open: phones get the plain links instead (Motion needs JS too). */
+.bar:not(.live) .links { display: flex; }
+.bar:not(.live) .menu, .bar:not(.live) .mo { display: none; }
+.bar:not(.live) .lk { margin: 0 7px; }
 
 @media (min-width: 1024px) {
   .nav { top: 2vw; }
@@ -133,6 +137,7 @@
   .chap { margin-right: calc(4px * var(--dock)); }
   .links { display: flex; }
   .menu { display: none; }
+  .bar:not(.live) .lk { margin: 0 11px; }
 }
 
 /* Phone menu: a paper sheet that slides down from the pill and fills the screen. */

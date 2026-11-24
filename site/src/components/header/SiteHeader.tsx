@@ -49,7 +49,8 @@ export default function SiteHeader({ mark, linkedin }: { mark: Mark; linkedin: s
       const dock = on ? Math.min(s.dock, out3(clamp01((time - start - 0.1) / 1))) : 1
       n.v = on && n.py >= 0 && dt ? lerp(n.v, (y - n.py) / dt, 0.12) : 0
       n.py = y
-      n.hid = on && nextHidden(n.hid, { y, v: n.v, docked: dock >= 1, keep: window.innerHeight * 0.5 })
+      // never hide a focused link (WCAG 2.4.11)
+      n.hid = on && !nav.contains(document.activeElement) && nextHidden(n.hid, { y, v: n.v, docked: dock >= 1, keep: window.innerHeight * 0.5 })
       n.hk = to(n.hk, +n.hid, 0.14)
       n.cf = to(n.cf, Math.min(s.chapter, Math.max(0, spans.length - 1)), 0.14)
       n.dk = to(n.dk, s.dark || footTop < mid ? 1 : 0, 0.08)
@@ -83,8 +84,15 @@ export default function SiteHeader({ mark, linkedin }: { mark: Mark; linkedin: s
       }
       if (on && dash === stitchDash(1)) st.setAttribute('stroke-dashoffset', (-(y * 0.002) % 0.8333).toFixed(4))
     }
+    // keyboard focus arriving in a hidden header reveals it at once
+    const reveal = () => void ((n.hid = false), (n.hk = 0))
+    nav.addEventListener('focusin', reveal)
+    // shortcut: with motion off the ticker still runs every frame (a few style writes) so night and chapter changes apply; switch to scroll/set-driven updates if it shows in profiles
     gsap.ticker.add(tick)
-    return () => gsap.ticker.remove(tick)
+    return () => {
+      gsap.ticker.remove(tick)
+      nav.removeEventListener('focusin', reveal)
+    }
   }, [on, state])
 
   // magnetic pull toward the cursor, at most 6px (fine pointers, motion on)
