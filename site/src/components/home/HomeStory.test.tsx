@@ -29,7 +29,7 @@ vi.mock('@/lib/motion/useMotion', () => ({
 const data = homeData()
 const scrollTo = vi.fn()
 beforeEach(() => {
-  window.matchMedia = (() => ({ matches: true })) as unknown as typeof window.matchMedia
+  window.matchMedia = (() => ({ matches: true, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia
   window.scrollTo = scrollTo as unknown as typeof window.scrollTo
   Object.defineProperty(window, 'innerHeight', { value: 900, configurable: true })
   scrollTo.mockClear()
@@ -38,12 +38,12 @@ beforeEach(() => {
   tick(0)
 })
 
-test('motion on: pins the stage for the whole timeline', () => {
+test('motion on: pins the stage for the whole timeline; the contact card then follows in the flow', () => {
   const { container } = render(<HomeStory data={data} />)
   const root = container.firstElementChild as HTMLElement
   expect(root).toHaveAttribute('data-stage')
   expect(st.vars).toMatchObject({ trigger: root, pin: true, start: 'top top' })
-  expect(st.vars.end()).toBe('+=13500')
+  expect(st.vars.end()).toBe('+=12900') // 13 500 less the last 600 units: the card's own height scrolls it in
 })
 
 test('motion off mid-visit: kills the pin, drops the stage, lands on the section being watched', () => {
@@ -64,7 +64,7 @@ test('resize or rotate: new scene lengths, same place in the same scene', () => 
   st.y = y
   Object.defineProperty(window, 'innerHeight', { value: 1366, configurable: true })
   on.refreshInit()
-  expect(st.vars.end()).toBe(`+=${sceneRanges(1366).total}`)
+  expect(st.vars.end()).toBe(`+=${sceneRanges(1366).at.foot[0]}`)
   on.refresh()
   expect(scrollTo).toHaveBeenLastCalledWith({ top: remap(y, sceneRanges(900), sceneRanges(1366)), behavior: 'instant' })
 })
@@ -119,4 +119,23 @@ test('word spans only on the stage; motion off leaves the plain, unstyled page',
   expect(manif.querySelector('span')).toBeNull()
   expect(container.querySelector('#top [style], #mano-padana [style], #revive [style]')).toBeNull()
   expect([...container.querySelectorAll('section')].map((n) => n.getAttribute('style'))).toEqual([null, null, null, null, null])
+})
+
+test('drift: the logo is written on, then the strip runs sideways with the scroll', () => {
+  const { container } = render(<HomeStory data={data} />)
+  const dr = container.querySelector<HTMLElement>('#drift')!, r = sceneRanges(900)
+  act(() => tick(r.at.dIn[0] + 100))
+  expect(dr.style.visibility).toBe('')
+  expect(dr.querySelector<HTMLElement>('h2')!.style.maskImage).toMatch(/^linear-gradient\(104deg/)
+  const track = dr.querySelector<HTMLElement>('ol')!
+  act(() => tick((r.at.strip[0] + r.at.strip[1]) / 2))
+  expect(track.style.transform).toMatch(/^translateX\(-\d/)
+  act(() => setMotion(false))
+  expect([...dr.querySelectorAll('[style]')].map((n) => n.getAttribute('style')).filter((v) => !/^--(ar|w): [\d.]+;?$/.test(v!))).toEqual([]) // only React's shape variables stay
+})
+
+test('desktop: the phone-only lunar contact sheet and Drift captions are not rendered (their photos are not fetched)', () => {
+  const { container } = render(<HomeStory data={data} />)
+  expect(container.querySelector('#lunelle image')).toBeNull()
+  expect(container.querySelectorAll('#drift a[href="/collections/drift/"]')).toHaveLength(1)
 })

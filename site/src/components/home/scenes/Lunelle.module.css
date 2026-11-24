@@ -27,6 +27,17 @@
 :global([data-stage]) .sheet span { position: relative; display: grid; place-items: center; padding: 0 6px; background: var(--night); }
 :global([data-stage]) .sheet svg { display: block; width: min(50px, 12.8vw); height: auto; aspect-ratio: 1; overflow: visible; }
 
+/* tablets (spec 5.7): the main photo keeps its 2:3 beside the text (--th mirrors geometry tabletPhoto), the second overlapping its left edge, the sheet under the text */
+@media (min-width: 600px) and (max-width: 1023.98px) {
+  :global([data-stage]) .ln { --th: min(72vw, 86svh); --tt: calc((100% - var(--th)) / 2); }
+  :global([data-stage]) .main { left: auto; right: 4.5%; top: var(--tt); width: calc(var(--th) / 1.5); height: var(--th); }
+  :global([data-stage]) .second { left: calc(95.5% - var(--th) * 0.727); top: calc(var(--tt) + var(--th) * 0.5); height: calc(var(--th) * 0.4); }
+  :global([data-stage]) .second.land { left: calc(95.5% - var(--th) * 0.727); top: calc(var(--tt) + var(--th) * 0.62); height: calc(var(--th) * 0.27); }
+  :global([data-stage]) .ln .text { left: 4.5%; right: auto; top: 50%; bottom: auto; width: 38%; transform: translateY(-50%); }
+  :global([data-stage]) .sheet { left: 4.5%; right: auto; width: 38%; }
+  :global([data-stage]) .sheet svg { width: min(44px, 5.4vw); }
+}
+
 @media (min-width: 1024px) {
   :global([data-stage]) .disc { left: 34%; top: -14%; width: auto; height: 128%; }
   /* main photo: right edge, full height, the photo's 2:3 (100% · H/W · 0.667 of the width) */

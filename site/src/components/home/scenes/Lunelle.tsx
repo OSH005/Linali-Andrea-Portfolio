@@ -5,6 +5,7 @@ import { LABELS, LN } from '../story'
 import { clamp01, inOut, lerp, out3, seg } from '@/lib/motion/ease'
 import { litPath, lunelleMain, moonRise } from '../geometry'
 import { Words, rise, showStep } from '../words'
+import { useNarrow } from '../useNarrow'
 import Photo from '../Photo'
 import s from '../HomeStory.module.css'
 import m from './Lunelle.module.css'
@@ -32,6 +33,7 @@ const grab = (n: HTMLElement | null) => {
 
 /** Lunelle: label, title, five sentences, the photo pair of each step. On the stage: the moon, the waxing disc and (phone) the lunar contact sheet. */
 export default function Lunelle({ data, stage }: { data: HomeData; stage: boolean }) {
+  const narrow = useNarrow()
   const full = 'translate(10 10) scale(0.944) translate(-10 -10)' // the icon's moon is r 8.5, the lit path's r 9
   return (
     <section id="lunelle" ref={grab} className={`${s.scene} ${m.ln}`} aria-labelledby="home-ln">
@@ -69,8 +71,8 @@ export default function Lunelle({ data, stage }: { data: HomeData; stage: boolea
         </div>
       </div>
       <svg className={m.ring} aria-hidden="true"><circle /></svg>
-      {/* client only: the contact sheet is decoration, and its thumbnails need not load for the stacked page */}
-      {stage && (
+      {/* client only, below 1024: the contact sheet is decoration, and its thumbnails need not load for the stacked page or on desktop */}
+      {stage && narrow && (
         <div className={m.sheet} aria-hidden="true">
           {SHEET.map((ph, i) => (
             <span key={ph}>

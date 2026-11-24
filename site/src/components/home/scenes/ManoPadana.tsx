@@ -23,7 +23,7 @@ export default function ManoPadana({ data, stage }: { data: HomeData; stage: boo
     <section id="mano-padana" ref={grab} className={`${s.scene} ${m.mp}`} aria-labelledby="home-mp">
       <div className={m.ground} aria-hidden="true" />
       <div className={`wrap ${s.grid}`}>
-        <div className={`${s.text} ${s.chap}`}>
+        <div className={`${s.text} ${s.chap} ${m.text}`}>
           <p className={`label ${s.first}`}>{LABELS.mp}</p>
           <h2 id="home-mp" className={`title-page ${s.chapTitle}`}>
             {data.mp.title} <span lang="si" className={s.sinh}>{data.mp.titleNative}</span>

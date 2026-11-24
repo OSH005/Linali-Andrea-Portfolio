@@ -36,6 +36,7 @@ export function homeData() {
     rv: { title: rv.c.title, logo: pic(rv.m.logo ?? fail('revive has no logo'), `${rv.c.title} ${rv.c.season}`), board: rv.page(RV_BOARD), pile: rv.page(RV_PILE) },
     ln: { title: ln.c.title, pairs: LN_PAIRS.map(([a, b]) => [ln.shot(a), ln.shot(b)] as [Pic, Pic]) },
     dr: {
+      slug: dr.c.slug,
       title: dr.c.title,
       season: dr.c.season,
       shots: Object.fromEntries(dr.m.shoot.map((i) => [i.order, dr.shot(i.order)])) as Record<number, Pic>,

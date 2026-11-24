@@ -1,4 +1,4 @@
-import { inkFor, jagSplit, litPath, lunelleMain, moonRise, tearPolygon, windowRects } from './geometry'
+import { driftCardH, inkFor, jagSplit, leadFrame, litPath, lunelleMain, moonRise, penMask, skew, stripItems, stripX, tabletPhoto, tearPolygon, windowRects } from './geometry'
 
 test('window rects: centred at 16:9, the photo keeps its 2:3 on a 4:3 screen', () => {
   const { A, B, C } = windowRects(1600, 900, false)
@@ -52,4 +52,45 @@ test('moonrise: rises from below to the middle, then grows to fill the frame', (
   expect(moonRise(0)).toEqual({ y: 150, r: 17 })
   expect(moonRise(0.65).y).toBe(50)
   expect(moonRise(1).r).toBe(120)
+})
+
+test('drift strip: items laid end to end with a gap; the track runs its length minus one screen; skew stays under 0.6deg', () => {
+  expect(stripItems(['a', undefined, 'c'], [100, 50, 200], 10)).toEqual([{ start: 0, size: 100, id: 'a' }, { start: 110, size: 50, id: undefined }, { start: 170, size: 200, id: 'c' }])
+  expect(stripX(1, 5000, 1600)).toBe(3400)
+  expect(stripX(0, 5000, 1600)).toBe(0)
+  expect(skew(1)).toBe(0.6)
+  expect(skew(-1)).toBe(-0.6)
+  expect(skew(0.05)).toBeCloseTo(0.3)
+})
+
+test('drift logo: a pen mask sweeps left to right at 104deg', () => {
+  expect(penMask(0)).toBe('linear-gradient(104deg, #000 -28%, transparent -14%)')
+  expect(penMask(1)).toBe('linear-gradient(104deg, #000 100%, transparent 114%)')
+})
+
+test('drift cards: 57% of a phone screen (less on short ones, so the captions fit); full height on desktop', () => {
+  expect(driftCardH(844, true)).toBeCloseTo(480, 0)
+  expect(driftCardH(640, true)).toBe(280)
+  expect(driftCardH(900, false)).toBe(900)
+})
+
+test('drift opening: the full-screen photo shrinks into its card, covered all the way', () => {
+  const a = leadFrame(390, 844, 320, 480, 64, 0)
+  expect(a.clip).toBe('inset(-64px -70px -300px 0px)') // the whole screen
+  expect(a.scale).toBeCloseTo(844 / 480)
+  expect(a.dx).toBe(35)
+  expect(a.dy).toBe(422 - 304)
+  expect(leadFrame(390, 844, 320, 480, 64, 1)).toEqual({ clip: 'inset(0px 0px 0px 0px)', dx: 0, dy: 0, scale: 1 })
+})
+
+test('tablets: a portrait photo stands beside the text, keeping its 2:3', () => {
+  const [x, y, w, h] = tabletPhoto(768, 1024)
+  expect((w * 768) / (h * 1024)).toBeCloseTo(2 / 3)
+  expect(x + w).toBeCloseTo(95.5)
+  expect(y * 2 + h).toBeCloseTo(100)
+  expect(x).toBeGreaterThan(42) // clear of the text column (4.5% + 38%)
+  expect(tabletPhoto(1023, 768)[3]).toBeCloseTo(86)
+  expect(windowRects(768, 1024, true).B).toEqual(tabletPhoto(768, 1024))
+  expect(lunelleMain(820, 1180, true)).toEqual(tabletPhoto(820, 1180))
+  expect(windowRects(599, 900, true).B[2]).toBe(100) // phones keep the full-width photo
 })

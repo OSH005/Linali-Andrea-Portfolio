@@ -43,9 +43,8 @@
 /* ---- Stage (motion on; HomeStory sets data-stage on the client): one pinned screen of layers (mockup "Home"). Phone below 1024, desktop at and above. ---- */
 .story[data-stage] { height: 100svh; overflow: hidden; background: var(--cream); }
 .story[data-stage] > section { position: absolute; inset: 0; overflow: hidden; }
-/* Interim until Task 10 paints Drift: it shows only on its chapter (visibility, so its links cannot take focus while off screen). */
-.story[data-stage] > section:nth-of-type(5) { z-index: 6; background: var(--cream); visibility: hidden; }
-.story[data-chapter='4'] > section:nth-of-type(5) { visibility: visible; }
+/* night behind Lunelle while it sinks back under the foam (Drift's own ground covers it from then on) */
+.story[data-chapter='4'] { background: var(--night); }
 
 /* word masks for sentences that rise (client only, see words.tsx) */
 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
