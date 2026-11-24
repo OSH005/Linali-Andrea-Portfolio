@@ -14,9 +14,10 @@ const word = (n: number) => NUM[n] ?? String(n)
 const isSpread = (m: { width: number; height: number }) => m.width / m.height > 2
 
 /** "17 photographs · 8 spreads", or "Portfolio · 4 spreads" without a shoot; double-page images count as spreads. */
+const many = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`
 export function countText({ shoot, pages }: CollectionMedia) {
-  const book = `${pages.length} ${pages.length && pages.every(isSpread) ? 'spreads' : 'pages'}`
-  return shoot.length ? `${shoot.length} photographs · ${book}` : `Portfolio · ${book}`
+  const book = many(pages.length, pages.length && pages.every(isSpread) ? 'spread' : 'page')
+  return shoot.length ? `${many(shoot.length, 'photograph')} · ${book}` : `Portfolio · ${book}`
 }
 
 /** SS25 < AW26 < SS27 */

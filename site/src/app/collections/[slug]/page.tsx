@@ -28,7 +28,8 @@ export default async function CollectionPage(props: PageProps<'/collections/[slu
         </nav>
         {/* the index's follow frame lands here (view-transition-name: collection-photo); Task 12's hero keeps the name */}
         <Photo p={{ ...hero, alt: c.alt[hero.id] ?? '' }} className={`${styles.hero} vt-photo`} sizes="100vw" eager />
-        <Chapter collection={c} media={m} defaultOpen />
+        {/* the hero is not repeated in the gallery (a portfolio page stays in the book) */}
+        <Chapter collection={c} media={{ ...m, shoot: m.shoot.filter((i) => i !== hero) }} defaultOpen />
       </main>
       <Footer variant="flow" />
     </>

@@ -28,8 +28,9 @@ test('four rows in journey order, each a link with number, name, meta, her line 
 
 test('counts come from the manifest: photographs, then pages or (double) spreads', () => {
   const page = { width: 1414, height: 1000 }, spread = { width: 2830, height: 1000 }
-  expect(countText({ shoot: [page, page], pages: [page] } as never)).toBe('2 photographs · 1 pages')
+  expect(countText({ shoot: [page, page], pages: [page] } as never)).toBe('2 photographs · 1 page')
   expect(countText({ shoot: [], pages: [spread, spread] } as never)).toBe('Portfolio · 2 spreads')
+  expect(countText({ shoot: [page], pages: [spread] } as never)).toBe('1 photograph · 1 spread')
 })
 
 test('seasons in order, Revive and Drift together at SS27', () => {

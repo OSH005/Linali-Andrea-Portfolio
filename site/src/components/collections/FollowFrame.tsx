@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { clamp01, lerp, out3 } from '@/lib/motion/ease'
 import Photo from '@/components/home/Photo'
 import type { Row } from './data'
+import { plainClick } from './rail'
 import s from './CollectionIndex.module.css'
 
 const FINE = '(hover: hover) and (pointer: fine)'
@@ -33,7 +34,7 @@ export default function FollowFrame({ rows, list, page }: { rows: Row[]; list: R
     }
     const out = () => void ((st.act = -1), tint())
     const click = (e: MouseEvent) => {
-      if (!(e.target as Element).closest('a[data-i]') || !frame.current) return
+      if (!plainClick(e) || !(e.target as Element).closest('a[data-i]') || !frame.current) return
       st.leaving = true // hold the frame still while the next page loads; it becomes that page's hero
       frame.current.style.viewTransitionName = 'collection-photo'
     }

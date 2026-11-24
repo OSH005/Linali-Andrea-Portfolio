@@ -4,6 +4,9 @@ import { clamp01, inOut } from '@/lib/motion/ease'
 export const RAIL_LEAD = 120
 export const RAIL_STEP = 470
 
+/** A plain left click; ctrl/cmd/shift/alt or another button opens elsewhere, so this page must not freeze for a View Transition. */
+export const plainClick = (e: MouseEvent) => !(e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey)
+
 /** Rows stacked from `top`; the row at `u` is open (`f` 1), its neighbours fold back. The rail rises one compact row per step. */
 export function railLayout(u: number, n: number, compact: number, expanded: number, top: number) {
   let acc = top - compact * u

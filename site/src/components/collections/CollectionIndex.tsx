@@ -1,7 +1,6 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { useMotion } from '@/lib/motion/useMotion'
-import { useNarrow } from '@/components/home/useNarrow'
 import { Words } from '@/components/home/words'
 import { useHeader } from '@/components/header/HeaderContext'
 import type { IndexData } from './data'
@@ -11,14 +10,22 @@ import Seasons from './Seasons'
 import s from './CollectionIndex.module.css'
 
 const CHAPTERS = ['Collections', 'Seasons', '— Get in touch']
+/** The desktop list (and follow frame) needs a mouse; touch screens of any width get the rail (the CSS uses the same query). */
+const DESK = '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
+const onDesk = (f: () => void) => {
+  const m = matchMedia(DESK)
+  m.addEventListener('change', f)
+  return () => m.removeEventListener('change', f)
+}
+const useDesk = () => useSyncExternalStore(onDesk, () => matchMedia(DESK).matches, () => true)
 
 /**
  * /collections. Server HTML and motion off: the list (a 12-column grid on desktop, open rows on phones and tablets) and the seasons, laid flat.
- * Motion on: the rows rise in; desktop rows get the follow frame (fine pointers); below 1024 the list becomes the focus rail; the seasons thread sews.
+ * Motion on: the rows rise in; desktop rows get the follow frame (fine pointers); below 1024 or on touch screens the list becomes the focus rail; the seasons thread sews.
  */
 export default function CollectionIndex({ data }: { data: IndexData }) {
   const { on } = useMotion()
-  const narrow = useNarrow()
+  const desk = useDesk()
   const { set } = useHeader()
   const page = useRef<HTMLDivElement>(null)
   const list = useRef<HTMLOListElement>(null)
@@ -53,8 +60,8 @@ export default function CollectionIndex({ data }: { data: IndexData }) {
   )
   return (
     <div ref={page} className={s.index}>
-      <FocusRail rows={data.rows} head={head} list={list} live={on && narrow} />
-      {on && !narrow && <FollowFrame rows={data.rows} list={list} page={page} />}
+      <FocusRail rows={data.rows} head={head} list={list} live={on && !desk} />
+      {on && desk && <FollowFrame rows={data.rows} list={list} page={page} />}
       <Seasons data={data} />
     </div>
   )

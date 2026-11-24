@@ -5,7 +5,7 @@ import { clamp01, inOut, lerp, out3, seg } from '@/lib/motion/ease'
 import { useLenis } from '@/lib/motion/lenisContext'
 import Photo from '@/components/home/Photo'
 import type { Row } from './data'
-import { morph, RAIL_LEAD, RAIL_STEP, railLayout, railScroll } from './rail'
+import { morph, plainClick, RAIL_LEAD, RAIL_STEP, railLayout, railScroll } from './rail'
 import s from './CollectionIndex.module.css'
 
 const CH = 92 // a compact row: 56×68 thumbnail, number · season · theme, name
@@ -89,7 +89,7 @@ export default function FocusRail({ rows, head, list, live }: { rows: Row[]; hea
     }
     // the open photo carries over to the collection page (cross-document View Transition; ignored where unsupported)
     const click = (e: MouseEvent) => {
-      const it = items.find((x) => x.a.contains(e.target as Node))
+      const it = plainClick(e) && items.find((x) => x.a.contains(e.target as Node))
       if (it) it.pics.style.viewTransitionName = 'collection-photo'
     }
     const back = () => items.forEach((it) => (it.pics.style.viewTransitionName = ''))

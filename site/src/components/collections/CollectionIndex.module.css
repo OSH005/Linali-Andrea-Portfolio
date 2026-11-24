@@ -19,8 +19,8 @@
 .open { align-self: flex-end; margin-top: -1.2em; font-weight: 500; font-size: 15px; }
 .open::after { content: ""; display: block; height: 2px; margin-top: 4px; background: repeating-linear-gradient(90deg, var(--teal) 0 7px, transparent 7px 11px); }
 
-/* tablets (not a phone turned sideways): the photo beside its text */
-@media (min-width: 600px) and (min-height: 600px) and (max-width: 1023.98px) {
+/* tablets and large touch screens (not a phone turned sideways): the photo beside its text */
+@media (min-width: 600px) and (min-height: 600px) and (not ((min-width: 1024px) and (hover: hover) and (pointer: fine))) {
   .link { display: grid; grid-template-columns: 46% minmax(0, 1fr); column-gap: 28px; align-content: end; }
   .pics { grid-row: 1 / span 4; aspect-ratio: 10 / 13; max-height: 56svh; }
   .tw, .lw, .open { grid-column: 2; }
@@ -48,8 +48,8 @@
 /* the text lies over the photo while it opens */
 .top[data-live] :is(.meta, .t, .line, .cnt, .open) { z-index: 1; }
 
-/* ---- desktop: one row per collection on a 12-column grid; all four fit the first screen at 16:9 ---- */
-@media (min-width: 1024px) {
+/* ---- desktop (a mouse; touch screens keep the open rows): one row per collection on a 12-column grid; all four fit the first screen at 16:9 ---- */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
   .pin { padding: 15svh 4.5% 9svh; }
   .h1 { margin-top: 0.8vw; font-size: 1.9vw; line-height: 1.15; }
   .list { margin-top: 4.3vw; border-bottom: 1px solid rgb(59 36 24 / 0.16); }
