@@ -86,6 +86,15 @@
     "chair-graded": "Linali sitting in a white hanging wicker chair in warm evening light",
     "her-flush": "Linali laughing with her hands in her hair, in a leopard-print corset top and a brown satin ruched skirt"
   },
+  "inspirationAlt": [
+    "Sheer pale fabric blowing in the wind against a bright sky, above a grassy dune",
+    "A woman at the sea’s edge, a sheer pink veil blowing across her face",
+    "A hand holding sheer caramel fabric out to the wind, blue sky behind",
+    "Wet white fabric lying on the sand at the water’s edge",
+    "Sea foam spreading over wet sand",
+    "Sheer white fabric lifting in the wind over breaking waves",
+    "White fabric trailing in the shallow water at the shoreline, seen from above"
+  ],
   "contact": {
     "endpointEnv": "NEXT_PUBLIC_CONTACT_ENDPOINT",
     "closing": "Let’s make something together."

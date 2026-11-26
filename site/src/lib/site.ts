@@ -14,6 +14,8 @@ export interface Site {
   skills: { name: 'Craft' | 'Design' | 'Tools' | 'People'; piece: 'bodice' | 'skirt' | 'sleeve' | 'pocket'; cut: string; skills: string[] }[]
   portrait: { figure: string; polaroids: string[] }
   personalAlt: Record<string, string>
+  /** Alt text for the inspiration photos, in their order (1…7). */
+  inspirationAlt: string[]
   contact: { endpointEnv: string; closing: string }
 }
 
@@ -25,7 +27,7 @@ export function parseSite(raw: unknown, file = 'site.json'): Site {
     throw new Error(`${file}: ${msg}`)
   }
   for (const k of ['name', 'role', 'location', 'tagline', 'manifesto', 'bio']) if (typeof s?.[k] !== 'string') fail(`${k} must be a string`)
-  for (const k of ['facts', 'skills']) if (!Array.isArray(s[k])) fail(`${k} must be an array`)
+  for (const k of ['facts', 'skills', 'inspirationAlt']) if (!Array.isArray(s[k])) fail(`${k} must be an array`)
   for (const k of ['links', 'portrait', 'personalAlt', 'contact']) if (typeof s[k] !== 'object' || !s[k]) fail(`${k} must be an object`)
   if (s.role !== 'Fashion designer') fail('role must be Fashion designer')
   if (!/^I\b/.test(s.bio) || /Linali Andrea is| she /.test(s.bio)) fail('bio must be first person')
