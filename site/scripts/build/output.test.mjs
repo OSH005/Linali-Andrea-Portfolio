@@ -15,7 +15,7 @@ test.each(pages)('%s has no undefined class names (CSS modules compiled)', (p) =
 })
 
 test('/work redirects to /collections and no page links to /work', () => {
-  expect(fs.readFileSync(path.join(out, '_redirects'), 'utf8')).toBe('/work/* /collections/:splat 301\n')
+  expect(fs.readFileSync(path.join(out, '_redirects'), 'utf8')).toBe('/work /collections/ 301\n/work/* /collections/:splat 301\n') // the splat doesn't match bare /work on Cloudflare
   for (const p of pages) expect(fs.readFileSync(path.join(out, p), 'utf8')).not.toContain('href="/work')
 })
 
