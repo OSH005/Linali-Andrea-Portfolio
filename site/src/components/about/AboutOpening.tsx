@@ -5,7 +5,7 @@ import { useMotion } from '@/lib/motion/useMotion'
 import { clamp01, lerp, out3, spring } from '@/lib/motion/ease'
 import { useHeader } from '@/components/header/HeaderContext'
 import Photo from '@/components/home/Photo'
-import { useJump } from '@/components/collection/Hero'
+import { useJump } from '@/lib/motion/useJump'
 import type { Pic } from '@/components/home/data'
 import s from './AboutOpening.module.css'
 

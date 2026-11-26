@@ -2,22 +2,11 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { useMotion } from '@/lib/motion/useMotion'
-import { useLenis } from '@/lib/motion/lenisContext'
+import { useJump } from '@/lib/motion/useJump'
 import { useHeader } from '@/components/header/HeaderContext'
 import Photo from '@/components/home/Photo'
 import type { CollectionData } from './data'
 import s from './Hero.module.css'
-
-/** A same-page jump that goes through Lenis when it runs (a plain anchor jump otherwise). */
-export function useJump() {
-  const lenis = useLenis()
-  return (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const id = e.currentTarget.hash
-    if (!lenis || !id) return
-    e.preventDefault()
-    lenis.scrollTo(id)
-  }
-}
 
 /**
  * The collection's opening (mockup `x-hero`). Desktop: her first photographs side by side at full height, uncropped,

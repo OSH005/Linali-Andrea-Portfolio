@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useJump } from './Hero'
+import { useJump } from '@/lib/motion/useJump'
 import s from './SectionSwitch.module.css'
 
 /**
