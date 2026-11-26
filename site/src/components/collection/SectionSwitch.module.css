@@ -17,3 +17,5 @@
 }
 .fl a[aria-current] { color: var(--cream); }
 @media (min-width: 1024px) { .fl { bottom: 3.5svh; } }
+/* a phone turned sideways (spec 5.7, not designed): no room for a floating bar over the ring and the reader; the header still jumps */
+@media (max-width: 1023.98px) and (max-height: 599.98px) and (orientation: landscape) { .fl { display: none; } }
