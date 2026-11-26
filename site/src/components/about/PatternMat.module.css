@@ -39,7 +39,7 @@
 .name { top: calc(var(--cy) + 22px); font: 400 20px/1 var(--font-gloock), serif; }
 .list { top: calc(var(--cy) + 52px); padding: 0; list-style: none; font-size: 15px; line-height: 1.45; }
 .list li { padding: 1px 0; }
-.cut { color: var(--muted); font-size: 10px; }
+.cut { color: var(--muted); font-size: 12px; }
 
 /* the tape measure lies in the corner */
 .tape { position: relative; display: block; justify-self: end; width: 70%; height: 70px; margin-top: 4px; overflow: visible; pointer-events: none; }

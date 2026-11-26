@@ -13,7 +13,7 @@
 .str { display: block; width: 1px; height: var(--str); margin: 0 auto; background: var(--brown); opacity: 0.6; }
 .pol { display: block; padding: 6% 6% 0; background: #fff; box-shadow: 0 12px 26px rgb(59 36 24 / 0.2); }
 .pol img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
-.name { display: block; padding: 6px 0; font-size: 8.5px; letter-spacing: 0.08em; text-align: center; white-space: nowrap; }
+.name { display: block; padding: 6px 0; font-size: 12px; line-height: 1.15; letter-spacing: 0; text-align: center; }
 
 @media (min-width: 1024px) {
   .sea { --tw: 12.5vw; --ty: calc(3.6vw + 12px); --str: 3vw; }
@@ -21,7 +21,7 @@
   .title { margin-top: 0.8vw; max-width: none; }
   .stage { margin: max(24px, calc(29svh - 3.6vw - 67px)) -4.5vw 0; }
   .yr { height: calc(var(--ty) - 2vw); font-size: 1.6vw; }
-  .name { padding: 0.7vw 0 0.8vw; font-size: 10px; letter-spacing: 0.14em; }
+  .name { padding: 0.7vw 0 0.8vw; letter-spacing: 0.14em; white-space: nowrap; }
 }
 
 /* motion on: a short pin while the thread sews across (screens tall enough to hold it) */

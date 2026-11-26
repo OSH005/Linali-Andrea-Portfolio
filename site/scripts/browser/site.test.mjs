@@ -120,6 +120,29 @@ test('390x844 /about/: every skill list ends above its cut marking, in type of a
   await ctx.close()
 })
 
+describe.each([[320, 640], [1440, 900]])('%ix%i', (width, height) => {
+  test.each(ROUTES.flatMap((r) => [[r, 'reduce'], [r, 'no-preference']]))('%s (%s motion): no visible text under 12px', async (route, reducedMotion) => {
+    const { page, ctx } = await open(route, { width, height, reducedMotion })
+    await page.waitForTimeout(500)
+    const small = await page.evaluate(() => {
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() ? 1 : 2) })
+      const bad = new Set()
+      for (let n; (n = w.nextNode()); ) {
+        const e = n.parentElement
+        // the "16 SKILLS" print on the tape measure (/about) is drawing, not copy: an aria-hidden SVG scaled with its picture
+        if (e.closest('dialog:not([open]), script, style, noscript, svg[aria-hidden="true"]')) continue
+        if (!e.checkVisibility({ opacityProperty: true, visibilityProperty: true }) || e.getClientRects().length === 0) continue
+        const cs = getComputedStyle(e)
+        if (cs.clipPath.startsWith('inset(50%') || cs.clip === 'rect(0px, 0px, 0px, 0px)') continue // visually hidden (sr-only)
+        if (parseFloat(cs.fontSize) < 12) bad.add(`${parseFloat(cs.fontSize).toFixed(1)}px ${e.tagName} "${n.textContent.trim().slice(0, 30)}"`)
+      }
+      return [...bad]
+    })
+    expect(small).toEqual([])
+    await ctx.close()
+  })
+})
+
 const overlap = (a, b) => a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
 
 test.each([[844, 390], [932, 430]])('phone turned sideways %ix%i: the Shoot | Portfolio switch never covers the ring or the reader', async (width, height) => {
