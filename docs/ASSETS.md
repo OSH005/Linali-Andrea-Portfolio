@@ -62,28 +62,34 @@ Alt text for every shoot photo is in `site/content/collections/<slug>.json` → 
 
 | File | What | Used in |
 |---|---|---|
-| `balcony-sticker.png` | Cut-out of Linali (leopard corset top, brown satin skirt) with a paper-white border and a warm shadow | Person section, standing figure |
-| `beach-graded.jpg` | Sitting on the sand at sunset, palette grade | Person section, polaroid A |
-| `mirror-graded.jpg` | Mirror photo, grey waistcoat and wide denim, palette grade | Person section, polaroid B |
-| `chair-graded.jpg` | Hanging wicker chair, warm light, palette grade | Spare polaroid (not used yet) |
+| `her-flush` | Flush cut-out of Linali (no paper border), re-cut from `originals/20261120_115442.jpg` with `tools/media/cutout.mjs`, then a gentle grade | Home opening and `/about` opening, standing on the bottom edge (`site.json` → `portrait.figure`) |
+| `beach-graded.jpg` | Sitting on the sand at sunset, palette grade | `/about` polaroid (`portrait.polaroids`) |
+| `mirror-graded.jpg` | Mirror photo, grey waistcoat and wide denim, palette grade | `/about` polaroid |
+| `chair-graded.jpg` | Hanging wicker chair, warm light, palette grade | `/about` polaroid |
+| `face` | Square crop of the chair photo around her face | Not used yet (kept for later) |
+| `balcony-sticker.png` | Phase 1 cut-out with a paper-white border | No longer used; kept as an asset and in `personalAlt` |
 | `originals/` | The 5 untouched phone photos | Never published. One contains **GPS location** |
 
 All edited versions (cutout, sticker, graded, duotone for each of the 5 photos) plus a layout mock are in `Personal/edited/` (open `Personal/edited/preview.html`). To redo them for new photos: `.claude/skills/treat-portraits`. Not used, on purpose: the snow photo (720 px, bystanders, litter), all duotones (muddy small), the chair cutout (white chair vanishes on cream).
 
 ## Brand (`media-src/brand/`)
-- `monogram.png`: the Didone "LA" monogram (on white; the nav blends it with `multiply`). **An SVG version is still needed** from the client for line-drawing animation.
+- `monogram.png`: the Didone "LA" monogram, plus `monogram-cream` (alpha filled `#F2E8DA`). The header draws it as a CSS mask in the current ink. **An SVG version is still needed** from the client.
+- `drift-logo-brown` and `drift-logo-cream`: the Drift script logo as a silhouette in brown (`#3B2418`) and cream (`#F7F0E6`), made from `drift/logo.png` (home Drift scene and strip). Revive's logo is used as it comes.
+
+## Inspiration (`media-src/Inspiration/`)
+Seven of her moodboard photos (sheer fabric in coastal wind, sea foam, white fabric in the shallows), in filename order, built as `inspiration/1…7` at 640 / 1280. Used for the home moodboard columns and sea-foam wash, and for "My inspiration" and the back layer on `/about`. Alt text is `inspirationAlt` in `site.json`.
 
 ## Where each image appears on the site
 
 | Place | Image |
 |---|---|
-| Hero ground (the "sketch") | Drift spread `18` (range plan, flats), set in `content/site.json` → `hero.sketch` |
-| Hero lens (the "reality") | Drift shoot `13-MMS_8698` (six models, the full line-up) → `hero.photo` |
-| Nav | Monogram |
-| Each chapter | Its shoot photos (ring, orbit, walk or grid), then its pages in the Tumble Deck |
-| Revive studio table | Its spreads, as files in three Glass Folders (`studio` in `revive.json`) |
-| `/work` index (becomes `/collections` in Phase 2) | First shoot photo, or the logo on paper when there is no shoot |
-| Person section | `balcony-sticker`, `beach-graded`, `mirror-graded` (`content/site.json` → `person`) |
+| Home opening | `her-flush`, the inspiration photos (moodboard columns), then Mano Padana shoot 1–4 in the opening window |
+| Home scenes | Mano Padana shoot 1–4; Revive pages 30 (torn board) and 34 (pile); Lunelle shoot photo pairs per sentence; Drift: shoot 13 (desktop) / 17 (phone) opening, the six looks (`looks` in `drift.json`), inspiration 5 as the foam |
+| Header | `monogram-cream` as a mask |
+| `/collections` rows, follow frame, focus rail | Three photos per collection, picked in `site/src/components/collections/data.ts` (`PICKS`) |
+| Collection page hero | `lead` in the collection JSON: desktop list and one phone photo, from `shoot` or `pages` |
+| Collection page | "In my words" film and the shoot: every shoot photo; the portfolio: every page (640 / 1280, and the 4800 file for zoom where it exists) |
+| `/about` | `her-flush`, three polaroids, two inspiration photos at the back, "My inspiration" frames (`MOOD` order in `app/about/page.tsx`) |
 
 ## Still missing from the client
 - **SVGs**: the LA monogram, the Drift and Revive logos, the Lunelle title, the Mano Padana Sinhala title.

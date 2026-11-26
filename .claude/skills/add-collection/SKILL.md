@@ -1,13 +1,13 @@
 ---
 name: add-collection
-description: Add a new fashion collection to Linali Andrea's portfolio site (shoot photos, portfolio pages, story text) so it appears as a chapter, in the /collections index and at /collections/<slug>. Use when the user says "add a collection", "new collection", "upload the X shoot", or drops a new folder of collection images.
+description: Add a new fashion collection to Linali Andrea's portfolio site (shoot photos, portfolio pages, story text) so it appears in the home journey, in the /collections index and at /collections/<slug>. Use when the user says "add a collection", "new collection", "upload the X shoot", or drops a new folder of collection images.
 ---
 
 # Add a collection
 
 A collection is **data, not code**. Adding one means: originals in one folder, one JSON file, one media build. No component is written per collection. If a step below seems to need new code, stop and say so; the system is missing a feature, and that is a separate task.
 
-PLAN.md (project root) is the source of truth for the design system, the storage layout (section 6) and the chapter moments (section 3). Read section 6 before starting.
+DESIGN.md and PRODUCT.md (project root) describe the design system and the routes; PLAN.md section 6 the storage layout; the Phase 2 spec (`docs/superpowers/specs/2026-11-24-immersive-redesign-design.md`, section 7) the collection page. Read PLAN.md section 6 before starting. Routes: `/collections` lists every collection (in `order`) and `/collections/<slug>/` is its page.
 
 ## 1. Collect before touching files
 
@@ -44,9 +44,12 @@ media-src/collections/<slug>/
   "title": "Drift",
   "season": "SS27",
   "year": 2026,
-  "order": 3,
+  "order": 5,
   "featured": true,
   "concept": "…her words…",
+  "line": "One sentence of hers, shown in the /collections list.",
+  "theme": "Nature",
+  "lead": { "from": "shoot", "desktop": [13, 14, 7, 3], "phone": 17 },
   "palette": { "ground": "#F2E8DA", "ink": "#3B2418", "accent": "#2B4C7E" },
   "moment": "ring",
   "carousel": { "preset": "cylinder", "autoplay": "drift", "speed": 8 },
@@ -57,7 +60,18 @@ media-src/collections/<slug>/
 }
 ```
 
-**Choose `moment` by what the collection has:**
+**New fields (all required except `looks`):**
+- `order`: position in her journey (mano-padana 1, revive 2, lunelle 3, drift 4); the index and the "Next collection" link follow it.
+- `line`: her one line about the collection, in her words, for the index.
+- `theme`: one of the loader's themes (Mind, Body, Nature, Renewal). It is shown beside the season.
+- `lead`: the photos of the collection page hero. `from` is `shoot` or `pages` (use `pages` when there is no shoot, as Revive does); `desktop` is a list of media `order` numbers shown side by side; `phone` is the one photo. The loader refuses numbers that do not exist.
+- `looks` (optional, Drift only today): `[{ "n": 1, "shots": [7, 8], "text": "…" }]`, the look panels in the home Drift strip. Descriptions must be hers or approved by her.
+
+**Index frame photos and tint** live in code, keyed by slug: `site/src/components/collections/data.ts` has `PICKS` (three media `order` numbers per collection for the follow frame and the phone rail) and `TINTS` (the row hover tint). A new collection works without them: it falls back to its first three photos and a cream tint. To choose, add a line to each map, e.g. `PICKS['<slug>'] = [2, 5, 9]` and `TINTS['<slug>'] = 'rgb(r g b)'` (a light, desaturated tint of the collection's photos).
+
+**Home journey:** the home page is a hand-built story of the four collections in order (`site/src/components/home/`); a fifth collection appears in `/collections` and has its own page, but is not added to the home story. Adding it to the home is a design task, not data.
+
+**`moment`, `carousel` and `studio`** are Phase 1 fields: the loader still requires `moment`, and the collection page always shows the shoot as the Circular Carousel (the `carousel` settings apply) and the portfolio as the page reader. Choose `moment` by what the collection has:
 
 | Material | moment | Notes |
 |---|---|---|
@@ -66,7 +80,7 @@ media-src/collections/<slug>/
 | Only sketches and pages, no shoot | `studio` | Glass Folders on the studio table, marked "In progress" |
 | Anything else | `gallery` | Plain grid + viewer, always safe |
 
-Never give two neighbouring featured chapters the same moment. Keep at most **4 `featured` collections** on the home story; the rest live in `/collections`. Mark the oldest featured one `false` when adding a fifth.
+`featured` is still validated (at most 4) but the home story does not read it.
 
 Every shoot photo needs an `alt` entry describing the garment, not just "model". The media build fails on a missing alt.
 
@@ -87,9 +101,9 @@ It reads `media-src/collections/<slug>`, then:
 
 ## 5. Check it, by looking
 
-1. Run the site. Open the chapter on the home page and `/collections/<slug>`.
+1. Run the site. Open `/collections` (the new row, hover and open) and `/collections/<slug>`.
 2. Screenshot at 1440, 1024, 768, 390 and 320 wide, and look at every shot.
-3. Check: the carousel or walk shows every photo; the deck opens, counts pages in order, and zooms; "Read the text" has the page text; the chapter's palette passes contrast (body text ≥ 4.5:1); reduced motion still shows everything.
+3. Check: the hero shows the `lead` photos; the shoot ring and grid show every photo; the page reader turns pages in order, zooms, and "Read the text" has the page text (it is disabled on pages without `pageText`); a collection without a shoot shows no shoot section or Shoot/Portfolio switch; the palette passes contrast (≥ 4.5:1); reduced motion and Motion off still show everything. Run `npm test` and `npm run test:build` inside `site/`.
 4. Score with the rubric in PLAN.md section 5b. Fix anything under 7 before calling it done.
 
 ## 6. Report

@@ -1,6 +1,15 @@
 # Linali Andrea — Portfolio Website Plan
 
-Status: **Phase 1 built** (static site, media pipeline, components; merged to `main`). Next: Phase 2, an **immersive redesign** (decided 2026-11-23 after reviewing Phase 1: home becomes a short motion-led highlight reel featuring 2–3 collections; new `/about`; `/work` becomes `/collections` with full detail pages). Prompt: `docs/prompts/phase-2-immersive.md`. See `docs/START-HERE.md`.
+Status: **Phase 2 built** on branch `phase-2-immersive` (the immersive redesign; merge to `main` only when the user says so). Phase 1 (static site, media pipeline, components) is on `main`. Next: Phase 3 polish. See `docs/START-HERE.md`.
+
+> **Phase 2 as built supersedes parts of this plan.** The design of record is `docs/superpowers/specs/2026-11-24-immersive-redesign-design.md` plus `DESIGN.md` and `PRODUCT.md`. What changed:
+> - **Routes:** `/` (opening, then Mano Padana → Revive → Lunelle → Drift, then the contact card), `/collections`, `/collections/<slug>`, `/about`. `/work/*` redirects to `/collections/*`. The per-collection "chapter moments" (`ring`, `orbit`, `walk`, `studio`, `gallery`) and the Phase 1 components (`PortfolioReader`, `Chapter`, `StudioTable`, `sections/`, the hero lens, the Person section) are gone; sections 3 and 4 below describe the Phase 1 idea, not the build.
+> - **Type:** Gloock (display), Hanken Grotesk (body), DM Mono (labels), Special Elite (Drift's narrative), Noto Serif Sinhala. Not Bodoni Moda or Courier Prime.
+> - **Closing line:** "Let’s make something together." (not "…something slow."). Her title is "Fashion designer"; the site speaks in first person.
+> - **Home** is one pinned, scroll-driven timeline (GSAP + Lenis; no WebGL, no OGL). **Collections** has a cursor-following photo frame (phone: focus rail) and a seasons thread. **A collection page** has the hero, "In my words", the shoot (ring or grid, viewer) and an inline page reader with loupe, zoom and "Read the text". **About** has her opening collage, about me, "My inspiration" and skills as pattern pieces on a cutting mat.
+> - **Contact card:** on the home page it follows the last scene; elsewhere it is the next block in the flow and never covers content. No per-collection page palettes: one cream template.
+> - **Header:** one SiteHeader on every page (paper pill with a sewn teal stitch, chapter roll, Motion on/off). Motion off, or `prefers-reduced-motion`, gives the stacked layout.
+> - **Her CV is on hand** but is not published or offered for download (it lists referees' contact details).
 
 > **Decisions made while building Phase 1 that override this plan** (details in `CLAUDE.md`):
 > - Spreads (Drift, Revive) are **not split**. Their text and images cross the gutter, so each spread is one deck card at ratio 2√2 (2.83). Single pages stay at √2 (1.41). A collection may not mix the two; the media build refuses.
@@ -67,7 +76,7 @@ I inspected it live. It was built by OFF+BRAND on **Webflow + Lenis (smooth scro
 | A hand-drawn scribble animates over the big type | Human touch on a technical site | Her **handwriting and signature** drawn stroke by stroke (SVG). This is our strongest defence against an "AI-made" feel. |
 | Faint topographic lines in the background | Texture without noise | **A single thread.** One stitched line (dashed running stitch, as on her Drift pages) runs down the whole page, sews each chapter to the next, and ends by signing her name in the footer. This is the story device that connects header to footer. |
 | Photos scattered at different depths, parallax on scroll | Feels like a collage | Her pages are already collages: polaroids, torn paper, clothes pegs, swatches. Pin real shoot photos and swatches with pegs and tape, at different depths. |
-| Footer rises as a rounded card with a huge closing line | A clear ending | A brown card rises over cream: *"Let's make something slow."*, contact details, and the thread finishes her signature. |
+| Footer rises as a rounded card with a huge closing line | A clear ending | A brown card with the closing line *"Let’s make something together."*, contact details, and the thread finishes her signature. |
 | Smooth scroll (Lenis) | Everything feels expensive | Same. Also **slow it down in the Drift chapter**, so the motion itself says "stop rushing". |
 
 **What to leave:** the WebGL *weight* (we allow one small, lazy-loaded OGL layer for signature moments, with CSS fallbacks, decided 2026-11-23), the sports-brand loudness (neon, all-caps shouting) and the long preloader. Her audience (brands, recruiters, Instagram traffic in Sri Lanka) will often be on mid-range Android phones.
@@ -105,7 +114,7 @@ Each chapter has **its own lighting and its own signature moment**, so nothing r
 
 | Problem in the code | What would happen | Fix |
 |---|---|---|
-| It calls `preventDefault()` on every wheel event over the deck, and the deck **loops forever** | Placed inside the long story page, it traps the scroll: the visitor wheels and can never get past it. All three skills ban scroll-jacking. | **Never place it inline.** On the story page, each chapter shows a closed, static stack of pages with a button: *Open the portfolio*. That opens the deck **full screen** in an overlay (also at `/work/<collection>`). Lenis is paused while it's open (`lenis.stop()`), and there is a visible Close button plus Esc. |
+| It calls `preventDefault()` on every wheel event over the deck, and the deck **loops forever** | Placed inside the long story page, it traps the scroll: the visitor wheels and can never get past it. All three skills ban scroll-jacking. | **Never place it inline.** On the story page, each chapter shows a closed, static stack of pages with a button: *Open the portfolio*. That opens the deck **full screen** in an overlay (Phase 1; Phase 2 uses the inline page reader on `/collections/<slug>`). Lenis is paused while it's open (`lenis.stop()`), and there is a visible Close button plus Esc. |
 | `touch-none` on the root | On a phone, a swipe over the deck can't scroll the page | Fine inside the full-screen overlay, where the deck should own the gestures |
 | It's endless, so there's no start or end | The brief says "explore the pages **in order**". An endless loop hides where you are. | ~~Cover cards~~ (dropped: available covers crop badly). A **page counter** (`07 / 20`, tabular numerals). |
 | No index callback. Clicking means "next". | No way to show a counter or zoom into the current page | **One small edit to the source:** an `onIndexChange(index)` prop, called from `paint()`. Then a **Zoom** button opens the current page in a pinch-zoom viewer (2400 px; 4800 px for spreads). |
@@ -116,7 +125,7 @@ Each chapter has **its own lighting and its own signature moment**, so nothing r
 
 **Settings (as built):** `aspect` = first page's width ÷ height, `depth={4}`, `scrollPerCard={240}` (default), `height="100svh"`, `background` set to each chapter's colour (cream, or night brown for Lunelle).
 
-Each collection also gets its own URL (`/work/drift` etc.), which opens straight into its deck, so the client can share one portfolio directly on Instagram or LinkedIn.
+Each collection also gets its own URL (`/collections/drift` etc.), which opens straight into its deck, so the client can share one portfolio directly on Instagram or LinkedIn.
 
 ---
 
@@ -138,7 +147,7 @@ Honest notes on colour:
 - **Teal on cream is 3.5:1 contrast.** That fails WCAG AA for body text. Use it only for large text (≥24px), lines and icons, never for small text.
 
 **Type (matches her monogram and her pages)**
-- Display: a high-contrast Didone, like her LA logo. *Bodoni Moda* (free) or a paid editorial Didone if the budget allows.
+- Display: a high-contrast Didone, like her LA logo. Built with *Gloock* (free).
 - Labels: a typewriter face. Her pages already use typewriter labels ("CONCEPT", "COLOR BOARD"). Use it for metadata only (season, page counter, credits), **never as a small label above a heading**. Impeccable bans that pattern outright.
 - Accent: **her real handwriting**, scanned and traced to SVG. Nothing says "not AI" more clearly.
 - Sinhala: Noto Serif Sinhala for මනෝ පාදන.
@@ -259,7 +268,7 @@ The site has a small library of chapter layouts. Each collection picks one in it
 
 Every moment ends in the same "Open the portfolio" stack and Tumble Deck. A collection that deserves something new gets a **new moment** added to the library once, and then every later collection can use it too.
 
-**The home story features at most 4 collections** (`featured: true`, in `order`), so it never becomes a 15-chapter scroll. Every collection, featured or not, is listed at `/work` and has its own page at `/work/<slug>`.
+**The home story features at most 4 collections** (`featured: true`, in `order`), so it never becomes a 15-chapter scroll. Every collection, featured or not, is listed at `/collections` and has its own page at `/collections/<slug>`.
 
 ### The media build (`npm run media -- <slug>`)
 - strips all EXIF (GPS, camera, dates) and applies rotation,

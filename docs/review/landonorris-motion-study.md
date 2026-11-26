@@ -76,7 +76,7 @@ So: **one smoothing layer (Lenis), short UI moves, long reveals, tiny per-charac
 | 14 Store collage | The **/about collage** (cut-out figure, taped polaroids, craft details) | — |
 | 15 Hand scribbles | The **running stitch** under key words, drawn by `stroke-dashoffset`. Her handwriting replaces it when supplied. | — |
 | 16 Socials fan | Skip on home. Maybe a **portfolio-page fan** on collection detail: the closed page stack opens into a fan before the Tumble Deck opens. *Proposal.* | Would add a second deck metaphor next to the Tumble Deck. |
-| 17 Footer card with notch | **Brown card rises over cream** (`margin-top: −40px`, 40 px top radius). The thread ends there. "Let's make something slow." | Their notch is skipped; our card already has its shape. |
+| 17 Footer card with notch | **Brown card rises over cream** (as built: 28 px top radius; on the home page it follows the last scene, elsewhere it is the next block in the flow). The thread ends there. "Let’s make something together." | Their notch is skipped; our card already has its shape. |
 | 18 Rive page transition | **Cross-document View Transitions, 300 ms.** Collection photo → detail hero as a shared element where possible. | No Rive: one runtime fewer. |
 
 ## Benchmark targets for Phase 2

@@ -1,5 +1,7 @@
 # Prompt: Phase 2, Immersive redesign (new structure + motion)
 
+> **History:** this is the original Phase 2 prompt. Phase 2 was built to the spec `docs/superpowers/specs/2026-11-24-immersive-redesign-design.md` instead (home order Mano Padana, Revive, Lunelle, Drift; no hero lens or Person teaser; closing line "Let’s make something together."). Where they differ, the spec and `DESIGN.md` win.
+
 Open this folder in Claude Code, start a **new session**, and paste everything below the line.
 
 ---
@@ -29,7 +31,7 @@ My feedback on Phase 1: **the home page doesn't look good.** The components feel
      - Each one is a full-screen, pinned scene: a large image, its title in display type, one line of her own concept words, and "Explore the collection →".
      - Scroll drives the transition from one scene to the next: a clip-path or mask wipe, and each scene's own light, e.g. Lunelle turns to night.
   4. **The designer, a teaser.** The collage (cut-out figure + taped polaroids, already built in `Person.tsx`), one line, and "About Linali →".
-  5. **Footer.** The brown card rises over the cream: "Let's make something slow.", contact form.
+  5. **Footer.** The brown card rises over the cream: "Let’s make something together.", contact form.
 - **`/collections` Collections index.** Every collection, not only the featured ones, as an editorial list: large title, season, one line.
   - On desktop, hovering a row reveals that collection's photograph, following the cursor (the ON/OFF-track hover idea from landonorris.com).
   - On phones, each row shows a thumbnail.

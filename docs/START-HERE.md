@@ -7,8 +7,8 @@ A step-by-step guide to taking Linali Andrea's portfolio from where it is now to
 | Phase | What | Status |
 |---|---|---|
 | 0 | Plan, product brief, design system, edited portraits | ✅ Done |
-| 1 | The site: every section from data, media pipeline, carousel, page deck, folders, contact form, `/work` pages | ✅ Done, on `main` (61 unit tests + 13 build checks green) |
-| 2 | **Immersive redesign**: home becomes a short highlight reel with motion (hero lens, manifesto, featured-collections reel, the thread); new `/about`; `/work` becomes `/collections` with detail pages | ⏭ Next: `docs/prompts/phase-2-immersive.md` |
+| 1 | The site: every section from data, media pipeline, carousel, page deck, folders, contact form, `/work` pages | ✅ Done, on `main` |
+| 2 | **Immersive redesign**: home is one scroll-driven journey (opening, Mano Padana, Revive, Lunelle, Drift, contact); new header; `/collections` index and detail pages with an inline page reader; `/about` with her skills as pattern pieces. Spec: `docs/superpowers/specs/2026-11-24-immersive-redesign-design.md` | ✅ Built on branch `phase-2-immersive`; **not merged** (merge only when the user says so). Before merging: look at it in a browser (`npm run dev`, then a phone width) |
 | 3 | Polish, accessibility, real-browser tests, SEO, release gate | `docs/prompts/phase-3-polish.md` |
 | 4 | Launch: Cloudflare Pages, form, domain, analytics | `docs/prompts/phase-4-launch.md` |
 
@@ -24,12 +24,15 @@ A step-by-step guide to taking Linali Andrea's portfolio from where it is now to
    ```bash
    npm run dev
    ```
-3. Open http://localhost:3000. Try:
-   - **The four chapters.** In Lunelle and Drift, switch Ring/Grid, Pause, and click a photo to open it full screen.
-   - **"Open the portfolio"** in each chapter: click or drag to turn pages; try Zoom and "Read the text" on Drift's first spread.
-   - **http://localhost:3000/work/**, then a single collection.
-   - **A phone width** (browser dev tools, 390 px).
-4. Note anything you dislike. It goes into the Phase 2 or 3 session.
+3. Open http://localhost:3000 (check out the branch first: `git switch phase-2-immersive`). Try:
+   - **The home journey.** Scroll from her opening through Mano Padana, Revive, Lunelle and Drift to the contact card. Turn **Motion** off in the header and check that the stacked layout reads.
+   - **http://localhost:3000/collections/**: hover a row (desktop), then open a collection.
+   - **A collection page.** Switch the shoot between Ring and Grid, click a photo to open it, then turn pages in the portfolio, use the loupe and zoom, and try "Read the text" (Drift page 04 only, for now).
+   - **http://localhost:3000/about/**: the skills on the cutting mat.
+   - **A phone width** (browser dev tools, 390 px, and 320 px for nothing scrolling sideways).
+4. Note anything you dislike. It goes into the Phase 3 session.
+
+Checks (inside `site/`): `npm test` (unit tests), `npm run test:build` (builds the static export and checks every route: `/`, `/collections/`, each `/collections/<slug>/`, `/about/`, the redirects file and every manifest image).
 
 In Claude Code's desktop app you can also start it from the Preview button: `.claude/launch.json` defines it.
 
@@ -37,16 +40,16 @@ In Claude Code's desktop app you can also start it from the Preview button: `.cl
 These don't block development, but some block **launch**. Copy the list into a message to her.
 
 **Blocks launch:**
-- [ ] Written OK from **every model** in the shoots (Drift, Lunelle, Mano Padana).
-- [ ] Explicit OK to publish the **Lunelle ultrasound images** and pregnancy photos.
+- [ ] Written OK from **every model** in the shoots (the user confirmed consent in chat on 2026-11-24; get it in writing). The Lunelle ultrasound image is treated as covered.
 - [ ] **Photographer's name**, credit line, and OK to use the photos (the `MMS_` files).
 - [ ] OK to publish **Revive** under the **E.L.V. Denim** collaboration name.
-- [ ] OK to publish her five **personal photos** (edited as collage).
-- [ ] Approval of the **draft bio** and **skills list** (shown on the site with a "Draft" marker while developing).
+- [ ] OK to publish her **personal photos** (the cut-out and three polaroids, edited as collage).
+- [ ] Her OK on the **bio, facts and skills** as written (from her CV; the user approved them).
 - [ ] A **business email** for the contact form (not her personal one).
 - [ ] Her **domain name** (or whether to buy one).
 
 **Makes it much better:**
+- [ ] **A version of her CV without the referees' phone numbers and emails**, if she wants a download link (none is offered until then).
 - [ ] **Page order** for Mano Padana and Lunelle portfolio pages. The current order is a guess. Does Drift have pages 01–03 and 20–29?
 - [ ] **Source text** of her portfolio pages (InDesign/Canva/PDF export), for "Read the text".
 - [ ] **SVG files** of her LA monogram and collection logos (Drift, Revive, Lunelle, Mano Padana's Sinhala title).
@@ -56,13 +59,8 @@ These don't block development, but some block **launch**. Copy the list into a m
 
 When files arrive, put them where `docs/ASSETS.md` says (originals into `media-src/…`). Ask Claude Code to rebuild the media.
 
-## Step 3: Run Phase 2 (immersive redesign)
-1. In Claude Code, open this folder and start a **new session** (a fresh context works best for a whole phase).
-2. Open `docs/prompts/phase-2-immersive.md`, copy everything below the line, and paste it as your first message.
-3. Claude reads the project docs, then **asks you what you picture for the home page motion** and shows mockups in a browser tab. React to them: this is where the look gets decided.
-4. It writes a short design doc, then a task plan. **Read each and reply "go" or with changes.**
-5. It builds task by task, on a branch `phase-2-immersive`, testing as it goes. Long steps (media builds, motion captures) run in the background; let them finish.
-6. At the end it shows screenshots and scores and asks whether to merge. Look at the site (`npm run dev`) before saying yes.
+## Step 3: Phase 2 (immersive redesign): done, review it
+Phase 2 was brainstormed through 18 browser mockups, written up as a spec (`docs/superpowers/specs/2026-11-24-immersive-redesign-design.md`, with the final mockup beside it) and built task by task on `phase-2-immersive` (plan: `docs/superpowers/plans/2026-11-24-immersive-redesign.md`). The original prompt is kept in `docs/prompts/phase-2-immersive.md` for history. Look at the site (Step 1), then say whether to merge.
 
 ## Step 4: Run Phase 3 (polish and release checks)
 Same as step 3, with `docs/prompts/phase-3-polish.md`. Afterwards you'll have:
@@ -87,7 +85,7 @@ Claude tells you exactly what to click and never handles your passwords.
 ## Later: everyday changes
 - **New collection:** put the originals in `media-src/collections/<name>/` (`shoot/01-….jpg`, `pages/01.png`…), then ask Claude Code "add the <name> collection". The project skill `add-collection` takes it from there.
 - **New personal photos:** ask Claude Code to "treat the new portraits" (skill `treat-portraits`).
-- **Change text:** site-wide copy is in `site/content/site.json`; each collection's text is in `site/content/collections/<slug>.json`.
+- **Change text:** site-wide copy (name, manifesto, bio, facts, skills, closing line) is in `site/content/site.json`; each collection's text, one-line summary, theme, hero photos and (Drift) looks are in `site/content/collections/<slug>.json`.
 
 ## Where everything is
 | File | What it's for |
@@ -99,6 +97,7 @@ Claude tells you exactly what to click and never handles your passwords.
 | `docs/ASSETS.md` | Every image: original, web version, where it's used, what's still missing |
 | `docs/prompts/` | The three phase prompts to paste into Claude Code |
 | `docs/superpowers/plans/` | The detailed task plans each phase writes |
-| `Personal/edited/preview.html` | The portrait treatments and the collage mock |
+| `docs/superpowers/specs/` | The Phase 2 design spec and its reference mockup |
+| `Personal/edited/preview.html` | The portrait treatments and the early collage mock (Phase 1 type; not the current design) |
 | `.claude/skills/` | `add-collection`, `treat-portraits` |
 | `media-src/` | Original images (not in git; back them up with her Drive) |
