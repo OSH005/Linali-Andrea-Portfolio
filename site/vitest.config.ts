@@ -22,6 +22,10 @@ export default defineConfig({
         extends: true,
         test: { name: 'build', environment: 'node', include: ['scripts/build/**/*.test.mjs'] },
       },
+      {
+        extends: true,
+        test: { name: 'browser', environment: 'node', include: ['scripts/browser/**/*.test.mjs'], testTimeout: 120_000, hookTimeout: 120_000 },
+      },
     ],
   },
 })
