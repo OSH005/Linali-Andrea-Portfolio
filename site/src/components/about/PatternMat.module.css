@@ -1,0 +1,75 @@
+/* Skills (mockup `a-skills`): pattern pieces on her cutting mat. Phones first; laid out in CSS so it reads without JS. */
+.skills { background: var(--cream); padding: 76px 0 56px; }
+.sg { padding: 0 24px; }
+.h2 { margin: 8px 0 0; }
+.hint { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--muted); }
+
+/* the mat: a cm grid with a ruler along the top */
+.mat {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start;
+  margin: 24px -8px 0; padding: 30px 14px 26px; border-radius: 6px; background-color: var(--mat);
+  background-image: linear-gradient(rgb(59 36 24 / 0.1) 1px, transparent 1px), linear-gradient(90deg, rgb(59 36 24 / 0.1) 1px, transparent 1px),
+    linear-gradient(rgb(59 36 24 / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(59 36 24 / 0.05) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  box-shadow: inset 0 0 0 1px rgb(59 36 24 / 0.12);
+}
+.mat > * { min-width: 0; }
+.ruler {
+  position: absolute; left: 0; right: 0; top: 0; height: 10px;
+  background: repeating-linear-gradient(90deg, rgb(59 36 24 / 0.35) 0 1px, transparent 1px 20px) left bottom / 100% 60% no-repeat,
+    repeating-linear-gradient(90deg, rgb(59 36 24 / 0.5) 0 1px, transparent 1px 100px) left bottom / 100% 100% no-repeat;
+}
+
+/* a piece: everything on it sits on its own centre line, inside its content box (--bl/--br) */
+.pc {
+  position: relative; margin: 0; width: min(100%, 470px); height: var(--ph); text-align: center;
+  rotate: calc(var(--rot) * 0.5); filter: drop-shadow(0 10px 16px rgb(59 36 24 / 0.16)); will-change: transform;
+}
+.pc:nth-of-type(even) { justify-self: end; }
+.pc svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.f { fill: var(--paper); stroke: rgb(59 36 24 / 0.55); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.sa { fill: none; stroke: var(--teal); stroke-width: 1; stroke-dasharray: 0.007 0.005; vector-effect: non-scaling-stroke; opacity: 0.8; }
+.fold { fill: none; stroke: rgb(59 36 24 / 0.45); stroke-width: 1; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+.cap, .name, .list, .cut { position: absolute; left: var(--bl); right: var(--br); margin: 0; }
+.cap { top: var(--cy); display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; color: var(--brown); }
+.g { display: inline-block; width: 34px; height: 1px; background: var(--brown); position: relative; }
+.g::before, .g::after { content: ""; position: absolute; top: -3px; border: 3.5px solid transparent; }
+.g::before { left: -3px; border-right: 5px solid var(--brown); border-left: 0; }
+.g::after { right: -3px; border-left: 5px solid var(--brown); border-right: 0; }
+.name { top: calc(var(--cy) + 22px); font: 400 20px/1 var(--font-gloock), serif; }
+.list { top: calc(var(--cy) + 52px); padding: 0; list-style: none; font-size: 15px; line-height: 1.45; }
+.list li { padding: 1px 0; }
+.cut { color: var(--muted); font-size: 10px; }
+
+/* the tape measure lies in the corner */
+.tape { position: relative; display: block; justify-self: end; width: 70%; height: 70px; margin-top: 4px; overflow: visible; pointer-events: none; }
+.tb { fill: none; stroke: var(--tape); stroke-width: 16; stroke-linecap: round; }
+.tk { fill: none; stroke: var(--brown); stroke-width: 5; stroke-dasharray: 1 6; opacity: 0.55; }
+.tape text { font: 9px var(--font-dm-mono), monospace; letter-spacing: 1px; fill: var(--brown); }
+
+/* tablets: two across, laid by hand */
+@media (min-width: 600px) and (min-height: 600px) {
+  .sg { padding-inline: 32px; }
+  .hint { max-width: 40ch; }
+  .mat { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 22px; margin: 28px 0 0; padding: 44px 26px 84px; }
+  .pc, .pc:nth-of-type(even) { --lay: 1; width: auto; justify-self: stretch; rotate: var(--rot); translate: 0 var(--oy); }
+  .tape { position: absolute; right: 26px; bottom: 14px; width: 190px; height: 66px; margin: 0; }
+}
+
+@media (min-width: 1024px) {
+  .skills { padding: 8vw 0 7vw; }
+  .sg { padding: 0 4.5%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 1.6vw; align-items: start; }
+  .sg > * { min-width: 0; }
+  .s1 { grid-column: 1 / span 3; }
+  .h2 { margin-top: 0.8vw; }
+  .hint { margin-top: 0.8vw; max-width: 24ch; }
+  .mat { grid-column: 4 / span 9; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); margin: 0; background-size: 10vw 10vw, 10vw 10vw, 2vw 2vw, 2vw 2vw; }
+  .ruler { height: 1.1vw; background-size: 100% 60%, 100% 100%; background-image: repeating-linear-gradient(90deg, rgb(59 36 24 / 0.35) 0 1px, transparent 1px 2vw), repeating-linear-gradient(90deg, rgb(59 36 24 / 0.5) 0 1px, transparent 1px 10vw); }
+  .g { width: 3.2vw; min-width: 34px; }
+}
+
+/* hover: the piece lifts and straightens (last, and doubled, so it beats the tablet layout) */
+@media (hover: hover) and (pointer: fine) {
+  .pc { transition: translate 0.35s var(--ease-out), rotate 0.35s var(--ease-out), filter 0.35s; }
+  .pc.pc:hover { translate: 0 calc(var(--oy, 0px) * var(--lay, 0) - 6px); rotate: 0deg; }
+}

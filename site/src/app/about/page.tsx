@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Footer from '@/components/Footer'
 import AboutOpening from '@/components/about/AboutOpening'
 import AboutMe from '@/components/about/AboutMe'
+import PatternMat from '@/components/about/PatternMat'
 import type { Pic } from '@/components/home/data'
 import { getInspiration, getPersonal, type MediaImage } from '@/lib/media'
 import { getSite } from '@/lib/site'
@@ -12,7 +13,7 @@ const pic = (m: MediaImage, alt: string): Pic => ({ src: m.src, srcset: m.srcset
 /** Her inspiration photos in the frames' order (mockup `MOOD`). */
 const MOOD = [1, 3, 4, 5, 6, 7, 2]
 
-/** About (spec 8): the opening collage, about me with my inspiration, then the contact card as the next block. */
+/** About (spec 8): the opening collage, about me with my inspiration, skills on the cutting mat, then the contact card as the next block. */
 export default function About() {
   const site = getSite()
   const insp = (n: number, alt = site.inspirationAlt[n - 1]) => pic(getInspiration().find((i) => i.order === n)!, alt)
@@ -30,7 +31,7 @@ export default function About() {
           small={[insp(2, ''), insp(7, '')]}
         />
         <AboutMe bio={site.bio} facts={site.facts} linkedin={site.links.linkedin} inspiration={MOOD.map((n) => insp(n))} />
-        {/* Task 15: the skills mat (a <section data-chapter="Skills">) goes here */}
+        <PatternMat skills={site.skills} />
       </main>
       <Footer variant="flow" />
     </>
