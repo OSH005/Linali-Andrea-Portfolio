@@ -15,6 +15,11 @@ export default function PhoneMenu({ linkedin, active, on, setOn }: { linkedin: s
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
   const ref = useDialog(open, close)
+  // a same-page link: after the sheet hands focus back to Menu, move it to the target (a keyboard visitor's next Tab is the form)
+  const go = (href: string) => {
+    close()
+    if (href[0] === '#') requestAnimationFrame(() => document.getElementById(href.slice(1))?.focus({ preventScroll: true }))
+  }
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key !== 'Escape') return
     e.preventDefault()
@@ -33,7 +38,7 @@ export default function PhoneMenu({ linkedin, active, on, setOn }: { linkedin: s
         <ul>
           {LINKS.map(([label, href]) => (
             <li key={label}>
-              <a href={href} className="title-section" aria-current={label === active ? 'page' : undefined} onClick={close}>
+              <a href={href} className="title-section" aria-current={label === active ? 'page' : undefined} onClick={() => go(href)}>
                 {label}
               </a>
             </li>

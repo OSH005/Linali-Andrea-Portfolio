@@ -19,3 +19,5 @@
   .title { font-size: 5vw; }
   .foot form { max-width: 70%; margin-top: 4.5vw; gap: 3vw 4vw; }
 }
+/* focused (tabIndex -1) only as a jump target from the phone menu; the form inside shows focus */
+.foot:focus { outline: none; }

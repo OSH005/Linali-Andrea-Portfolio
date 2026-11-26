@@ -73,6 +73,22 @@ test('a link in the sheet closes it', async () => {
   expect(screen.getByRole('dialog', { hidden: true })).toHaveProperty('open', false)
 })
 
+test("the sheet's Contact link leaves focus on the contact card, so the next Tab reaches the form", async () => {
+  phone = true
+  render(
+    <>
+      <SiteHeader {...props} />
+      <footer id="contact" tabIndex={-1} />
+    </>,
+  )
+  await userEvent.click(screen.getByRole('button', { name: 'Menu' }))
+  const link = within(screen.getByRole('dialog')).getByRole('link', { name: 'Contact' })
+  link.addEventListener('click', (e) => e.preventDefault())
+  await userEvent.click(link)
+  await act(() => new Promise((r) => setTimeout(r, 50)))
+  expect(document.activeElement).toBe(document.getElementById('contact'))
+})
+
 test('motion off: fully sewn and static; over the contact card the pill turns night', async () => {
   render(
     <>
