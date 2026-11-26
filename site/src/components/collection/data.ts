@@ -20,15 +20,12 @@ export function nextSlug(slug: string): string {
   return all[(i + 1) % all.length].slug
 }
 
-const isSpread = (m: MediaImage) => m.width / m.height > 2
-
 export function collectionData(slug: string) {
   const all = getCollections(), c = getCollection(slug)!, m = getMedia(slug), i = all.indexOf(c)
   const pic = (im: MediaImage, alt = c.alt[im.id] ?? ''): Pic => ({ src: im.src, srcset: im.srcset, width: im.width, height: im.height, alt })
   const lead = (n: number) => m[c.lead.from].find((im) => im.order === n)!
   const leadAlt = (im: MediaImage) => c.alt[im.id] ?? `${c.title} portfolio, page ${im.order}`
   const nx = getCollection(nextSlug(slug))!, nm = getMedia(nx.slug), np = nm[nx.lead.from].find((im) => im.order === nx.lead.phone)!
-  const unit = m.pages.length && m.pages.every(isSpread) ? 'spread' : 'page'
   return {
     slug: c.slug,
     title: c.title,
@@ -44,7 +41,6 @@ export function collectionData(slug: string) {
     alt: c.alt,
     pages: m.pages,
     pageText: c.pageText,
-    pagesHeading: `${m.pages.length} ${unit}${m.pages.length === 1 ? '' : 's'}`,
     next: {
       slug: nx.slug,
       title: nx.title,

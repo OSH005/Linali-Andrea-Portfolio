@@ -1,9 +1,6 @@
-/* A collection page's portfolio section (Task 13 replaces the reader inside it). */
+/* A collection page's portfolio section (the reader is PageReader). */
 .port { background: #ede2d2; padding: 84px 24px 60px; }
-.port > :global(.label) { margin: 0; }
-.h2 { margin: 8px 0 28px; }
 @media (min-width: 600px) { .port { padding-inline: 32px; } }
 @media (min-width: 1024px) {
   .port { padding: 11vw 4.5% 8vw; }
-  .h2 { margin: 0.8vw 0 2.6vw; }
 }

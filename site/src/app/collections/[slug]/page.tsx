@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import Footer from '@/components/Footer'
-import PortfolioReader from '@/components/PortfolioReader'
 import Hero from '@/components/collection/Hero'
 import InMyWords from '@/components/collection/InMyWords'
 import Shoot from '@/components/collection/Shoot'
+import PageReader from '@/components/collection/PageReader'
 import SectionSwitch from '@/components/collection/SectionSwitch'
 import NextCollection from '@/components/collection/NextCollection'
 import { collectionData } from '@/components/collection/data'
@@ -31,11 +31,7 @@ export default async function CollectionPage(props: PageProps<'/collections/[slu
         <InMyWords d={d} />
         {d.shoot.length > 0 && <Shoot d={d} />}
         <section id="portfolio" className={styles.port} aria-labelledby="portfolio-title">
-          <p className="label">The portfolio</p>
-          <h2 id="portfolio-title" className={`title-section ${styles.h2}`}>
-            {d.pagesHeading}
-          </h2>
-          <PortfolioReader title={d.title} pages={d.pages} pageText={d.pageText} background="#EDE2D2" />
+          <PageReader title={d.title} pages={d.pages} pageText={d.pageText} />
         </section>
         <NextCollection next={d.next} />
         {d.shoot.length > 0 && <SectionSwitch />}
