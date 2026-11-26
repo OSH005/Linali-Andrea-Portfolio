@@ -27,3 +27,6 @@ export function loupeStyle(rx: number, ry: number, w: number, h: number, zoom = 
     backgroundPosition: `${size / 2 - rx * w * zoom}px ${size / 2 - ry * h * zoom}px`,
   }
 }
+
+/** The largest webp in an image's srcset (the loupe's file; zoom's fallback). */
+export const largest = (im: MediaImage) => im.srcset.webp.split(', ').pop()!.split(' ')[0]

@@ -28,10 +28,11 @@
   font: 400 15px var(--font-hanken), sans-serif; cursor: pointer;
 }
 .bar .k { background: var(--brown); color: var(--cream); }
+.bar button:disabled { opacity: 0.35; cursor: default; }
 .v { min-width: 48px; text-align: center; font: 500 11px var(--font-dm-mono), monospace; letter-spacing: 0.1em; }
 @media (min-width: 600px) {
   .bar { gap: 8px; }
   .v { min-width: 56px; }
 }
 @media (min-width: 1024px) { .hint { left: 4.5%; top: 4.5%; } }
-@media (hover: hover) and (pointer: fine) { .bar button:not(.k):hover { background: rgb(59 36 24 / 0.08); } }
+@media (hover: hover) and (pointer: fine) { .bar button:not(.k, :disabled):hover { background: rgb(59 36 24 / 0.08); } }

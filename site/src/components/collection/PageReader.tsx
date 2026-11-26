@@ -6,7 +6,7 @@ import type { MediaImage } from '@/lib/media'
 import { useDialog } from '@/lib/useDialog'
 import { useMotion } from '@/lib/motion/useMotion'
 import { clamp01, inOut, seg } from '@/lib/motion/ease'
-import { loupeStyle, readerPages } from './reader'
+import { largest, loupeStyle, readerPages } from './reader'
 import ZoomView from './ZoomView'
 import s from './PageReader.module.css'
 
@@ -22,7 +22,6 @@ const pad2 = (n: number) => String(n).padStart(2, '0')
 const noop = () => () => {}
 const TURN = 750 // ms
 const stack = (d: number) => `translateY(${-d * 3.2}%) scale(${1 - d * 0.035})`
-const largest = (im: MediaImage) => im.srcset.webp.split(', ').pop()!.split(' ')[0]
 type Turn = { from: number; to: number; dir: number }
 
 /**
@@ -46,6 +45,8 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
   const loupe = useRef<HTMLDivElement>(null)
   const turn = useRef<Turn | null>(null)
   const turning = useRef(false)
+  const pending = useRef<number | null>(null) // asked for during a turn: turned to once it lands
+  const focusFront = useRef(false)
   const swipe = useRef<number | null>(null)
   const swiped = useRef(false)
   const shown = useRef(pages)
@@ -68,10 +69,23 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
 
   const go = (to: number) => {
     to = Math.max(0, Math.min(n - 1, to))
+    if (turning.current) return void (pending.current = to)
     if (to === pi) return
+    // the page in front goes inert, so focus inside the stack follows the turn
+    focusFront.current = !!list.current?.contains(document.activeElement)
     turn.current = { from: pi, to, dir: Math.sign(to - pi) }
     setPi(to)
   }
+  const goLatest = useRef(go)
+  goLatest.current = go
+  /** One page on from where the reader is heading (a press during a turn counts from the queued page). */
+  const step = (d: number) => go((pending.current ?? pi) + d)
+
+  useEffect(() => {
+    if (!focusFront.current) return
+    focusFront.current = false
+    ;(list.current?.children[pi]?.querySelector('button') as HTMLElement | null)?.focus({ preventScroll: true })
+  }, [pi])
 
   // paint the stack; a turn runs frame by frame (motion off: it simply changes)
   useLayoutEffect(() => {
@@ -109,11 +123,17 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
     const step = (now: number) => {
       const tk = clamp01((now - t0) / TURN)
       paint(tk)
-      if (tk < 1) raf = requestAnimationFrame(step)
+      if (tk < 1) return void (raf = requestAnimationFrame(step))
+      const next = pending.current
+      pending.current = null
+      if (next !== null) goLatest.current(next)
     }
     paint(0)
     raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(raf)
+      turning.current = false
+    }
   }, [pi, pages, mounted, on])
 
   // the rail keeps the current page in the middle
@@ -159,7 +179,7 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
     e.preventDefault()
-    go(pi + (e.key === 'ArrowRight' ? 1 : -1))
+    step(e.key === 'ArrowRight' ? 1 : -1)
   }
 
   const counter = (
@@ -214,7 +234,7 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
               swipe.current = null
               if (x0 === null || Math.abs(e.clientX - x0) <= 40) return
               swiped.current = true
-              go(pi + (e.clientX < x0 ? 1 : -1))
+              step(e.clientX < x0 ? 1 : -1)
             }}
             onPointerCancel={() => (swipe.current = null)}
           >
@@ -251,11 +271,11 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
           {mounted && <div ref={loupe} className={s.loupe} aria-hidden="true" />}
           {mounted && (
             <div className={s.ctl}>
-              <button type="button" className={`pressable ${s.btn} ${s.arrow}`} aria-label="Previous page" disabled={pi === 0} onClick={() => go(pi - 1)}>
+              <button type="button" className={`pressable ${s.btn} ${s.arrow}`} aria-label="Previous page" disabled={pi === 0} onClick={() => step(-1)}>
                 {narrow ? '← Previous' : '←'}
               </button>
               {narrow && counter}
-              <button type="button" className={`pressable ${s.btn} ${s.arrow}`} aria-label="Next page" disabled={pi === n - 1} onClick={() => go(pi + 1)}>
+              <button type="button" className={`pressable ${s.btn} ${s.arrow}`} aria-label="Next page" disabled={pi === n - 1} onClick={() => step(1)}>
                 {narrow ? 'Next →' : '→'}
               </button>
             </div>
@@ -279,7 +299,7 @@ export default function PageReader({ title, pages: images, pageText, narrow: for
       </div>
 
       {mounted && (
-        <ZoomView open={!!zoom} page={page} at={zoom ?? CENTRE} label={`${title} portfolio, ${name(pi)}`} onClose={() => setZoom(null)} onTurn={(d) => go(pi + d)} />
+        <ZoomView open={!!zoom} page={page} at={zoom ?? CENTRE} label={`${title} portfolio, ${name(pi)}`} onClose={() => setZoom(null)} first={pi === 0} last={pi === n - 1} onTurn={step} />
       )}
 
       <dialog ref={drawer} tabIndex={-1} className={s.drawer} aria-label="The text on this page" data-still={!on || undefined} onCancel={(e) => (e.preventDefault(), setReading(false))} data-lenis-prevent>

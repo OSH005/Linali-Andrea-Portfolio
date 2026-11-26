@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDialog } from '@/lib/useDialog'
 import { useMotion } from '@/lib/motion/useMotion'
-import { zoomOffset, type ReaderPage } from './reader'
+import { largest, zoomOffset, type ReaderPage } from './reader'
 import s from './ZoomView.module.css'
 
 type Props = {
@@ -11,6 +11,9 @@ type Props = {
   /** The point opened on, as a fraction of the page (0…1). */
   at: { x: number; y: number }
   label: string
+  /** The reader is on its first / last page. */
+  first: boolean
+  last: boolean
   onClose: () => void
   onTurn: (d: number) => void
 }
@@ -22,7 +25,7 @@ const clampZ = (z: number) => Math.min(5, Math.max(1, z))
  * a mouse pans by moving, a finger by dragging; wheel or + − for 1–5×; ← → turn the pages; Esc closes.
  * The 4800px file loads only while it is open.
  */
-export default function ZoomView({ open, page, at, label, onClose, onTurn }: Props) {
+export default function ZoomView({ open, page, at, label, first, last, onClose, onTurn }: Props) {
   const ref = useDialog(open, onClose)
   const { on } = useMotion()
   const [z, setZ] = useState(2.5)
@@ -49,8 +52,12 @@ export default function ZoomView({ open, page, at, label, onClose, onTurn }: Pro
   if (fh > H * 0.8) (fh = H * 0.8), (fw = fh * page.ar)
   const { x, y } = zoomOffset({ W, H, w: fw * z, h: fh * z, mx: m.x, my: m.y })
 
+  const pan = (dx: number, dy: number) => setM((v) => ({ x: Math.min(1, Math.max(0, v.x + dx)), y: Math.min(1, Math.max(0, v.y + dy)) }))
   const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') onTurn(e.key === 'ArrowRight' ? 1 : -1)
+    const k = e.key, side = k === 'ArrowRight' ? 1 : k === 'ArrowLeft' ? -1 : 0
+    if (side && e.shiftKey) pan(side * 0.1, 0)
+    else if (side) onTurn(side)
+    else if (k === 'ArrowUp' || k === 'ArrowDown') pan(0, k === 'ArrowDown' ? 0.1 : -0.1)
     else if (e.key === '+' || e.key === '=') setZ((v) => clampZ(v * 1.4))
     else if (e.key === '-') setZ((v) => clampZ(v / 1.4))
     else if (e.key === 'Escape') onClose()
@@ -86,7 +93,7 @@ export default function ZoomView({ open, page, at, label, onClose, onTurn }: Pro
     >
       {open && W > 0 && (
         <>
-          <p className={`label ${s.hint}`}>{fine ? 'Move to explore · scroll or + − to zoom · Esc to close' : 'Drag to explore · + and − to zoom'}</p>
+          <p className={`label ${s.hint}`}>{fine ? 'Move or Shift + arrows to explore · scroll or + − to zoom · Esc to close' : 'Drag to explore · + and − to zoom'}</p>
           <div
             className={s.page}
             data-half={half}
@@ -100,14 +107,14 @@ export default function ZoomView({ open, page, at, label, onClose, onTurn }: Pro
               backgroundPosition: half === 1 ? 'right' : 'left',
             }}
           >
-            <img key={page.image.zoom} src={page.image.zoom} alt={label} draggable={false} />
+            <img key={page.image.zoom || page.image.src} src={page.image.zoom || largest(page.image)} alt={label} draggable={false} />
           </div>
           <div className={s.bar}>
             <button type="button" aria-label="Zoom out" onClick={() => setZ((v) => clampZ(v / 1.4))}>−</button>
             <span className={s.v} aria-live="polite">{Math.round(z * 100)}%</span>
             <button type="button" aria-label="Zoom in" onClick={() => setZ((v) => clampZ(v * 1.4))}>+</button>
-            <button type="button" aria-label="Previous page" onClick={() => onTurn(-1)}>←</button>
-            <button type="button" aria-label="Next page" onClick={() => onTurn(1)}>→</button>
+            <button type="button" aria-label="Previous page" disabled={first} onClick={() => onTurn(-1)}>←</button>
+            <button type="button" aria-label="Next page" disabled={last} onClick={() => onTurn(1)}>→</button>
             <button type="button" className={s.k} onClick={onClose}>Close</button>
           </div>
         </>
