@@ -48,6 +48,8 @@ export default function HomeStory({ data }: { data: HomeData }) {
   const lenisRef = useRef(lenis)
   useEffect(() => void (lenisRef.current = lenis), [lenis])
   const frameRef = useRef<(() => void) | null>(null)
+  // the stacked section being read, kept from the last scroll: by the time the stage starts, a rotation has already reflowed the page
+  const readRef = useRef(0)
 
   // added after SmoothScroll's Lenis tick (it re-runs once Lenis exists), so each frame paints the scroll Lenis just set
   useEffect(() => {
@@ -69,12 +71,13 @@ export default function HomeStory({ data }: { data: HomeData }) {
     if (!on) {
       // stacked page: the chapter roll follows the section at mid-screen
       set({ dock: 1, dark: false, x0: null })
-      const chapter = () => set({ chapter: Math.max(0, marks.filter((m) => m && m.getBoundingClientRect().top < innerHeight / 2).length - 1) })
+      const chapter = () => set({ chapter: (readRef.current = Math.max(0, marks.filter((m) => m && m.getBoundingClientRect().top < innerHeight / 2).length - 1)) })
       chapter()
       addEventListener('scroll', chapter, { passive: true })
       return () => removeEventListener('scroll', chapter)
     }
 
+    const was = readRef.current
     el.setAttribute('data-stage', '')
     dr.reset()
     // inline styles React set before the first paint (snapshot once, at stage start): motion off restores these and drops everything paint wrote
@@ -113,16 +116,21 @@ export default function HomeStory({ data }: { data: HomeData }) {
     measure()
     // resize/rotate: ScrollTrigger refreshes; new scene lengths, then back to the same fraction of the same scene
     const init = () => void ((y0 = st.scroll() - st.start), (from = r), (r = sceneRanges(innerHeight)))
+    const jump = (top: number) => {
+      const l = lenisRef.current
+      if (!l) return window.scrollTo({ top, behavior: 'instant' })
+      l.resize() // its scroll limit may still be the stacked page's
+      l.scrollTo(top, { immediate: true, force: true })
+    }
     const done = () => {
       measure()
       shown.length = 0
-      if (r.total === from.total) return
-      const top = st.start + remap(y0, from, r)
-      if (lenisRef.current) lenisRef.current.scrollTo(top, { immediate: true, force: true })
-      else window.scrollTo({ top, behavior: 'instant' })
+      if (r.total !== from.total) jump(st.start + remap(y0, from, r))
     }
     ScrollTrigger.addEventListener('refreshInit', init)
     ScrollTrigger.addEventListener('refresh', done)
+    // stacked to stage (Motion back on, a phone turned back to portrait): back to the first scene of the section being read, or the contact card
+    if (was > 0) jump(was > 4 ? st.end : Math.ceil(st.start + r.at[(['op', 'mp', 'tear', 'rise', 'foam'] as const)[was]][0])) // ceil: scroll is whole px
     frameRef.current = frame
     frame()
 

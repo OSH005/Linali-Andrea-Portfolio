@@ -146,6 +146,34 @@ test('phone turned sideways: the home page reads as the stacked page (no stage)'
   await ctx.close()
 })
 
+const motion = (page, v) => page.evaluate((v) => (localStorage.setItem('la-motion', v), dispatchEvent(new Event('la-motion'))), v)
+/** Scrolls the stacked home page into Drift (its section top a little above mid-screen). */
+const intoDrift = (page) => page.evaluate(() => window.scrollTo({ top: document.getElementById('drift').getBoundingClientRect().top + scrollY + 200, behavior: 'instant' }))
+
+test('1440x900 home: Motion back on from the stacked page at Drift lands in the Drift scene', async () => {
+  const { page, ctx } = await open('/', { width: 1440, height: 900 })
+  await motion(page, 'off')
+  await page.waitForFunction(() => !document.querySelector('[data-stage]'))
+  await intoDrift(page)
+  await page.waitForTimeout(300)
+  await motion(page, 'on')
+  await page.waitForSelector('[data-stage]')
+  await page.waitForTimeout(600)
+  expect(await page.$eval('[data-stage]', (e) => e.dataset.chapter)).toBe('4')
+  await ctx.close()
+})
+
+test('home: a phone turned back from sideways to portrait at Drift stays in the Drift scene', async () => {
+  const { page, ctx } = await open('/', { width: 844, height: 390 })
+  await intoDrift(page)
+  await page.waitForTimeout(300)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.waitForSelector('[data-stage]')
+  await page.waitForTimeout(800)
+  expect(await page.$eval('[data-stage]', (e) => e.dataset.chapter)).toBe('4')
+  await ctx.close()
+})
+
 test('1023x768 home: the Revive pile clears her logo', async () => {
   const { page, ctx } = await open('/', { width: 1023, height: 768 })
   await page.waitForSelector('[data-stage]')
