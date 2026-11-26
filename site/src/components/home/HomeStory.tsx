@@ -13,6 +13,7 @@ import ManoPadana, * as mp from './scenes/ManoPadana'
 import Revive, * as rv from './scenes/Revive'
 import Lunelle, * as ln from './scenes/Lunelle'
 import Drift, * as dr from './scenes/Drift'
+import { useShortLandscape } from './useNarrow'
 import s from './HomeStory.module.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -39,7 +40,9 @@ const SCENES: { paint: Paint; dom: { root: HTMLElement | null }; live: (r: Range
  */
 export default function HomeStory({ data }: { data: HomeData }) {
   const root = useRef<HTMLDivElement>(null)
-  const { on } = useMotion()
+  // a phone turned sideways reads the stacked page: the stage's phone layout needs a portrait screen (spec 5.7)
+  const short = useShortLandscape()
+  const on = useMotion().on && !short
   const { set } = useHeader()
   const lenis = useLenis()
   const lenisRef = useRef(lenis)
@@ -73,6 +76,7 @@ export default function HomeStory({ data }: { data: HomeData }) {
     }
 
     el.setAttribute('data-stage', '')
+    dr.reset()
     // inline styles React set before the first paint (snapshot once, at stage start): motion off restores these and drops everything paint wrote
     const own = new Map([...el.querySelectorAll('[style]')].map((n) => [n, n.getAttribute('style')!]))
     let r = sceneRanges(innerHeight), from = r, y0 = 0, W = 0, H = 0

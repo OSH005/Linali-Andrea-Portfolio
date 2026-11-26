@@ -159,6 +159,8 @@ export default function Drift({ data, stage }: { data: HomeData; stage: boolean 
 
 type Item = { start: number; size: number; id?: string; out?: boolean; c: HTMLElement; img: HTMLElement | null; ov: HTMLElement | null; texts: HTMLElement[]; bn: HTMLElement | null }
 let laid = '', items: Item[] = [], len = 0, ch = 0, vel = 0, px = 0, capKey: string | null = null, capT = 0, idxK = 0
+/** Stage start: forget the last layout, so items rebuilt after motion off (their styles stripped) get their focus state again. */
+export const reset = () => void ((laid = ''), (capKey = null), (vel = px = 0))
 const vis = (el: Element, on: boolean) => void ((el as HTMLElement).style.visibility = on ? '' : 'hidden')
 
 /** Lays the strip out from its items' shapes (data attributes, not layout reads): cards are the card height × their photo's ratio, panels a share of the screen height. */

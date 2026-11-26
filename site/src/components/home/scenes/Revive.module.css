@@ -23,6 +23,11 @@
 :global([data-stage]) .pile { position: absolute; z-index: 2; left: 14%; width: min(74%, (100svh - 350px - max(120px, min(42.7svh, 100svh - 460px))) * 2.83); top: calc(92px + max(120px, min(42.7svh, 100svh - 460px))); rotate: none; justify-self: auto; box-shadow: 0 14px 30px rgb(59 36 24 / 0.16); }
 :global([data-stage]) .pile img { width: 100%; }
 
+/* tablet landscape: the pile sits right, clear of her logo at the left (1023×768) */
+@media (min-width: 600px) and (max-width: 1023.98px) and (orientation: landscape) {
+  :global([data-stage]) .pile { left: auto; right: 6%; }
+}
+
 @media (min-width: 1024px) {
   :global([data-stage]) .rv .text { width: 30%; }
   :global([data-stage]) .logo { width: 15vw; margin-bottom: 22px; }

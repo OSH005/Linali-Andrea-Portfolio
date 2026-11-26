@@ -29,7 +29,7 @@ vi.mock('@/lib/motion/useMotion', () => ({
 const data = homeData()
 const scrollTo = vi.fn()
 beforeEach(() => {
-  window.matchMedia = (() => ({ matches: true, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia
+  window.matchMedia = ((q: string) => ({ matches: !q.includes('landscape'), addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia
   window.scrollTo = scrollTo as unknown as typeof window.scrollTo
   Object.defineProperty(window, 'innerHeight', { value: 900, configurable: true })
   scrollTo.mockClear()
@@ -149,4 +149,21 @@ test('drift: strip items off screen cannot take focus (the hidden-overflow layer
   act(() => tick(r.at.strip[1] - 1))
   expect(end.style.visibility).toBe('')
   expect(lis[0].style.visibility).toBe('hidden')
+})
+
+test('drift: after motion off and on again, off-screen strip items are hidden from focus again', () => {
+  const { container } = render(<HomeStory data={data} />)
+  const r = sceneRanges(900), lis = container.querySelectorAll<HTMLElement>('#drift ol > li'), end = lis[lis.length - 1]
+  act(() => tick(r.at.strip[0] + 10))
+  expect(end.style.visibility).toBe('hidden')
+  act(() => setMotion(false))
+  act(() => setMotion(true))
+  act(() => tick(r.at.strip[0] + 10))
+  expect(end.style.visibility).toBe('hidden')
+})
+
+test('a phone turned sideways (short landscape): no stage, the stacked phone page (the stage needs a portrait screen)', () => {
+  window.matchMedia = ((q: string) => ({ matches: q.includes('landscape'), addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia
+  const { container } = render(<HomeStory data={data} />)
+  expect(container.firstElementChild).not.toHaveAttribute('data-stage')
 })
