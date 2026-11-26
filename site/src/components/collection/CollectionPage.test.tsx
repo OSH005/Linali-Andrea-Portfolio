@@ -73,6 +73,7 @@ test('next collection: after Drift back to the start, otherwise the next one', a
   const a = render(await page('drift'))
   const next = a.container.querySelector('#next')!
   expect(next.textContent).toContain('Back to the start of the journey')
+  expect(next.querySelector('span h2')).toBeNull() // a heading inside a <span> is invalid markup
   expect(within(next as HTMLElement).getByRole('link')).toHaveAttribute('href', '/collections/mano-padana/')
   a.unmount()
   const b = render(await page('lunelle'))
