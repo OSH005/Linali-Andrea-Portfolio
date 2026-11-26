@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, type CSSProperties } from 'react'
 import gsap from 'gsap'
 import { useMotion } from '@/lib/motion/useMotion'
 import { clamp01, out3, spring } from '@/lib/motion/ease'
@@ -36,17 +36,22 @@ export default function PatternMat({ skills }: { skills: Site['skills'] }) {
         }
         over(fitFontSize(over))
       })
+    // a resize burst (dragging a window edge, rotating) fits once, on the next frame
+    let raf = 0
+    const onResize = () => void (raf ||= requestAnimationFrame(() => ((raf = 0), fit())))
     fit()
     document.fonts?.ready.then(fit)
-    addEventListener('resize', fit)
+    addEventListener('resize', onResize)
     return () => {
       live = false
-      removeEventListener('resize', fit)
+      cancelAnimationFrame(raf)
+      removeEventListener('resize', onResize)
     }
   }, [])
 
-  // the drop and the seam: a few seconds on the ticker once the mat is in view, then the CSS layout takes over again
-  useEffect(() => {
+  // the drop and the seam: a few seconds on the ticker once the mat is in view, then the CSS layout takes over again.
+  // A layout effect: the pieces are hidden before the browser paints, so the laid-out mat never flashes first.
+  useLayoutEffect(() => {
     if (!on) return
     const figs = [...mat.current!.querySelectorAll<HTMLElement>('figure')]
     const seams = figs.map((f) => f.querySelector<SVGPathElement>('[data-seam]')!)
