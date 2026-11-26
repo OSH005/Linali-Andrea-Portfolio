@@ -50,6 +50,7 @@ export default function ShootGallery({ images, alt, preset, autoplay, speed, fad
   const items = useMemo(() => images.map((im) => ({ src: im.srcset.webp.split(' ')[0], alt: alt[im.id] ?? '' })), [images, alt])
 
   // pinned: scroll turns the ring. The vendored carousel turns on horizontal wheel deltas, so scroll is fed to it as one.
+  // This leans on the carousel's internal wheel handling: re-check the scroll-follow whenever circular-carousel/ is updated.
   useEffect(() => {
     if (!pinned || view !== 'ring') return
     let last = scrollY
