@@ -33,7 +33,7 @@ export default function About() {
         <AboutMe bio={site.bio} facts={site.facts} linkedin={site.links.linkedin} inspiration={MOOD.map((n) => insp(n))} />
         <PatternMat skills={site.skills} />
       </main>
-      <Footer variant="flow" />
+      <Footer />
     </>
   )
 }

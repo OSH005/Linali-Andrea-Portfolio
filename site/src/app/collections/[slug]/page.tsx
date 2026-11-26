@@ -36,7 +36,7 @@ export default async function CollectionPage(props: PageProps<'/collections/[slu
         <NextCollection next={d.next} />
         {d.shoot.length > 0 && <SectionSwitch />}
       </main>
-      <Footer variant="flow" />
+      <Footer />
     </>
   )
 }

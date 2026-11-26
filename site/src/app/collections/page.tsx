@@ -11,7 +11,7 @@ export default function CollectionsIndex() {
       <main>
         <CollectionIndex data={indexData()} />
       </main>
-      <Footer variant="flow" />
+      <Footer />
     </>
   )
 }

@@ -8,7 +8,7 @@ export default function Home() {
       <main>
         <HomeStory data={homeData()} />
       </main>
-      <Footer variant="rise" />
+      <Footer />
     </>
   )
 }
