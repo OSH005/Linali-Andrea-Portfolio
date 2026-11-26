@@ -25,6 +25,8 @@ function setOn(v: boolean) {
   try {
     localStorage.setItem(KEY, v ? 'on' : 'off')
   } catch {}
+  // the visitor's choice, for CSS (globals.css); the layout's head script sets it from storage on each page load
+  document.documentElement.dataset.motion = v ? 'on' : 'off'
   window.dispatchEvent(new Event(EVENT))
 }
 

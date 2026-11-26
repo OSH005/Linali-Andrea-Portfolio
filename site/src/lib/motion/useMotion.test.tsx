@@ -26,6 +26,14 @@ test("stored 'on' overrides reduced motion", () => {
   expect(result.current.on).toBe(true)
 })
 
+test('setOn marks the choice on <html> for CSS', () => {
+  const { result } = renderHook(() => useMotion())
+  act(() => result.current.setOn(true))
+  expect(document.documentElement.dataset.motion).toBe('on')
+  act(() => result.current.setOn(false))
+  expect(document.documentElement.dataset.motion).toBe('off')
+})
+
 test('setOn(false) persists and a second instance follows', () => {
   const a = renderHook(() => useMotion())
   const b = renderHook(() => useMotion())

@@ -115,8 +115,10 @@ html { scrollbar-color: var(--brown-muted) var(--cream); }
 ::view-transition-group(collection-photo) { animation-duration: 0.7s; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.4s; }
 
+/* OS reduced motion, unless the visitor turned Motion on (data-motion, see useMotion). Motion off in the header skips
+   the view transitions in the layout's head script; the at-rule below can't be scoped, so it stays off without JS. */
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
   html { scroll-behavior: auto; }
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  html:not([data-motion="on"]) *, html:not([data-motion="on"]) *::before, html:not([data-motion="on"]) *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

@@ -14,6 +14,14 @@ const dmMono = DM_Mono({ variable: "--font-dm-mono", subsets: ["latin"], weight:
 const specialElite = Special_Elite({ variable: "--font-special-elite", subsets: ["latin"], weight: "400" });
 const sinhala = Noto_Serif_Sinhala({ variable: "--font-noto-sinhala", subsets: ["sinhala"] });
 
+/** Before first paint: the visitor's stored Motion choice on <html> (for CSS), and page-change view transitions skipped when
+ * motion is off, with useMotion's precedence (stored choice, else the OS setting). */
+const MOTION_HEAD = `(function(){
+function pref(){try{var v=localStorage.getItem('la-motion');if(v==='on'||v==='off')return v}catch(e){}return null}
+var v=pref();if(v)document.documentElement.dataset.motion=v;
+function skip(e){var p=pref();if(e.viewTransition&&(p?p==='off':matchMedia('(prefers-reduced-motion: reduce)').matches))e.viewTransition.skipTransition()}
+addEventListener('pageswap',skip);addEventListener('pagereveal',skip)})()`;
+
 export const metadata: Metadata = {
   title: "Linali Andrea · Fashion designer",
   description: "Fashion designer · Sri Lanka",
@@ -24,7 +32,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   const { monogramCream: m } = getBrand();
   const mark = { src: m.srcset.webp.split(" ")[0], width: m.width, height: m.height };
   return (
-    <html lang="en" className={fonts}>
+    <html lang="en" className={fonts} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: MOTION_HEAD }} />
+      </head>
       <body>
         <SmoothScroll>
           <HeaderProvider>

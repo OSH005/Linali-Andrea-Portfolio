@@ -197,6 +197,28 @@ test('home: a phone turned back from sideways to portrait at Drift stays in the 
   await ctx.close()
 })
 
+test.each([['off', false], ['on', true]])('Motion %s in the header: the page change view transition runs: %s', async (pref, want) => {
+  const { page, ctx } = await open('/collections/', { width: 1440, height: 900 })
+  await ctx.addInitScript(() => addEventListener('pagereveal', (e) => {
+    window.__vt = 'none'
+    e.viewTransition?.ready.then(() => (window.__vt = 'ran'), () => (window.__vt = 'skipped'))
+  }))
+  await motion(page, pref)
+  await Promise.all([page.waitForURL('**/about/'), page.click('header a[href="/about/"]')])
+  await page.waitForFunction(() => window.__vt && window.__vt !== 'pending', null, { timeout: 5000 })
+  expect(await page.evaluate(() => window.__vt === 'ran')).toBe(want) // off: skipped on the old page (none) or the new (skipped)
+  await ctx.close()
+})
+
+test('OS reduced motion but Motion turned on: CSS transitions run again', async () => {
+  const { page, ctx } = await open('/collections/', { width: 1440, height: 900, reducedMotion: 'reduce' })
+  const dur = () => page.$eval('header a[href="/about/"]', (e) => getComputedStyle(e).transitionDuration)
+  expect(await dur()).toBe('1e-05s')
+  await page.click('header button[aria-label="Motion"]') // the visitor's own choice, mid-visit
+  expect(await dur()).not.toBe('1e-05s')
+  await ctx.close()
+})
+
 test('1023x768 home: the Revive pile clears her logo', async () => {
   const { page, ctx } = await open('/', { width: 1023, height: 768 })
   await page.waitForSelector('[data-stage]')
