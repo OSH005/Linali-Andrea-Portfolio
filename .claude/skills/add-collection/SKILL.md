@@ -40,10 +40,10 @@ media-src/collections/<slug>/
 
 ```json
 {
-  "slug": "drift",
-  "title": "Drift",
-  "season": "SS27",
-  "year": 2026,
+  "slug": "example",
+  "title": "Example",
+  "season": "SS28",
+  "year": 2027,
   "order": 5,
   "featured": true,
   "concept": "…her words…",
@@ -55,32 +55,27 @@ media-src/collections/<slug>/
   "carousel": { "preset": "cylinder", "autoplay": "drift", "speed": 8 },
   "credits": { "photographer": "…", "models": ["…"], "collaboration": null },
   "rights": { "models": true, "photographer": true, "sensitive": "none", "confirmedBy": "client, 2026-11-23" },
-  "alt": { "01-MMS_8188.jpg": "Model in an oversized cream shirt over an indigo crochet skirt, on coastal rocks" },
-  "pageText": { "01": "Text of portfolio page 1, for the Read the text panel" }
+  "alt": { "01-MMS_8188": "Model in an oversized cream shirt over an indigo crochet skirt, on coastal rocks" },
+  "pageText": { "01": "Text of portfolio page 1, for the Read the text panel" },
+  "pageOrder": "provisional"
 }
 ```
 
-**New fields (all required except `looks`):**
+**Required by the loader (`parseCollection`, build fails without them):** `slug`, `title`, `season`, `concept`, `line`, `year`, `order`, `featured`, `theme`, `lead`, `palette` (three `#RRGGBB`, ink on ground ≥ 4.5:1), `moment`, `credits`, `rights`, `alt`, `pageText` (may be `{}`) and `pageOrder`. Optional: `looks`, `titleNative`, `carousel`, `studio`.
+- `pageOrder`: `"confirmed"` when the page order is verified (printed page numbers or the client said so), `"provisional"` when it is a guess (flag it to her).
+
+**Fields new in Phase 2:**
 - `order`: position in her journey (mano-padana 1, revive 2, lunelle 3, drift 4); the index and the "Next collection" link follow it.
 - `line`: her one line about the collection, in her words, for the index.
 - `theme`: one of the loader's themes (Mind, Body, Nature, Renewal). It is shown beside the season.
 - `lead`: the photos of the collection page hero. `from` is `shoot` or `pages` (use `pages` when there is no shoot, as Revive does); `desktop` is a list of media `order` numbers shown side by side; `phone` is the one photo. The loader refuses numbers that do not exist.
 - `looks` (optional, Drift only today): `[{ "n": 1, "shots": [7, 8], "text": "…" }]`, the look panels in the home Drift strip. Descriptions must be hers or approved by her.
 
-**Index frame photos and tint** live in code, keyed by slug: `site/src/components/collections/data.ts` has `PICKS` (three media `order` numbers per collection for the follow frame and the phone rail) and `TINTS` (the row hover tint). A new collection works without them: it falls back to its first three photos and a cream tint. To choose, add a line to each map, e.g. `PICKS['<slug>'] = [2, 5, 9]` and `TINTS['<slug>'] = 'rgb(r g b)'` (a light, desaturated tint of the collection's photos).
+**Index frame photos and tint** live in code, keyed by slug: `site/src/components/collections/data.ts` has `PICKS` (three media `order` numbers per collection for the follow frame and the phone rail) and `TINTS` (the row hover tint). A new collection works without them: it falls back to its first three photos and a cream tint. To choose, add an entry to each map, e.g. `PICKS['<slug>'] = [2, 5, 9]` and `TINTS['<slug>'] = 'rgb(r g b)'` (a light, desaturated tint of the collection's photos).
 
 **Home journey:** the home page is a hand-built story of the four collections in order (`site/src/components/home/`); a fifth collection appears in `/collections` and has its own page, but is not added to the home story. Adding it to the home is a design task, not data.
 
-**`moment`, `carousel` and `studio`** are Phase 1 fields: the loader still requires `moment`, and the collection page always shows the shoot as the Circular Carousel (the `carousel` settings apply) and the portfolio as the page reader. Choose `moment` by what the collection has:
-
-| Material | moment | Notes |
-|---|---|---|
-| 10+ strong shoot photos | `ring` (cylinder) or `orbit` | Use `orbit` when the concept has a centre (the moon in Lunelle) |
-| 4–9 shoot photos | `walk` | Pinned horizontal sequence |
-| Only sketches and pages, no shoot | `studio` | Glass Folders on the studio table, marked "In progress" |
-| Anything else | `gallery` | Plain grid + viewer, always safe |
-
-`featured` is still validated (at most 4) but the home story does not read it.
+**`moment`:** the loader still requires it (plus `carousel` for `ring`/`orbit`, `studio` for `studio`), but no page reads these any more. Use `"moment": "ring"` with a `carousel` block as the safe default.
 
 Every shoot photo needs an `alt` entry describing the garment, not just "model". The media build fails on a missing alt.
 
@@ -103,7 +98,7 @@ It reads `media-src/collections/<slug>`, then:
 
 1. Run the site. Open `/collections` (the new row, hover and open) and `/collections/<slug>`.
 2. Screenshot at 1440, 1024, 768, 390 and 320 wide, and look at every shot.
-3. Check: the hero shows the `lead` photos; the shoot ring and grid show every photo; the page reader turns pages in order, zooms, and "Read the text" has the page text (it is disabled on pages without `pageText`); a collection without a shoot shows no shoot section or Shoot/Portfolio switch; the palette passes contrast (≥ 4.5:1); reduced motion and Motion off still show everything. Run `npm test` and `npm run test:build` inside `site/`.
+3. Check: the hero shows the `lead` photos; the shoot ring and grid show every photo; the page reader turns pages in order, zooms, and "Read the text" has the page text (it is disabled on pages without `pageText`); a collection without a shoot shows no shoot section and no Shoot/Portfolio switch (the page renders them only when there is at least one shoot photo); the palette passes contrast (≥ 4.5:1); reduced motion and Motion off still show everything. Run `npm test` and `npm run test:build` inside `site/`.
 4. Score with the rubric in PLAN.md section 5b. Fix anything under 7 before calling it done.
 
 ## 6. Report
