@@ -233,6 +233,18 @@ test('1440x900 collection: the hero strip stops painting once it is off screen',
   await ctx.close()
 })
 
+test.each([[1440, 900], [390, 844]])('%ix%i home: the first Tab shows a skip link that jumps past the story to the contact card', async (width, height) => {
+  const { page, ctx } = await open('/', { width, height })
+  const skip = page.locator('a[href="#contact"]', { hasText: 'Skip to contact' })
+  expect(await skip.evaluate((e) => e.getBoundingClientRect().bottom <= 0)).toBe(true) // out of sight until focused
+  await page.keyboard.press('Tab')
+  expect(await skip.evaluate((e) => e === document.activeElement && e.getBoundingClientRect().top >= 0)).toBe(true)
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(800)
+  expect(await page.evaluate(() => [document.activeElement.id, document.getElementById('contact').getBoundingClientRect().top < innerHeight])).toEqual(['contact', true])
+  await ctx.close()
+})
+
 test('1023x768 home: the Revive pile clears her logo', async () => {
   const { page, ctx } = await open('/', { width: 1023, height: 768 })
   await page.waitForSelector('[data-stage]')

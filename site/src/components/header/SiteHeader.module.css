@@ -9,6 +9,22 @@
   justify-content: center;
   pointer-events: none;
 }
+/* out of sight above the screen until it has keyboard focus */
+.skip {
+  position: absolute;
+  top: 0;
+  left: 14px;
+  padding: 12px 16px;
+  color: var(--brown);
+  text-decoration: none;
+  background: var(--paper);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgb(59 36 24 / 0.16);
+  pointer-events: auto;
+  transform: translateY(calc(-100% - 2vw - 24px)); /* clears the header's own top offset (14px, desktop 2vw) */
+}
+.skip:focus { transform: translateY(60px); } /* phones: under the pill, which spans the top */
+@media (min-width: 1024px) { .skip:focus { transform: none; } }
 .bar {
   --dock: 1;
   --dk: 0;

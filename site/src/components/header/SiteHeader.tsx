@@ -107,6 +107,10 @@ export default function SiteHeader({ mark, linkedin }: { mark: Mark; linkedin: s
 
   return (
     <header ref={navRef} className={styles.nav}>
+      {/* the first Tab stop: past the story (the home stage is long) to the contact card */}
+      <a href="#contact" className={`label ${styles.skip}`}>
+        Skip to contact
+      </a>
       <nav ref={barRef} className={styles.bar} aria-label="Main">
         <svg ref={svgRef} className={styles.nb} aria-hidden="true">
           <path ref={fillRef} className={styles.fill} />
