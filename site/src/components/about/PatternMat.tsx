@@ -56,7 +56,7 @@ export default function PatternMat({ skills }: { skills: Site['skills'] }) {
     const figs = [...mat.current!.querySelectorAll<HTMLElement>('figure')]
     const seams = figs.map((f) => f.querySelector<SVGPathElement>('[data-seam]')!)
     const clear = () => {
-      figs.forEach((f) => ((f.style.transform = ''), (f.style.opacity = '')))
+      figs.forEach((f) => ((f.style.transform = ''), (f.style.opacity = ''), (f.style.willChange = '')))
       seams.forEach((p) => (p.style.strokeDasharray = ''))
     }
     figs.forEach((f) => (f.style.opacity = '0'))
@@ -82,6 +82,7 @@ export default function PatternMat({ skills }: { skills: Site['skills'] }) {
       ([e]) => {
         if (!e.isIntersecting && e.boundingClientRect.top > 0) return
         io.disconnect()
+        figs.forEach((f) => (f.style.willChange = 'transform')) // a layer only for the drop
         gsap.ticker.add(paint)
       },
       { rootMargin: '0px 0px -20% 0px' },

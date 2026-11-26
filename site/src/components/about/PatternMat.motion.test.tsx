@@ -5,12 +5,21 @@ import PatternMat from './PatternMat'
 import { getSite } from '@/lib/site'
 
 vi.mock('@/lib/motion/useMotion', () => ({ useMotion: () => ({ on: true, setOn() {} }) }))
-vi.mock('gsap', () => ({ default: { ticker: { add() {}, remove() {} } } }))
+const tick = vi.hoisted(() => [] as ((t: number) => void)[])
+vi.mock('gsap', () => ({ default: { ticker: { add: (f: (t: number) => void) => tick.push(f), remove() {} } } }))
 
 const frames: FrameRequestCallback[] = []
+let seen: (e: { isIntersecting: boolean; boundingClientRect: { top: number } }[]) => void = () => {}
 beforeEach(() => {
   frames.length = 0
-  window.IntersectionObserver = class { observe() {} disconnect() {} } as unknown as typeof IntersectionObserver
+  tick.length = 0
+  window.IntersectionObserver = class {
+    constructor(cb: typeof seen) {
+      seen = cb
+    }
+    observe() {}
+    disconnect() {}
+  } as unknown as typeof IntersectionObserver
   window.requestAnimationFrame = (f) => frames.push(f)
   window.cancelAnimationFrame = () => {}
 })
@@ -24,6 +33,17 @@ test('the pieces are hidden before the browser paints (no one-frame flash of the
   }
   render(<><Probe /><PatternMat skills={getSite().skills} /></>)
   expect(seen).toEqual(['0', '0', '0', '0'])
+})
+
+test('the pieces are compositor layers only while they drop', () => {
+  const { container } = render(<PatternMat skills={getSite().skills} />)
+  const figs = [...container.querySelectorAll<HTMLElement>('figure')]
+  expect(figs.map((f) => f.style.willChange)).toEqual(['', '', '', ''])
+  seen([{ isIntersecting: true, boundingClientRect: { top: 100 } }])
+  expect(figs.map((f) => f.style.willChange)).toEqual(['transform', 'transform', 'transform', 'transform'])
+  tick[0](0)
+  tick[0](10) // long after the drop
+  expect(figs.map((f) => f.style.willChange)).toEqual(['', '', '', ''])
 })
 
 test('a burst of resize events fits the type once, on the next frame', () => {

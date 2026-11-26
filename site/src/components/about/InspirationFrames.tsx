@@ -43,12 +43,13 @@ export default function InspirationFrames({ images }: { images: Pic[] }) {
         const turn = cur * n + prev
         if (turn !== g.turn[f]) {
           g.turn[f] = turn
-          frames[f].forEach((im) => Object.assign(im.style, { zIndex: '0', clipPath: '', transform: '' }))
+          frames[f].forEach((im) => Object.assign(im.style, { zIndex: '0', clipPath: '', transform: '', willChange: '' }))
           Object.assign(child(f, prev).style, { zIndex: '1', transform: 'scale(1.02)' })
           child(f, cur).style.zIndex = '2'
         }
         if (k >= 1 && child(f, cur).style.clipPath === 'none') return
         const kk = out3(k), c = child(f, cur).style
+        c.willChange = kk >= 1 ? '' : 'transform, clip-path' // a layer only for the wipe
         c.clipPath = kk >= 1 ? 'none' : `inset(${((1 - kk) * 100).toFixed(2)}% 0 0 0)`
         c.transform = `scale(${lerp(1.12, 1.02, kk).toFixed(4)})`
       })
@@ -57,7 +58,7 @@ export default function InspirationFrames({ images }: { images: Pic[] }) {
     return () => {
       gsap.ticker.remove(paint)
       ro?.disconnect()
-      frames.flat().forEach((im) => Object.assign(im.style, { zIndex: '', clipPath: '', transform: '' }))
+      frames.flat().forEach((im) => Object.assign(im.style, { zIndex: '', clipPath: '', transform: '', willChange: '' }))
     }
   }, [on, n])
 

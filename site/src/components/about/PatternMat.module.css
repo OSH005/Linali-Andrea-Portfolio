@@ -23,7 +23,7 @@
 /* a piece: everything on it sits on its own centre line, inside its content box (--bl/--br) */
 .pc {
   position: relative; margin: 0; width: min(100%, 470px); height: var(--ph); text-align: center;
-  rotate: calc(var(--rot) * 0.5); filter: drop-shadow(0 10px 16px rgb(59 36 24 / 0.16)); will-change: transform;
+  rotate: calc(var(--rot) * 0.5); filter: drop-shadow(0 10px 16px rgb(59 36 24 / 0.16));
 }
 .pc:nth-of-type(even) { justify-self: end; }
 .pc svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
