@@ -219,6 +219,20 @@ test('OS reduced motion but Motion turned on: CSS transitions run again', async 
   await ctx.close()
 })
 
+test('1440x900 collection: the hero strip stops painting once it is off screen', async () => {
+  const { page, ctx } = await open('/collections/drift/', { width: 1440, height: 900 })
+  const strip = () => page.$eval('#hero > div', (e) => e.style.transform)
+  const a = await strip()
+  await page.waitForTimeout(500)
+  expect(await strip()).not.toBe(a) // it drifts while seen
+  await page.evaluate(() => window.scrollTo(0, document.getElementById('portfolio').getBoundingClientRect().top + scrollY))
+  await page.waitForTimeout(500)
+  const b = await strip()
+  await page.waitForTimeout(500)
+  expect(await strip()).toBe(b)
+  await ctx.close()
+})
+
 test('1023x768 home: the Revive pile clears her logo', async () => {
   const { page, ctx } = await open('/', { width: 1023, height: 768 })
   await page.waitForSelector('[data-stage]')

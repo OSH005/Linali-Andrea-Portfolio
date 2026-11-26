@@ -59,9 +59,13 @@ export default function Hero({ d }: { d: CollectionData }) {
       if (half) st.style.transform = `translate3d(${(-((y * 0.35 + t * 6) % half)).toFixed(1)}px,0,0)`
       ph.style.transform = `translate3d(0,${(y * 0.3).toFixed(1)}px,0) scale(1.05)`
     }
-    gsap.ticker.add(paint)
+    // paints only while the hero is on screen (no per-frame work for the rest of the visit)
+    const io = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(([e]) => (e.isIntersecting ? gsap.ticker.add(paint) : gsap.ticker.remove(paint)))
+    if (io) io.observe(sec.current!)
+    else gsap.ticker.add(paint)
     return () => {
       gsap.ticker.remove(paint)
+      io?.disconnect()
       ro?.disconnect()
       st.style.transform = ph.style.transform = ''
       setLoop(false)
